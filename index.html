@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edanios Belchior - Fisioterapia & Pilates</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+
+<body>
+
+    <div id="telaLogin" class="login-overlay">
+        <div class="login-box">
+            <h2 class="font-headline">EDANIOS BELCHIOR</h2>
+            <p class="theme-subtitle">Fisioterapia & Pilates</p>
+
+            <div class="login-tabs">
+                <button onclick="mudarAbaLogin('staff')" id="tabStaff" class="active">Admin</button>
+                <button onclick="mudarAbaLogin('aluno')" id="tabAluno">ALUNO</button>
+            </div>
+
+            <div id="formStaff">
+                <input type="email" id="emailLogin" placeholder="E-MAIL ADMINISTRATIVO">
+                <input type="password" id="senhaLogin" placeholder="SENHA">
+                <button onclick="fazerLoginAdmin()" style="margin-top: 20px;">Fazer login </button>
+            </div>
+
+            <div id="formAluno" style="display: none;">
+                <input type="text" id="nomeAlunoLogin" placeholder="SEU NOME COMPLETO">
+                <input type="password" id="senhaAlunoLogin" placeholder="SENHA (Nome + 2026)">
+                <button onclick="fazerLoginAluno()"
+                    style="margin-top: 20px; background-color: var(--text-primary); color: var(--bg-body);">ACESSAR MEU
+                    PRONTUÁRIO</button>
+                <p
+                    style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 10px; font-family: var(--font-mono);">
+                    Ex: se seu nome é Ana, a senha é Ana2026</p>
+            </div>
+            <p id="msgErroLogin"
+                style="color: var(--danger); margin-top: 15px; font-weight: bold; font-family: var(--font-mono);"></p>
+        </div>
+    </div>
+
+    <div id="appAluno" style="display: none;">
+        <header class="main-header" style="justify-content: center;">
+            <div class="logo">EDANIOS BELCHIOR</div>
+            <button onclick="fazerLogout()" class="btn-sair">ENCERRAR SESSÃO</button>
+        </header>
+
+        <main class="content">
+            <div class="form-card" style="text-align: center;">
+                <h2 id="saudacaoAluno">OLÁ</h2>
+                <div class="info-aula">
+                    <p
+                        style="color: var(--text-secondary); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px;">
+                        Status da Aula de Hoje:</p>
+                    <h1 id="horarioAulaAluno" style="font-size: 3rem; color: var(--text-primary); margin: 10px 0;">--:--
+                    </h1>
+                    <div id="statusBadge" class="status-badge">SEM AGENDAMENTO</div>
+                    <p id="motivoRecusaAluno"
+                        style="color: var(--danger); font-size: 0.9rem; margin-top: 10px; display: none; font-style: italic;">
+                    </p>
+                </div>
+                <div class="divider"></div>
+                <div id="acoesAluno" style="display: none; flex-direction: column; gap: 15px;">
+                    <p style="font-family: var(--font-mono);">CONFIRMAR PRESENÇA?</p>
+                    <button onclick="solicitarStatusAluno('solicitado_presente')" class="btn-big presente">✅ CONFIRMAR
+                        PRESENÇA</button>
+                    <button onclick="solicitarStatusAluno('solicitado_imprevisto')" class="btn-big imprevisto">⚠️ TIVE
+                        UM IMPREVISTO</button>
+                    <button onclick="solicitarStatusAluno('solicitado_falta')" class="btn-big falta">❌ VOU
+                        FALTAR</button>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <h3>💰 MEUS PAGAMENTOS</h3>
+                <div id="listaMeusPagamentos"
+                    style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+                    <p style="color: var(--text-secondary);">Carregando histórico...</p>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <h3>🔄 SOLICITAÇÃO DE TROCA</h3>
+                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 15px;">Selecione sua aula
+                    atual e para quando deseja mudar.</p>
+                <div class="input-group">
+                    <label>AULA ATUAL (ORIGEM):</label>
+                    <select id="selectTrocaOrigem">
+                        <option>Carregando...</option>
+                    </select>
+
+                    <label>NOVO DIA DESEJADO:</label>
+                    <select id="selectTrocaDestinoDia">
+                        <option value="segunda">SEGUNDA-FEIRA</option>
+                        <option value="terca">TERÇA-FEIRA</option>
+                        <option value="quarta">QUARTA-FEIRA</option>
+                        <option value="quinta">QUINTA-FEIRA</option>
+                        <option value="sexta">SEXTA-FEIRA</option>
+                    </select>
+
+                    <label>NOVO HORÁRIO:</label>
+                    <select id="selectTrocaDestinoHora">
+                        <option value="07:00 - 08:00">07:00 - 08:00</option>
+                        <option value="08:00 - 09:00">08:00 - 09:00</option>
+                        <option value="09:00 - 10:00">09:00 - 10:00</option>
+                        <option value="10:00 - 11:00">10:00 - 11:00</option>
+                        <option value="13:00 - 14:00">13:00 - 14:00</option>
+                        <option value="14:00 - 15:00">14:00 - 15:00</option>
+                        <option value="15:00 - 16:00">15:00 - 16:00</option>
+                        <option value="16:00 - 17:00">16:00 - 17:00</option>
+                        <option value="17:00 - 18:00">17:00 - 18:00</option>
+                        <option value="18:00 - 19:00">18:00 - 19:00</option>
+                        <option value="19:00 - 20:00">19:00 - 20:00</option>
+                    </select>
+                    <button onclick="solicitarTrocaHorario()"
+                        style="background: var(--text-primary); color: var(--bg-body);">ENVIAR PEDIDO</button>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <h3>🏥 MEU PRONTUÁRIO</h3>
+                <div id="meuProntuarioLista" class="historico-prontuario">Carregando...</div>
+            </div>
+        </main>
+    </div>
+
+    <div id="appConteudo" style="display: none;">
+        <header class="main-header no-print">
+            <div class="header-top">
+                <div class="logo">EDANIOS BELCHIOR</div>
+            </div>
+            <nav class="main-nav">
+                <button onclick="mostrarTela('clientes')" class="active">ALUNOS</button>
+                <button onclick="mostrarTela('agenda')">AGENDA</button>
+                <button onclick="mostrarTela('frequencia')">NOTIFICAÇÕES</button>
+                <button onclick="mostrarTela('prontuarios')">PRONTUÁRIOS</button>
+                <button onclick="mostrarTela('financeiro')">FINANCEIRO</button>
+                <button onclick="abrirLogs()" id="btnLogsAdmin"
+                    style="display:none; color:var(--text-muted);">LOGS</button>
+                <button onclick="fazerLogout()" class="btn-sair">SAIR</button>
+            </nav>
+        </header>
+
+        <main class="content">
+            <section id="clientes" class="tela ativa">
+                <div class="header-section">
+                    <h2>ARQUIVO DE ALUNOS</h2>
+                </div>
+                <div class="stats-alunos">
+                    <div class="stat-card"><span class="label">TOTAL</span><span class="value" id="statTotal">0</span>
+                    </div>
+                    <div class="stat-card pendente"><span class="label">PENDENTES</span><span class="value"
+                            id="statPendentes">0</span></div>
+                    <div class="stat-card recebido"><span class="label">RECEBIDO</span><span class="value"
+                            id="statRecebido">R$ 0</span></div>
+                </div>
+
+                <div class="form-card">
+                    <h4>NOVO CADASTRO COMPLETO:</h4>
+                    <div class="input-group">
+                        <input type="hidden" id="idClienteEditando">
+                        <input type="text" id="nomeCliente" placeholder="NOME COMPLETO">
+                        <input type="text" id="telefoneCliente" placeholder="TELEFONE">
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <div style="flex: 1;">
+                                <label>DATA DE NASCIMENTO:</label>
+                                <input type="date" id="nascCliente">
+                            </div>
+                            <div style="flex: 1;">
+                                <label>PROFISSÃO:</label>
+                                <input type="text" id="profissaoCliente" placeholder="Ex: Advogada">
+                            </div>
+                        </div>
+                        <input type="text" id="queixaCliente" placeholder="QUEIXA PRINCIPAL">
+                        <input type="text" id="diagnosticoCliente" placeholder="DIAGNÓSTICO CLÍNICO">
+
+                        <button id="btnSalvarCliente" onclick="salvarOuAtualizarCliente()">+ REGISTRAR FICHA</button>
+                        <button id="btnCancelarEdicao" onclick="cancelarEdicao()"
+                            style="display:none; background:var(--danger);">CANCELAR</button>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <label>MÊS DE REFERÊNCIA:</label>
+                        <input type="month" id="mesReferencia">
+                    </div>
+                </div>
+
+                <div class="barra-filtros-alunos">
+                    <input type="text" id="inputBusca" placeholder="BUSCAR NOME..." oninput="renderizarClientes()">
+                    <div class="botoes-filtro">
+                        <button onclick="filtrarClientes('todos')" class="btn-filtro active"
+                            id="btnFiltroTodos">TODOS</button>
+                        <button onclick="filtrarClientes('pendente')" class="btn-filtro"
+                            id="btnFiltroPendente">PENDENTES</button>
+                        <button onclick="filtrarClientes('pago')" class="btn-filtro" id="btnFiltroPago">PAGOS</button>
+                    </div>
+                </div>
+
+                <div class="lista-container">
+                    <table id="tabelaClientes">
+                        <thead>
+                            <tr>
+                                <th>ALUNO</th>
+                                <th>STATUS</th>
+                                <th>FORMA</th>
+                                <th>VALOR</th>
+                                <th>AÇÕES</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="agenda" class="tela">
+                <div class="header-section">
+                    <h2>ROTEIRO SEMANAL</h2>
+                </div>
+                <div class="agenda-tools">
+                    <button onclick="clonarAgenda()" class="btn-tool">🔁 CLONAR SEMANA</button>
+                </div>
+                <div class="agenda-filtros">
+                    <input type="text" id="buscaAgenda" placeholder="BUSCAR NA AGENDA..." oninput="renderizarAgenda()">
+                    <select id="filtroOcupacao" onchange="renderizarAgenda()">
+                        <option value="todos">VER TUDO</option>
+                        <option value="ocupados">OCUPADOS</option>
+                        <option value="livres">LIVRES</option>
+                    </select>
+                </div>
+                <div class="dias-semana">
+                    <button onclick="mudarDia('segunda')" class="btn-dia active" id="btn-segunda">SEG</button>
+                    <button onclick="mudarDia('terca')" class="btn-dia" id="btn-terca">TER</button>
+                    <button onclick="mudarDia('quarta')" class="btn-dia" id="btn-quarta">QUA</button>
+                    <button onclick="mudarDia('quinta')" class="btn-dia" id="btn-quinta">QUI</button>
+                    <button onclick="mudarDia('sexta')" class="btn-dia" id="btn-sexta">SEX</button>
+                </div>
+                <div class="agenda-container" id="containerAgenda"></div>
+            </section>
+
+            <section id="frequencia" class="tela">
+                <div class="header-section">
+                    <h2>CENTRAL DE NOTIFICAÇÕES</h2>
+                </div>
+
+                <div class="form-card" style="border: 1px solid var(--success);">
+                    <h3 style="color: var(--success); border-left-color: var(--success);">📍 CHECK-IN PENDENTE (ALUNOS)
+                    </h3>
+                    <div id="listaSolicitacoes" style="display: flex; flex-direction: column; gap: 10px;">
+                        <p style="text-align:center; color:var(--text-muted);">Nenhuma solicitação pendente.</p>
+                    </div>
+                </div>
+
+                <div class="form-card" style="border: 1px solid var(--imprevisto);">
+                    <h3 style="color: var(--imprevisto); border-left-color: var(--imprevisto);">🔄 PEDIDOS DE TROCA</h3>
+                    <div id="listaTrocas" style="display: flex; flex-direction: column; gap: 10px;">
+                        <p style="text-align:center; color:var(--text-muted);">Nenhuma troca solicitada.</p>
+                    </div>
+                </div>
+
+                <div class="lista-container">
+                    <h3>RELATÓRIO MENSAL</h3>
+                    <div style="padding: 10px; display: flex; gap: 10px;">
+                        <button onclick="alternarVisaoFrequencia('faltas')" id="btnVerFaltas" style="width:auto;">VER
+                            FALTAS</button>
+                        <button onclick="alternarVisaoFrequencia('presencas')" id="btnVerPresencas"
+                            style="width:auto; background:transparent; border:1px solid var(--text-secondary); color:var(--text-secondary);">VER
+                            PRESENÇAS</button>
+                    </div>
+                    <table id="tabelaFrequencia">
+                        <thead>
+                            <tr>
+                                <th>DATA</th>
+                                <th>ALUNO</th>
+                                <th>STATUS</th>
+                                <th>AÇÃO</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="prontuarios" class="tela">
+                <div class="header-section">
+                    <h2>EVOLUÇÃO CLÍNICA</h2>
+                </div>
+                <div class="form-card">
+                    <div class="input-group">
+                        <label>PACIENTE:</label>
+                        <input type="text" id="buscaProntuario" placeholder="FILTRAR POR NOME..."
+                            oninput="filtrarSelectProntuario()">
+                        <select id="selectProntuarioAluno" onchange="carregarProntuarioSelecionado()">
+                            <option value="">-- SELECIONE --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="areaProntuario" style="display:none;">
+                    <div class="form-card" id="dadosPacienteHeader"
+                        style="background:var(--bg-input); border:1px dashed var(--text-secondary);"></div>
+                    <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+                        <button onclick="gerarProntuarioPDF()" class="btn-tool" style="width: auto;">BAIXAR PDF</button>
+                    </div>
+                    <div class="historico-prontuario" id="listaEvolucao"></div>
+                    <div class="form-card">
+                        <h4>NOVA NOTA:</h4>
+                        <textarea id="textoNovaEvolucao" rows="4" placeholder="Escreva a evolução..."></textarea>
+                        <button onclick="adicionarEvolucao()" style="margin-top:10px;">SALVAR REGISTRO</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="financeiro" class="tela">
+                <div class="header-section">
+                    <h2>THE VAULT</h2>
+                </div>
+                <div class="painel-controle-fin">
+                    <div class="input-mes-wrapper">
+                        <label>PERÍODO:</label>
+                        <input type="month" id="mesFinanceiro" onchange="mudarMesRelatorio(this.value)">
+                    </div>
+                    <div class="tools-fin">
+                        <button onclick="exportarCSV()" class="btn-tool">EXPORTAR</button>
+                        <button onclick="virarMes()" class="btn-tool danger">VIRAR MÊS</button>
+                    </div>
+                </div>
+                <div class="dashboard-financeiro">
+                    <div class="card-dash entrada"><span>RECEITA</span><strong id="dashReceita">R$ 0,00</strong></div>
+                    <div class="card-dash saida"><span>DESPESAS</span><strong id="dashDespesas">R$ 0,00</strong></div>
+                    <div class="card-dash lucro"><span>LUCRO</span><strong id="dashLucro">R$ 0,00</strong></div>
+                </div>
+                <div class="form-card no-print">
+                    <h4>NOVA DESPESA:</h4>
+                    <div class="input-group">
+                        <input type="text" id="descGasto" placeholder="DESCRIÇÃO">
+                        <select id="catGasto">
+                            <option value="fixo">FIXO</option>
+                            <option value="variavel">VARIÁVEL</option>
+                            <option value="pessoal">PESSOAL</option>
+                        </select>
+                        <input type="number" id="valorGasto" placeholder="VALOR">
+                        <button onclick="adicionarGasto()" style="background-color: var(--danger);">LANÇAR</button>
+                    </div>
+                </div>
+                <div class="lista-container">
+                    <table id="tabelaGastos">
+                        <thead>
+                            <tr>
+                                <th>DESCRIÇÃO</th>
+                                <th>CATEGORIA</th>
+                                <th>VALOR</th>
+                                <th>AÇÃO</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="modalConfirm" class="modal-overlay">
+        <div class="modal-box">
+            <h3 id="modalTitulo">CONFIRMAR</h3>
+            <p id="modalTexto">Tem certeza?</p>
+            <div class="modal-footer">
+                <button id="btnModalNao" class="btn-fechar">NÃO</button>
+                <button id="btnModalSim">SIM</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalLogs" class="modal-overlay">
+        <div class="modal-box" style="max-width: 600px;">
+            <h3>REGISTROS DO SISTEMA</h3>
+            <div id="listaLogs" class="historico-prontuario" style="text-align: left; height: 300px;"></div>
+            <div class="modal-footer">
+                <button onclick="document.getElementById('modalLogs').style.display='none'"
+                    class="btn-fechar">FECHAR</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+
+</html>
