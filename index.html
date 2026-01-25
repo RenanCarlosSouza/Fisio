@@ -5,10 +5,70 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edanios Belchior - Fisioterapia & Pilates</title>
+
     <link rel="stylesheet" href="style.css">
+
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        /* Estilos inline para a sub-navegação da Agenda (pode mover para o style.css depois) */
+        .agenda-subnav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .agenda-subnav button {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 8px 15px;
+            font-size: 0.8rem;
+            width: auto;
+            border-radius: 4px;
+        }
+
+        .agenda-subnav button.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .agenda-view {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .agenda-view.active {
+            display: block;
+        }
+
+        /* Card Agenda do Dia */
+        .card-agenda-hoje {
+            background: var(--bg-card);
+            padding: 20px;
+            border-left: 5px solid var(--primary);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+
+        .hora-destaque {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            font-family: var(--font-mono);
+        }
+    </style>
 </head>
 
 <body>
@@ -33,11 +93,13 @@
                 <input type="text" id="nomeAlunoLogin" placeholder="SEU NOME COMPLETO">
                 <input type="password" id="senhaAlunoLogin" placeholder="SENHA (Nome + 2026)">
                 <button onclick="fazerLoginAluno()"
-                    style="margin-top: 20px; background-color: var(--text-primary); color: var(--bg-body);">ACESSAR MEU
-                    PRONTUÁRIO</button>
+                    style="margin-top: 20px; background-color: var(--text-primary); color: var(--bg-body);">
+                    ACESSAR MEU PRONTUÁRIO
+                </button>
                 <p
                     style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 10px; font-family: var(--font-mono);">
-                    Ex: se seu nome é Ana, a senha é Ana2026</p>
+                    Ex: se seu nome é Ana, a senha é Ana2026
+                </p>
             </div>
             <p id="msgErroLogin"
                 style="color: var(--danger); margin-top: 15px; font-weight: bold; font-family: var(--font-mono);"></p>
@@ -56,7 +118,8 @@
                 <div class="info-aula">
                     <p
                         style="color: var(--text-secondary); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px;">
-                        Status da Aula de Hoje:</p>
+                        Status da Aula de Hoje:
+                    </p>
                     <h1 id="horarioAulaAluno" style="font-size: 3rem; color: var(--text-primary); margin: 10px 0;">--:--
                     </h1>
                     <div id="statusBadge" class="status-badge">SEM AGENDAMENTO</div>
@@ -137,7 +200,6 @@
             <nav class="main-nav">
                 <button onclick="mostrarTela('clientes')" class="active">ALUNOS</button>
                 <button onclick="mostrarTela('agenda')">AGENDA</button>
-                <button onclick="mostrarTela('frequencia')">NOTIFICAÇÕES</button>
                 <button onclick="mostrarTela('prontuarios')">PRONTUÁRIOS</button>
                 <button onclick="mostrarTela('financeiro')">FINANCEIRO</button>
                 <button onclick="abrirLogs()" id="btnLogsAdmin"
@@ -157,7 +219,7 @@
                     <div class="stat-card pendente"><span class="label">PENDENTES</span><span class="value"
                             id="statPendentes">0</span></div>
                     <div class="stat-card recebido"><span class="label">RECEBIDO</span><span class="value"
-                            id="statRecebido">R$ 0</span></div>
+                            id="statRecebido">---</span></div>
                 </div>
 
                 <div class="form-card">
@@ -166,7 +228,13 @@
                         <input type="hidden" id="idClienteEditando">
                         <input type="text" id="nomeCliente" placeholder="NOME COMPLETO">
                         <input type="text" id="telefoneCliente" placeholder="TELEFONE">
-                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+
+                        <label>CONTRATO / SERVIÇO:</label>
+                        <select id="selectServicoCadastro">
+                            <option value="">-- SELECIONE O SERVIÇO --</option>
+                        </select>
+
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
                             <div style="flex: 1;">
                                 <label>DATA DE NASCIMENTO:</label>
                                 <input type="date" id="nascCliente">
@@ -176,7 +244,7 @@
                                 <input type="text" id="profissaoCliente" placeholder="Ex: Advogada">
                             </div>
                         </div>
-                        <input type="text" id="queixaCliente" placeholder="QUEIXA PRINCIPAL">
+                        <input type="text" id="queixaCliente" placeholder="QUEIXA PRINCIPAL" style="margin-top: 10px;">
                         <input type="text" id="diagnosticoCliente" placeholder="DIAGNÓSTICO CLÍNICO">
 
                         <button id="btnSalvarCliente" onclick="salvarOuAtualizarCliente()">+ REGISTRAR FICHA</button>
@@ -207,7 +275,7 @@
                                 <th>ALUNO</th>
                                 <th>STATUS</th>
                                 <th>FORMA</th>
-                                <th>VALOR</th>
+                                <th>SERVIÇO</th>
                                 <th>AÇÕES</th>
                             </tr>
                         </thead>
@@ -218,69 +286,91 @@
 
             <section id="agenda" class="tela">
                 <div class="header-section">
-                    <h2>ROTEIRO SEMANAL</h2>
+                    <h2>GESTÃO DE AGENDA</h2>
                 </div>
+
                 <div class="agenda-tools">
                     <button onclick="clonarAgenda()" class="btn-tool">🔁 CLONAR SEMANA</button>
                 </div>
-                <div class="agenda-filtros">
-                    <input type="text" id="buscaAgenda" placeholder="BUSCAR NA AGENDA..." oninput="renderizarAgenda()">
-                    <select id="filtroOcupacao" onchange="renderizarAgenda()">
-                        <option value="todos">VER TUDO</option>
-                        <option value="ocupados">OCUPADOS</option>
-                        <option value="livres">LIVRES</option>
-                    </select>
-                </div>
-                <div class="dias-semana">
-                    <button onclick="mudarDia('segunda')" class="btn-dia active" id="btn-segunda">SEG</button>
-                    <button onclick="mudarDia('terca')" class="btn-dia" id="btn-terca">TER</button>
-                    <button onclick="mudarDia('quarta')" class="btn-dia" id="btn-quarta">QUA</button>
-                    <button onclick="mudarDia('quinta')" class="btn-dia" id="btn-quinta">QUI</button>
-                    <button onclick="mudarDia('sexta')" class="btn-dia" id="btn-sexta">SEX</button>
-                </div>
-                <div class="agenda-container" id="containerAgenda"></div>
-            </section>
 
-            <section id="frequencia" class="tela">
-                <div class="header-section">
-                    <h2>CENTRAL DE NOTIFICAÇÕES</h2>
+                <div class="agenda-subnav">
+                    <button onclick="mudarSubAbaAgenda('roteiro')" id="sub-roteiro" class="active">📅 ROTEIRO
+                        SEMANAL</button>
+                    <button onclick="mudarSubAbaAgenda('hoje')" id="sub-hoje">☀️ AGENDA DO DIA</button>
+                    <button onclick="mudarSubAbaAgenda('checkins')" id="sub-checkins">📍 CHECK-INS</button>
+                    <button onclick="mudarSubAbaAgenda('trocas')" id="sub-trocas">🔄 TROCAS</button>
+                    <button onclick="mudarSubAbaAgenda('historico')" id="sub-historico">📜 RELATÓRIO</button>
                 </div>
 
-                <div class="form-card" style="border: 1px solid var(--success);">
-                    <h3 style="color: var(--success); border-left-color: var(--success);">📍 CHECK-IN PENDENTE (ALUNOS)
-                    </h3>
-                    <div id="listaSolicitacoes" style="display: flex; flex-direction: column; gap: 10px;">
-                        <p style="text-align:center; color:var(--text-muted);">Nenhuma solicitação pendente.</p>
+                <div id="view-roteiro" class="agenda-view active">
+                    <div class="agenda-filtros">
+                        <input type="text" id="buscaAgenda" placeholder="BUSCAR NA AGENDA..."
+                            oninput="renderizarAgenda()">
+                        <select id="filtroOcupacao" onchange="renderizarAgenda()">
+                            <option value="todos">VER TUDO</option>
+                            <option value="ocupados">OCUPADOS</option>
+                            <option value="livres">LIVRES</option>
+                        </select>
+                    </div>
+                    <div class="dias-semana">
+                        <button onclick="mudarDia('segunda')" class="btn-dia active" id="btn-segunda">SEG</button>
+                        <button onclick="mudarDia('terca')" class="btn-dia" id="btn-terca">TER</button>
+                        <button onclick="mudarDia('quarta')" class="btn-dia" id="btn-quarta">QUA</button>
+                        <button onclick="mudarDia('quinta')" class="btn-dia" id="btn-quinta">QUI</button>
+                        <button onclick="mudarDia('sexta')" class="btn-dia" id="btn-sexta">SEX</button>
+                    </div>
+                    <div class="agenda-container" id="containerAgenda"></div>
+                </div>
+
+                <div id="view-hoje" class="agenda-view">
+                    <div class="form-card" style="border-left: 5px solid var(--primary);">
+                        <h3 id="tituloAgendaHoje">AGENDA DE HOJE</h3>
+                        <div id="listaAgendaHoje">Carregando...</div>
                     </div>
                 </div>
 
-                <div class="form-card" style="border: 1px solid var(--imprevisto);">
-                    <h3 style="color: var(--imprevisto); border-left-color: var(--imprevisto);">🔄 PEDIDOS DE TROCA</h3>
-                    <div id="listaTrocas" style="display: flex; flex-direction: column; gap: 10px;">
-                        <p style="text-align:center; color:var(--text-muted);">Nenhuma troca solicitada.</p>
+                <div id="view-checkins" class="agenda-view">
+                    <div class="form-card" style="border: 1px solid var(--success);">
+                        <h3 style="color: var(--success); border-left-color: var(--success);">📍 CHECK-IN PENDENTE
+                            (ALUNOS)</h3>
+                        <div id="listaSolicitacoes" style="display: flex; flex-direction: column; gap: 10px;">
+                            <p style="text-align:center; color:var(--text-muted);">Nenhuma solicitação pendente.</p>
+                        </div>
                     </div>
                 </div>
 
-                <div class="lista-container">
-                    <h3>RELATÓRIO MENSAL</h3>
-                    <div style="padding: 10px; display: flex; gap: 10px;">
-                        <button onclick="alternarVisaoFrequencia('faltas')" id="btnVerFaltas" style="width:auto;">VER
-                            FALTAS</button>
-                        <button onclick="alternarVisaoFrequencia('presencas')" id="btnVerPresencas"
-                            style="width:auto; background:transparent; border:1px solid var(--text-secondary); color:var(--text-secondary);">VER
-                            PRESENÇAS</button>
+                <div id="view-trocas" class="agenda-view">
+                    <div class="form-card" style="border: 1px solid var(--imprevisto);">
+                        <h3 style="color: var(--imprevisto); border-left-color: var(--imprevisto);">🔄 PEDIDOS DE TROCA
+                        </h3>
+                        <div id="listaTrocas" style="display: flex; flex-direction: column; gap: 10px;">
+                            <p style="text-align:center; color:var(--text-muted);">Nenhuma troca solicitada.</p>
+                        </div>
                     </div>
-                    <table id="tabelaFrequencia">
-                        <thead>
-                            <tr>
-                                <th>DATA</th>
-                                <th>ALUNO</th>
-                                <th>STATUS</th>
-                                <th>AÇÃO</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+                </div>
+
+                <div id="view-historico" class="agenda-view">
+                    <div class="lista-container">
+                        <h3>RELATÓRIO MENSAL</h3>
+                        <div style="padding: 10px; display: flex; gap: 10px;">
+                            <button onclick="alternarVisaoFrequencia('faltas')" id="btnVerFaltas"
+                                style="width:auto;">VER FALTAS</button>
+                            <button onclick="alternarVisaoFrequencia('presencas')" id="btnVerPresencas"
+                                style="width:auto; background:transparent; border:1px solid var(--text-secondary); color:var(--text-secondary);">VER
+                                PRESENÇAS</button>
+                        </div>
+                        <table id="tabelaFrequencia">
+                            <thead>
+                                <tr>
+                                    <th>DATA</th>
+                                    <th>ALUNO</th>
+                                    <th>STATUS</th>
+                                    <th>AÇÃO</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
                 </div>
             </section>
 
@@ -324,7 +414,10 @@
                         <input type="month" id="mesFinanceiro" onchange="mudarMesRelatorio(this.value)">
                     </div>
                     <div class="tools-fin">
-                        <button onclick="exportarCSV()" class="btn-tool">EXPORTAR</button>
+                        <button onclick="gerarRelatorioFinanceiroPDF()" class="btn-tool"
+                            style="color: white; background: var(--text-primary); font-weight: bold;">📄 RELATÓRIO
+                            PDF</button>
+                        <button onclick="exportarCSV()" class="btn-tool">EXPORTAR CSV</button>
                         <button onclick="virarMes()" class="btn-tool danger">VIRAR MÊS</button>
                     </div>
                 </div>
@@ -333,6 +426,21 @@
                     <div class="card-dash saida"><span>DESPESAS</span><strong id="dashDespesas">R$ 0,00</strong></div>
                     <div class="card-dash lucro"><span>LUCRO</span><strong id="dashLucro">R$ 0,00</strong></div>
                 </div>
+
+                <div class="form-card">
+                    <h4>🛠️ CATÁLOGO DE SERVIÇOS</h4>
+                    <p style="font-size:0.8rem; color:var(--text-secondary);">Cadastre aqui as modalidades (Ex: Pilates,
+                        Fisioterapia).</p>
+                    <div class="input-group" style="flex-direction: row; gap: 10px;">
+                        <input type="text" id="nomeNovoServico" placeholder="NOME DO SERVIÇO (EX: PILATES)"
+                            style="flex:2;">
+                        <input type="number" id="valorNovoServico" placeholder="VALOR (R$)" style="flex:1;">
+                        <button onclick="adicionarServico()" style="width: auto;">+ ADICIONAR</button>
+                    </div>
+                    <div id="listaServicosCadastrados" style="display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;">
+                    </div>
+                </div>
+
                 <div class="form-card no-print">
                     <h4>NOVA DESPESA:</h4>
                     <div class="input-group">
