@@ -41,7 +41,7 @@ const auth = getAuth(app);
 
 const EMAIL_ADMIN = "edanios@studio.com";
 const SENHA_ALUNO_PADRAO_SUFIXO = "2026";
-const MAX_ALUNOS = 8;
+const MAX_ALUNOS = 12;
 const diasSemana = ['segunda', 'terca', 'quarta', 'quinta', 'sexta'];
 
 // Cache Local
@@ -1387,5 +1387,6 @@ window.abrirLogs = async () => {
         container.innerHTML += `<div style="border-bottom:1px solid #333; padding:8px; font-size:0.85rem;"><strong>${d.usuario.split('@')[0]}</strong> (${d.data})<br>${d.acao}</div>`;
     });
 };
+
 
 
