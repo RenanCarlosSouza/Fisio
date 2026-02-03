@@ -816,7 +816,7 @@ window.renderizarAgenda = () => {
     container.innerHTML = '';
     const busca = document.getElementById('buscaAgenda').value.toLowerCase();
     const filtro = document.getElementById('filtroOcupacao').value;
-    const horarios = ["13:00 - 14:00", "14:00 - 15:00", "15:00 - 16:00", "16:00 - 17:00", "17:00 - 18:00", "18:00 - 19:00", "19:00 - 20:00", "20:00 - 21:00"];
+    const horarios = ["07:00 - 08:00", "08:00 - 09:00","09:00 - 10:00","10:00 - 11:00", "13:00 - 14:00", "14:00 - 15:00", "15:00 - 16:00", "16:00 - 17:00", "17:00 - 18:00", "18:00 - 19:00", "19:00 - 20:00", "20:00 - 21:00"];
     const dadosDia = dbAgenda[diaAtualAgenda] || {};
 
     // Remove duplicidade
@@ -1387,4 +1387,5 @@ window.abrirLogs = async () => {
         container.innerHTML += `<div style="border-bottom:1px solid #333; padding:8px; font-size:0.85rem;"><strong>${d.usuario.split('@')[0]}</strong> (${d.data})<br>${d.acao}</div>`;
     });
 };
+
 
