@@ -15,7 +15,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
     <style>
-        /* Estilos inline para a sub-navegação da Agenda (pode mover para o style.css depois) */
+        /* Estilos inline para a sub-navegação da Agenda */
         .agenda-subnav {
             display: flex;
             gap: 10px;
@@ -73,7 +73,7 @@
 
 <body>
 
-    <div id="telaLogin" class="login-overlay">
+    <div id="telaLogin" class="login-overlay" style="display: flex;">
         <div class="login-box">
             <h2 class="font-headline">EDANIOS BELCHIOR</h2>
             <p class="theme-subtitle">Fisioterapia & Pilates</p>
@@ -127,16 +127,6 @@
                         style="color: var(--danger); font-size: 0.9rem; margin-top: 10px; display: none; font-style: italic;">
                     </p>
                 </div>
-                <div class="divider"></div>
-                <div id="acoesAluno" style="display: none; flex-direction: column; gap: 15px;">
-                    <p style="font-family: var(--font-mono);">CONFIRMAR PRESENÇA?</p>
-                    <button onclick="solicitarStatusAluno('solicitado_presente')" class="btn-big presente">✅ CONFIRMAR
-                        PRESENÇA</button>
-                    <button onclick="solicitarStatusAluno('solicitado_imprevisto')" class="btn-big imprevisto">⚠️ TIVE
-                        UM IMPREVISTO</button>
-                    <button onclick="solicitarStatusAluno('solicitado_falta')" class="btn-big falta">❌ VOU
-                        FALTAR</button>
-                </div>
             </div>
 
             <div class="form-card">
@@ -144,45 +134,6 @@
                 <div id="listaMeusPagamentos"
                     style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
                     <p style="color: var(--text-secondary);">Carregando histórico...</p>
-                </div>
-            </div>
-
-            <div class="form-card">
-                <h3>🔄 SOLICITAÇÃO DE TROCA</h3>
-                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 15px;">Selecione sua aula
-                    atual e para quando deseja mudar.</p>
-                <div class="input-group">
-                    <label>AULA ATUAL (ORIGEM):</label>
-                    <select id="selectTrocaOrigem">
-                        <option>Carregando...</option>
-                    </select>
-
-                    <label>NOVO DIA DESEJADO:</label>
-                    <select id="selectTrocaDestinoDia">
-                        <option value="segunda">SEGUNDA-FEIRA</option>
-                        <option value="terca">TERÇA-FEIRA</option>
-                        <option value="quarta">QUARTA-FEIRA</option>
-                        <option value="quinta">QUINTA-FEIRA</option>
-                        <option value="sexta">SEXTA-FEIRA</option>
-                    </select>
-
-                    <label>NOVO HORÁRIO:</label>
-                    <select id="selectTrocaDestinoHora">
-                        <option value="07:00 - 08:00">07:00 - 08:00</option>
-                        <option value="08:00 - 09:00">08:00 - 09:00</option>
-                        <option value="09:00 - 10:00">09:00 - 10:00</option>
-                        <option value="10:00 - 11:00">10:00 - 11:00</option>
-                        <option value="13:00 - 14:00">13:00 - 14:00</option>
-                        <option value="14:00 - 15:00">14:00 - 15:00</option>
-                        <option value="15:00 - 16:00">15:00 - 16:00</option>
-                        <option value="16:00 - 17:00">16:00 - 17:00</option>
-                        <option value="17:00 - 18:00">17:00 - 18:00</option>
-                        <option value="18:00 - 19:00">18:00 - 19:00</option>
-                        <option value="19:00 - 20:00">19:00 - 20:00</option>
-                        <option value="20:00 - 21:00">20:00 - 21:00</option>
-                    </select>
-                    <button onclick="solicitarTrocaHorario()"
-                        style="background: var(--text-primary); color: var(--bg-body);">ENVIAR PEDIDO</button>
                 </div>
             </div>
 
@@ -290,17 +241,10 @@
                     <h2>GESTÃO DE AGENDA</h2>
                 </div>
 
-                <div class="agenda-tools">
-                    <button onclick="clonarAgenda()" class="btn-tool">🔁 CLONAR SEMANA</button>
-                </div>
-
                 <div class="agenda-subnav">
                     <button onclick="mudarSubAbaAgenda('roteiro')" id="sub-roteiro" class="active">📅 ROTEIRO
                         SEMANAL</button>
                     <button onclick="mudarSubAbaAgenda('hoje')" id="sub-hoje">☀️ AGENDA DO DIA</button>
-                    <button onclick="mudarSubAbaAgenda('checkins')" id="sub-checkins">📍 CHECK-INS</button>
-                    <button onclick="mudarSubAbaAgenda('trocas')" id="sub-trocas">🔄 TROCAS</button>
-                    <button onclick="mudarSubAbaAgenda('historico')" id="sub-historico">📜 RELATÓRIO</button>
                 </div>
 
                 <div id="view-roteiro" class="agenda-view active">
@@ -330,49 +274,6 @@
                     </div>
                 </div>
 
-                <div id="view-checkins" class="agenda-view">
-                    <div class="form-card" style="border: 1px solid var(--success);">
-                        <h3 style="color: var(--success); border-left-color: var(--success);">📍 CHECK-IN PENDENTE
-                            (ALUNOS)</h3>
-                        <div id="listaSolicitacoes" style="display: flex; flex-direction: column; gap: 10px;">
-                            <p style="text-align:center; color:var(--text-muted);">Nenhuma solicitação pendente.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="view-trocas" class="agenda-view">
-                    <div class="form-card" style="border: 1px solid var(--imprevisto);">
-                        <h3 style="color: var(--imprevisto); border-left-color: var(--imprevisto);">🔄 PEDIDOS DE TROCA
-                        </h3>
-                        <div id="listaTrocas" style="display: flex; flex-direction: column; gap: 10px;">
-                            <p style="text-align:center; color:var(--text-muted);">Nenhuma troca solicitada.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="view-historico" class="agenda-view">
-                    <div class="lista-container">
-                        <h3>RELATÓRIO MENSAL</h3>
-                        <div style="padding: 10px; display: flex; gap: 10px;">
-                            <button onclick="alternarVisaoFrequencia('faltas')" id="btnVerFaltas"
-                                style="width:auto;">VER FALTAS</button>
-                            <button onclick="alternarVisaoFrequencia('presencas')" id="btnVerPresencas"
-                                style="width:auto; background:transparent; border:1px solid var(--text-secondary); color:var(--text-secondary);">VER
-                                PRESENÇAS</button>
-                        </div>
-                        <table id="tabelaFrequencia">
-                            <thead>
-                                <tr>
-                                    <th>DATA</th>
-                                    <th>ALUNO</th>
-                                    <th>STATUS</th>
-                                    <th>AÇÃO</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                </div>
             </section>
 
             <section id="prontuarios" class="tela">
