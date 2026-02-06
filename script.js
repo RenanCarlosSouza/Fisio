@@ -1,11 +1,7 @@
 /* ==========================================================================
    SISTEMA DE GESTÃO INTEGRADA - EDANIOS BELCHIOR
-   VERSÃO: 24.0 (MASTER ULTIMATE - CORREÇÃO VISUAL & JS FULL)
+   VERSÃO: 25.0 (AGENDA FIXA & CORREÇÃO PDF)
    DATA: 2026
-   
-   CORREÇÃO CRÍTICA DESTA VERSÃO:
-   - Ajuste no 'onAuthStateChanged' para forçar 'display: grid' nos cards de Alunos,
-     garantindo que fiquem alinhados e do mesmo tamanho que o Financeiro.
    ========================================================================== */
 
 // ==========================================================================
@@ -50,13 +46,11 @@ let listaServicos = [];
 let dbPagamentos = {};
 let dbGastos = [];
 let dbAgenda = {};
-let dbFrequenciaHistorico = [];
 let alunoLogado = null;
 
 // Estado da Interface
 let filtroAtualClientes = 'todos';
 let diaAtualAgenda = 'segunda';
-let visualizacaoFrequencia = 'faltas';
 
 // Listeners
 let unsubClientes = null;
@@ -64,8 +58,6 @@ let unsubServicos = null;
 let unsubPagamentos = null;
 let unsubGastos = null;
 let unsubAgenda = null;
-let unsubTrocas = null;
-let unsubFrequencia = null;
 
 // Configuração Inicial de Data
 const inputMes = document.getElementById('mesReferencia');
@@ -150,31 +142,27 @@ window.fazerLogout = () => {
     location.reload();
 };
 
-// --- MONITOR DE SESSÃO E PERMISSÕES (CORRIGIDO PARA GRID) ---
+// --- MONITOR DE SESSÃO E PERMISSÕES ---
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        // USUÁRIO LOGADO (Pode ser Admin ou Assistente)
+        // USUÁRIO LOGADO (Admin ou Assistente)
         document.getElementById('telaLogin').style.display = 'none';
         document.getElementById('appConteudo').style.display = 'block';
         document.getElementById('appAluno').style.display = 'none';
 
         const isAdmin = user.email === EMAIL_ADMIN;
 
-        // Elementos da Interface a serem controlados
         const btnFin = document.querySelector("button[onclick=\"mostrarTela('financeiro')\"]");
         const btnLogs = document.getElementById('btnLogsAdmin');
-        const statsCards = document.querySelector('.stats-alunos'); // Container dos totais na tela de alunos
+        const statsCards = document.querySelector('.stats-alunos');
 
-        // LÓGICA DE VISIBILIDADE (FIX: USA 'GRID' AO INVÉS DE 'FLEX' PARA NÃO ENCOLHER)
         if (btnFin) btnFin.style.display = isAdmin ? 'inline-block' : 'none';
         if (btnLogs) btnLogs.style.display = isAdmin ? 'inline-block' : 'none';
 
         if (statsCards) {
-            // AQUI ESTAVA O ERRO: Mudamos de 'flex' para 'grid' para respeitar o CSS novo
             statsCards.style.display = isAdmin ? 'grid' : 'none';
         }
 
-        // Se assistente tentar acessar financeiro (ex: via console), força ir para clientes
         if (!isAdmin) mostrarTela('clientes');
 
         iniciarListeners(user);
@@ -193,7 +181,7 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // ==========================================================================
-// 4. PORTAL DO ALUNO
+// 4. PORTAL DO ALUNO (SIMPLIFICADO)
 // ==========================================================================
 
 function iniciarModoAluno() {
@@ -205,7 +193,6 @@ function iniciarModoAluno() {
     document.getElementById('saudacaoAluno').innerText = `OLÁ, ${primeiroNome}.`;
 
     carregarAgendaDoAlunoHoje();
-    carregarMeusHorarios();
     carregarMeuProntuario();
     carregarMeusPagamentos();
 }
@@ -220,11 +207,11 @@ async function carregarAgendaDoAlunoHoje() {
 
     if (displayHorario) displayHorario.innerText = "...";
     if (motivoRecusa) motivoRecusa.style.display = 'none';
+    if (botoes) botoes.style.display = 'none'; // Desativado na versão fixa
 
     if (diaHoje === 'sabado' || diaHoje === 'domingo') {
         if (displayHorario) displayHorario.innerText = "FIM DE SEMANA";
         if (badge) { badge.innerText = "SEM AULA"; badge.className = "status-badge neutro"; }
-        if (botoes) botoes.style.display = 'none';
         return;
     }
 
@@ -254,20 +241,20 @@ async function carregarAgendaDoAlunoHoje() {
             alunoLogado.diaHoje = diaHoje;
 
             if (statusAtual === 'presente') {
-                badge.innerText = "✅ CONFIRMADO"; badge.className = "status-badge sucesso"; botoes.style.display = 'none';
+                badge.innerText = "✅ CONFIRMADO"; badge.className = "status-badge sucesso";
             } else if (statusAtual === 'recusado') {
                 badge.innerText = "❌ RECUSADO"; badge.className = "status-badge erro";
-                motivoRecusa.innerText = `Motivo: "${motivo || '-'}"`; motivoRecusa.style.display = 'block'; botoes.style.display = 'flex';
+                motivoRecusa.innerText = `Motivo: "${motivo || '-'}"`; motivoRecusa.style.display = 'block';
             } else if (statusAtual && statusAtual.startsWith('solicitado_')) {
-                badge.innerText = "⏳ AGUARDANDO"; badge.className = "status-badge pendente"; botoes.style.display = 'none';
+                badge.innerText = "⏳ AGUARDANDO"; badge.className = "status-badge pendente";
             } else {
-                badge.innerText = "PENDENTE"; badge.className = "status-badge neutro"; botoes.style.display = 'flex';
+                badge.innerText = "AGENDADO"; badge.className = "status-badge neutro";
             }
         } else {
-            displayHorario.innerText = "SEM AULA"; badge.innerText = "-"; botoes.style.display = 'none';
+            displayHorario.innerText = "SEM AULA"; badge.innerText = "-";
         }
     } else {
-        displayHorario.innerText = "SEM AULA"; botoes.style.display = 'none';
+        displayHorario.innerText = "SEM AULA";
     }
 }
 
@@ -313,42 +300,6 @@ window.carregarMeusPagamentos = async () => {
     });
 };
 
-window.carregarMeusHorarios = async () => {
-    const sel = document.getElementById('selectTrocaOrigem');
-    if (!sel) return;
-    sel.innerHTML = '';
-    const snap = await getDocs(collection(db, "agenda"));
-    let tem = false;
-    snap.forEach(docDia => {
-        const dia = docDia.id;
-        const agenda = docDia.data();
-        Object.keys(agenda).forEach(hora => {
-            if (Array.isArray(agenda[hora]) && agenda[hora].find(a => a.id === alunoLogado.id)) {
-                tem = true;
-                sel.innerHTML += `<option value="${dia}|${hora}">${dia.toUpperCase()} - ${hora}</option>`;
-            }
-        });
-    });
-    if (!tem) sel.innerHTML = "<option>Sem horários fixos</option>";
-};
-
-window.solicitarTrocaHorario = async () => {
-    const origem = document.getElementById('selectTrocaOrigem').value;
-    const diaDest = document.getElementById('selectTrocaDestinoDia').value;
-    const horaDest = document.getElementById('selectTrocaDestinoHora').value;
-    if (!origem || origem.includes('Sem')) return alert("Sem horário para trocar.");
-    const [diaOrig, horaOrig] = origem.split('|');
-    if (!confirm(`Trocar para ${diaDest.toUpperCase()} às ${horaDest}?`)) return;
-    await addDoc(collection(db, "solicitacoes_troca"), {
-        alunoId: alunoLogado.id, nome: alunoLogado.nome,
-        diaOrigem: diaOrig, horaOrigem: horaOrig,
-        diaDestino: diaDest, horaDestino: horaDest,
-        status: 'pendente', dataSolicitacao: new Date().toLocaleString()
-    });
-    registrarLog(`Troca solicitada: ${alunoLogado.nome}`);
-    mostrarNotificacao("PEDIDO ENVIADO!");
-};
-
 window.carregarMeuProntuario = async () => {
     const lista = document.getElementById('meuProntuarioLista');
     if (lista) lista.innerHTML = 'Carregando...';
@@ -387,28 +338,17 @@ function iniciarListeners(user) {
         snap.forEach(d => listaClientes.push({ id: d.id, ...d.data() }));
         renderizarClientes();
         filtrarSelectProntuario();
-        // Apenas Admin vê o recalculo total do financeiro
         if (user.email === EMAIL_ADMIN) renderizarFinanceiro();
     });
 
-    // 3. Agenda
+    // 3. Agenda (Sem cálculo de pendências)
     unsubAgenda = onSnapshot(collection(db, "agenda"), (snap) => {
         dbAgenda = { segunda: {}, terca: {}, quarta: {}, quinta: {}, sexta: {} };
         snap.forEach(d => dbAgenda[d.id] = d.data());
         renderizarAgenda();
-        calcularFrequenciaPendencias();
         const viewHoje = document.getElementById('view-hoje');
         if (viewHoje && viewHoje.classList.contains('active')) renderizarAgendaDoDia();
     });
-
-    // 4. Trocas (Apenas Admin vê isso para aprovar)
-    if (user.email === EMAIL_ADMIN) {
-        unsubTrocas = onSnapshot(collection(db, "solicitacoes_troca"), (snap) => {
-            const trocas = [];
-            snap.forEach(d => trocas.push({ id: d.id, ...d.data() }));
-            renderizarTrocasPendentes(trocas);
-        });
-    }
 
     carregarDadosDoMes(user);
 }
@@ -420,7 +360,6 @@ function carregarDadosDoMes(user = auth.currentUser) {
 
     if (unsubPagamentos) unsubPagamentos();
     if (unsubGastos) unsubGastos();
-    if (unsubFrequencia) unsubFrequencia();
 
     if (user && user.email === EMAIL_ADMIN) {
         // ADMIN: Carrega TUDO
@@ -435,29 +374,22 @@ function carregarDadosDoMes(user = auth.currentUser) {
             snap.forEach(d => dbGastos.push({ id: d.id, ...d.data() }));
             renderizarFinanceiro();
         });
-        unsubFrequencia = onSnapshot(query(collection(db, "historico_frequencia"), where("mesReferencia", "==", mes)), (snap) => {
-            dbFrequenciaHistorico = [];
-            snap.forEach(d => dbFrequenciaHistorico.push({ id: d.id, ...d.data() }));
-            renderizarTabelaHistorico();
-        });
     } else {
-        // ASSISTENTE: Carrega pagamentos SÓ para ver status na lista (sem somar)
+        // ASSISTENTE: Apenas status de pagamentos
         unsubPagamentos = onSnapshot(query(collection(db, "pagamentos"), where("mesReferencia", "==", mes)), (snap) => {
             dbPagamentos = {};
             snap.forEach(d => dbPagamentos[d.data().clienteId] = d.data());
-            renderizarClientes(); // Atualiza cores da tabela
+            renderizarClientes();
         });
-        dbGastos = []; // Não vê gastos
-        dbFrequenciaHistorico = [];
+        dbGastos = [];
 
-        // Garante que o painel financeiro esteja oculto
         const dash = document.querySelector('.dashboard-financeiro');
         if (dash) dash.style.display = 'none';
     }
 }
 
 // ==========================================================================
-// 6. GESTÃO DE SERVIÇOS (COM VERIFICAÇÃO DE PERMISSÃO)
+// 6. GESTÃO DE SERVIÇOS
 // ==========================================================================
 
 window.adicionarServico = async () => {
@@ -482,13 +414,12 @@ window.adicionarServico = async () => {
         mostrarNotificacao("Serviço Salvo!");
     } catch (e) {
         console.error("Erro serviço:", e);
-        if (e.code === 'permission-denied') alert("ERRO: Apenas o Admin pode criar serviços. Verifique as Regras.");
+        if (e.code === 'permission-denied') alert("ERRO: Apenas o Admin pode criar serviços.");
         else mostrarNotificacao("Erro ao salvar.", "erro");
     }
 };
 
 window.removerServico = async (id) => {
-    // Bloqueio visual para assistente
     if (auth.currentUser.email !== EMAIL_ADMIN) return alert("Apenas o Admin pode remover serviços.");
 
     if (confirm("Remover este serviço?")) {
@@ -510,7 +441,6 @@ function renderizarServicos() {
         if (listaServicos.length === 0) lista.innerHTML = '<span style="color:#777; font-size:0.8rem;">Vazio.</span>';
         else {
             listaServicos.forEach(s => {
-                // Só mostra botão de excluir se for Admin
                 const btnDelete = isAdmin ? `<button onclick="removerServico('${s.id}')" style="background:none; color:red; border:none; cursor:pointer;">&times;</button>` : '';
                 lista.innerHTML += `
                     <div style="background:var(--bg-input); padding:5px 10px; border-radius:4px; display:flex; gap:10px; border:1px solid #ddd; align-items:center;">
@@ -522,7 +452,6 @@ function renderizarServicos() {
         }
     }
 
-    // Atualiza Select do Cadastro (Visível para todos Staff)
     const select = document.getElementById('selectServicoCadastro');
     if (select) {
         const valAtual = select.value;
@@ -549,7 +478,6 @@ window.salvarOuAtualizarCliente = async () => {
     const tel = document.getElementById('telefoneCliente').value.trim();
     const selectServ = document.getElementById('selectServicoCadastro');
 
-    // Prontuário
     const nasc = document.getElementById('nascCliente').value;
     const prof = document.getElementById('profissaoCliente').value;
     const queixa = document.getElementById('queixaCliente').value;
@@ -577,7 +505,6 @@ window.salvarOuAtualizarCliente = async () => {
             mostrarNotificacao("Aluno Atualizado!");
         } else {
             const docRef = await addDoc(collection(db, "clientes"), dados);
-            // Gera pagamento inicial
             await setDoc(doc(db, "pagamentos", `${inputMes.value}_${docRef.id}`), {
                 clienteId: docRef.id,
                 mesReferencia: inputMes.value,
@@ -631,7 +558,6 @@ window.renderizarClientes = () => {
         if (filtroAtualClientes !== 'todos' && pg.status !== filtroAtualClientes) return;
 
         const tr = document.createElement('tr');
-
         let displayServico = c.nomeServico || "-";
 
         tr.innerHTML = `
@@ -662,7 +588,6 @@ window.renderizarClientes = () => {
         tbody.appendChild(tr);
     });
 
-    // Se não for admin, esconde totais
     if (isAdmin && document.getElementById('statTotal')) {
         document.getElementById('statTotal').innerText = total;
         document.getElementById('statPendentes').innerText = pendentes;
@@ -723,7 +648,6 @@ window.cancelarEdicao = () => {
 };
 
 window.removerCliente = async (id, nome) => {
-    // Bloqueio para Assistente
     if (auth.currentUser.email !== EMAIL_ADMIN) return alert("Apenas Admin pode excluir alunos.");
 
     try {
@@ -738,7 +662,7 @@ window.removerCliente = async (id, nome) => {
 };
 
 // ==========================================================================
-// 8. RELATÓRIOS PDF (SEGURANÇA APLICADA)
+// 8. RELATÓRIOS PDF (CORRIGIDO PARA NÃO TRAVAR E PAGINAÇÃO)
 // ==========================================================================
 
 window.gerarRelatorioFinanceiroPDF = () => {
@@ -747,10 +671,14 @@ window.gerarRelatorioFinanceiroPDF = () => {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     const mes = inputMes.value;
+    const marginX = 14;
 
-    doc.setFontSize(18); doc.setTextColor(27, 59, 111);
+    doc.setFontSize(18);
+    doc.setTextColor(27, 59, 111);
     doc.text("EDANIOS BELCHIOR - RELATÓRIO FINANCEIRO", 105, 15, null, null, "center");
-    doc.setFontSize(12); doc.setTextColor(100);
+
+    doc.setFontSize(12);
+    doc.setTextColor(100);
     doc.text(`Referência: ${mes}`, 105, 22, null, null, "center");
 
     const dadosReceita = [];
@@ -759,20 +687,34 @@ window.gerarRelatorioFinanceiroPDF = () => {
     Object.values(dbPagamentos).forEach(pg => {
         if (pg.status === 'pago') {
             const cliente = listaClientes.find(c => c.id === pg.clienteId);
-            // Só conta se aluno existir (ativo)
             if (cliente) {
                 const nome = cliente.nome;
                 const servico = cliente.nomeServico || "-";
                 const val = parseFloat(pg.valor || 0);
                 totalReceita += val;
-                dadosReceita.push([pg.mesReferencia, nome, servico, pg.forma.toUpperCase(), `R$ ${val.toFixed(2)}`]);
+
+                // CORREÇÃO CRÍTICA: Usa "N/A" se a forma de pagamento estiver vazia
+                let formaPagamento = (pg.forma || "N/A").toUpperCase();
+
+                dadosReceita.push([
+                    pg.mesReferencia,
+                    nome,
+                    servico,
+                    formaPagamento,
+                    `R$ ${val.toFixed(2)}`
+                ]);
             }
         }
     });
 
     doc.autoTable({
-        startY: 30, head: [['Mês', 'Aluno', 'Serviço', 'Forma', 'Valor']], body: dadosReceita,
-        theme: 'striped', headStyles: { fillColor: [27, 59, 111] }
+        startY: 30,
+        head: [['Mês', 'Aluno', 'Serviço', 'Forma', 'Valor']],
+        body: dadosReceita,
+        theme: 'striped',
+        headStyles: { fillColor: [27, 59, 111] },
+        styles: { fontSize: 10 },
+        margin: { top: 30, bottom: 20 }
     });
 
     const dadosDespesa = [];
@@ -783,25 +725,57 @@ window.gerarRelatorioFinanceiroPDF = () => {
         dadosDespesa.push([g.categoria.toUpperCase(), g.desc, `R$ ${val.toFixed(2)}`]);
     });
 
+    // Lógica Inteligente de Quebra de Página
+    let finalY = doc.lastAutoTable.finalY + 15;
+    if (finalY > 250) {
+        doc.addPage();
+        finalY = 20;
+    }
+
+    doc.setFontSize(12);
+    doc.setTextColor(198, 40, 40);
+    doc.text("DESPESAS REGISTRADAS", marginX, finalY - 5);
+
     doc.autoTable({
-        startY: doc.lastAutoTable.finalY + 15, head: [['Categoria', 'Descrição', 'Valor']], body: dadosDespesa,
-        theme: 'striped', headStyles: { fillColor: [198, 40, 40] }
+        startY: finalY,
+        head: [['Categoria', 'Descrição', 'Valor']],
+        body: dadosDespesa,
+        theme: 'striped',
+        headStyles: { fillColor: [198, 40, 40] },
+        styles: { fontSize: 10 },
+        margin: { bottom: 20 }
     });
 
-    const finalY = doc.lastAutoTable.finalY + 20;
+    finalY = doc.lastAutoTable.finalY + 20;
+    const espacoNecessario = 40;
+
+    if (finalY + espacoNecessario > 285) {
+        doc.addPage();
+        finalY = 20;
+    }
+
     const lucro = totalReceita - totalDespesa;
 
-    doc.setFontSize(14); doc.setTextColor(0);
-    doc.text(`TOTAL RECEITA (ATIVOS): R$ ${totalReceita.toFixed(2)}`, 14, finalY);
-    doc.text(`TOTAL DESPESA: R$ ${totalDespesa.toFixed(2)}`, 14, finalY + 7);
-    doc.setTextColor(lucro >= 0 ? 46 : 198, lucro >= 0 ? 125 : 40, lucro >= 0 ? 50 : 40);
-    doc.setFontSize(16); doc.text(`LUCRO LÍQUIDO: R$ ${lucro.toFixed(2)}`, 14, finalY + 16);
+    doc.setFontSize(14);
+    doc.setTextColor(0);
+    doc.text(`TOTAL RECEITA (ATIVOS): R$ ${totalReceita.toFixed(2)}`, marginX, finalY);
+    doc.text(`TOTAL DESPESA: R$ ${totalDespesa.toFixed(2)}`, marginX, finalY + 7);
+
+    if (lucro >= 0) {
+        doc.setTextColor(46, 125, 50);
+    } else {
+        doc.setTextColor(198, 40, 40);
+    }
+
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.text(`LUCRO LÍQUIDO: R$ ${lucro.toFixed(2)}`, marginX, finalY + 16);
 
     doc.save(`Relatorio_${mes}.pdf`);
 };
 
 // ==========================================================================
-// 9. AGENDA CENTRALIZADA (LÓGICA DE AGENDAMENTO ÚNICO)
+// 9. AGENDA CENTRALIZADA (FIXA)
 // ==========================================================================
 
 window.mudarDia = (dia) => {
@@ -816,10 +790,9 @@ window.renderizarAgenda = () => {
     container.innerHTML = '';
     const busca = document.getElementById('buscaAgenda').value.toLowerCase();
     const filtro = document.getElementById('filtroOcupacao').value;
-    const horarios = ["07:00 - 08:00", "08:00 - 09:00","09:00 - 10:00","10:00 - 11:00", "13:00 - 14:00", "14:00 - 15:00", "15:00 - 16:00", "16:00 - 17:00", "17:00 - 18:00", "18:00 - 19:00", "19:00 - 20:00", "20:00 - 21:00"];
+    const horarios = ["07:00 - 08:00", "08:00 - 09:00", "09:00 - 10:00", "10:00 - 11:00", "13:00 - 14:00", "14:00 - 15:00", "15:00 - 16:00", "16:00 - 17:00", "17:00 - 18:00", "18:00 - 19:00", "19:00 - 20:00", "20:00 - 21:00"];
     const dadosDia = dbAgenda[diaAtualAgenda] || {};
 
-    // Remove duplicidade
     const agendadosHojeIds = [];
     Object.keys(dadosDia).forEach(h => {
         if (Array.isArray(dadosDia[h])) {
@@ -838,12 +811,10 @@ window.renderizarAgenda = () => {
             let statusClass = '';
             if (a.presenca === 'presente') statusClass = 'presente';
             else if (a.presenca === 'falta') statusClass = 'falta';
-            else if (a.presenca === 'imprevisto') statusClass = 'imprevisto';
-            if (a.presenca && a.presenca.startsWith('solicitado_')) statusClass = 'imprevisto';
 
             htmlAlunos += `
                 <div class="aluno-item ${statusClass}">
-                    <span>${a.nome} ${a.presenca && a.presenca.startsWith('solicitado') ? '⏳' : ''}</span>
+                    <span>${a.nome}</span>
                     <div>
                         <button onclick="confirmarAcao('REMOVER?', '', ()=>rmAgenda('${hora}', ${idx}))" style="color:var(--danger)">🗑️</button>
                     </div>
@@ -877,7 +848,6 @@ window.addAgenda = async (hora) => {
     if (!val) return;
     const [id, nome] = val.split('|');
 
-    // Verificação dupla de duplicidade
     const dadosDia = dbAgenda[diaAtualAgenda] || {};
     let jaAgendado = false;
     Object.values(dadosDia).forEach(lista => {
@@ -902,20 +872,6 @@ window.rmAgenda = async (hora, idx) => {
     dados[hora].splice(idx, 1);
     await updateDoc(ref, dados);
     registrarLog(`Removeu aluno da agenda`);
-};
-
-window.clonarAgenda = async () => {
-    confirmarAcao("CLONAR SEMANA?", "Copiar Segunda?", async () => {
-        const segRef = doc(db, "agenda", "segunda");
-        const snap = await getDoc(segRef);
-        if (!snap.exists()) return mostrarNotificacao("SEGUNDA VAZIA", "erro");
-        const dados = snap.data();
-        Object.keys(dados).forEach(k => { if (Array.isArray(dados[k])) dados[k] = dados[k].map(a => ({ id: a.id, nome: a.nome, presenca: null })); });
-        const promises = ['terca', 'quarta', 'quinta', 'sexta'].map(dia => setDoc(doc(db, "agenda", dia), dados));
-        await Promise.all(promises);
-        registrarLog("Clonou agenda");
-        mostrarNotificacao("AGENDA CLONADA!");
-    });
 };
 
 window.mudarSubAbaAgenda = (abaId) => {
@@ -953,7 +909,6 @@ window.renderizarAgendaDoDia = () => {
                 let estilo = ''; let icone = '';
                 if (a.presenca === 'presente') { estilo = 'color:var(--success); font-weight:bold;'; icone = '✅ '; }
                 else if (a.presenca === 'falta') { estilo = 'color:var(--danger); text-decoration:line-through;'; icone = '❌ '; }
-                else if (a.presenca && a.presenca.startsWith('solicitado')) { estilo = 'color:var(--warning);'; icone = '⏳ '; }
                 return `<span style="${estilo}">${icone}${a.nome}</span>`;
             }).join(', ');
             if (lista) lista.innerHTML += `
@@ -967,152 +922,7 @@ window.renderizarAgendaDoDia = () => {
 };
 
 // ==========================================================================
-// 10. CONTROLE DE FREQUÊNCIA E CHECK-INS
-// ==========================================================================
-
-function calcularFrequenciaPendencias() {
-    const listaSolicitacoes = document.getElementById('listaSolicitacoes');
-    if (!listaSolicitacoes) return;
-    listaSolicitacoes.innerHTML = '';
-    let temSolicitacao = false;
-    diasSemana.forEach(dia => {
-        const dados = dbAgenda[dia] || {};
-        Object.keys(dados).forEach(hora => {
-            if (Array.isArray(dados[hora])) {
-                dados[hora].forEach(a => {
-                    if (a.presenca && a.presenca.startsWith('solicitado_')) {
-                        temSolicitacao = true;
-                        const tipo = a.presenca.replace('solicitado_', '').toUpperCase();
-                        let corBadge = tipo === 'PRESENTE' ? 'var(--success)' : 'var(--danger)';
-                        listaSolicitacoes.innerHTML += `
-                            <div style="background:var(--bg-input); padding:15px; display:flex; justify-content:space-between; align-items:center; border-left:4px solid ${corBadge}; margin-bottom:10px;">
-                                <div><strong>${a.nome}</strong><br><small style="color:var(--text-muted)">${dia.toUpperCase()} - ${hora}</small><br><span style="color:${corBadge}; font-weight:bold;">PEDIDO: ${tipo}</span></div>
-                                <div style="display:flex; gap:10px;"><button onclick="validarFrequencia('${dia}', '${hora}', '${a.id}', '${tipo.toLowerCase()}', '${a.nome}')" style="padding:10px; background:var(--success); color:black;">✔</button><button onclick="recusarFrequencia('${dia}', '${hora}', '${a.id}')" style="padding:10px; background:var(--danger); color:white;">✖</button></div>
-                            </div>`;
-                    }
-                });
-            }
-        });
-    });
-    if (!temSolicitacao) listaSolicitacoes.innerHTML = '<p style="text-align:center; color:var(--text-muted);">Nenhuma solicitação pendente.</p>';
-}
-
-window.alternarVisaoFrequencia = (tipo) => {
-    visualizacaoFrequencia = tipo;
-    const btnFaltas = document.getElementById('btnVerFaltas');
-    const btnPresencas = document.getElementById('btnVerPresencas');
-    if (btnFaltas && btnPresencas) {
-        btnFaltas.style.background = tipo === 'faltas' ? 'var(--text-primary)' : 'transparent';
-        btnFaltas.style.color = tipo === 'faltas' ? 'var(--bg-body)' : 'var(--text-secondary)';
-        btnPresencas.style.background = tipo === 'presencas' ? 'var(--text-primary)' : 'transparent';
-        btnPresencas.style.color = tipo === 'presencas' ? 'var(--bg-body)' : 'var(--text-secondary)';
-    }
-    renderizarTabelaHistorico();
-};
-
-function renderizarTabelaHistorico() {
-    const tabela = document.getElementById('tabelaFrequencia');
-    if (!tabela) return;
-    const tbody = tabela.querySelector('tbody');
-    tbody.innerHTML = '';
-    const dadosFiltrados = dbFrequenciaHistorico.filter(item => {
-        if (visualizacaoFrequencia === 'faltas') return item.status === 'falta' || item.status === 'imprevisto';
-        if (visualizacaoFrequencia === 'presencas') return item.status === 'presente';
-        return true;
-    });
-    dadosFiltrados.sort((a, b) => b.dataCompleta.localeCompare(a.dataCompleta));
-    dadosFiltrados.forEach(item => {
-        tbody.innerHTML += `<tr><td>${new Date(item.dataCompleta).toLocaleDateString('pt-BR')}</td><td><strong>${item.nome}</strong></td><td>${item.status.toUpperCase()}</td><td><button onclick="removerHistoricoFrequencia('${item.id}')" style="color:var(--danger); border:none; background:transparent;">🗑️</button></td></tr>`;
-    });
-}
-
-window.validarFrequencia = async (dia, hora, alunoId, statusFinal, nomeAluno) => {
-    const ref = doc(db, "agenda", dia);
-    const snap = await getDoc(ref);
-    if (snap.exists()) {
-        let dados = snap.data();
-        const index = dados[hora].findIndex(a => a.id === alunoId);
-        if (index !== -1) {
-            dados[hora][index].presenca = statusFinal;
-            await updateDoc(ref, dados);
-            await addDoc(collection(db, "historico_frequencia"), { alunoId, nome: nomeAluno, status: statusFinal, diaSemana: dia, mesReferencia: inputMes.value, dataCompleta: new Date().toISOString() });
-            registrarLog(`Admin validou ${statusFinal} para ${nomeAluno}`);
-            mostrarNotificacao("VALIDADO E ARQUIVADO!");
-        }
-    }
-};
-
-window.recusarFrequencia = async (dia, hora, alunoId) => {
-    const motivo = prompt("Motivo da recusa:");
-    if (!motivo) return;
-    const ref = doc(db, "agenda", dia);
-    const snap = await getDoc(ref);
-    if (snap.exists()) {
-        let dados = snap.data();
-        const index = dados[hora].findIndex(a => a.id === alunoId);
-        dados[hora][index].presenca = 'recusado';
-        dados[hora][index].motivoRecusa = motivo;
-        await updateDoc(ref, dados);
-        registrarLog(`Admin recusou presença: ${motivo}`);
-        mostrarNotificacao("RECUSADO.");
-    }
-};
-
-window.removerHistoricoFrequencia = async (id) => {
-    if (!confirm("Apagar este registro permanentemente?")) return;
-    await deleteDoc(doc(db, "historico_frequencia", id));
-    mostrarNotificacao("REGISTRO APAGADO.");
-};
-
-// ==========================================================================
-// 11. TROCAS DE HORÁRIO
-// ==========================================================================
-
-function renderizarTrocasPendentes(listaTrocas) {
-    const container = document.getElementById('listaTrocas');
-    if (!container) return;
-    container.innerHTML = '';
-    if (listaTrocas.length === 0) { container.innerHTML = '<p style="text-align:center; color:var(--text-muted);">Nenhuma troca solicitada.</p>'; return; }
-    listaTrocas.forEach(t => {
-        container.innerHTML += `
-            <div style="background:var(--bg-input); padding:15px; border-left:4px solid var(--imprevisto); margin-bottom:10px;">
-                <div style="margin-bottom:10px;"><strong>${t.nome}</strong> solicita troca:</div>
-                <div style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:10px;">De: ${t.diaOrigem.toUpperCase()} (${t.horaOrigem}) <br> Para: <strong>${t.diaDestino.toUpperCase()} (${t.horaDestino})</strong></div>
-                <div style="display:flex; gap:10px;"><button onclick="aprovarTroca('${t.id}')" style="background:var(--success); color:black;">APROVAR</button><button onclick="rejeitarTroca('${t.id}')" style="background:var(--danger); color:white;">NEGAR</button></div>
-            </div>`;
-    });
-}
-
-window.aprovarTroca = async (trocaId) => {
-    const docTroca = await getDoc(doc(db, "solicitacoes_troca", trocaId));
-    if (!docTroca.exists()) return;
-    const troca = docTroca.data();
-    const refOrigem = doc(db, "agenda", troca.diaOrigem);
-    const snapOrigem = await getDoc(refOrigem);
-    let dadosOrigem = snapOrigem.data();
-    const idxOrigem = dadosOrigem[troca.horaOrigem].findIndex(a => a.id === troca.alunoId);
-    if (idxOrigem > -1) dadosOrigem[troca.horaOrigem].splice(idxOrigem, 1);
-    const refDestino = doc(db, "agenda", troca.diaDestino);
-    const snapDestino = await getDoc(refDestino);
-    let dadosDestino = snapDestino.exists() ? snapDestino.data() : {};
-    if (!dadosDestino[troca.horaDestino]) dadosDestino[troca.horaDestino] = [];
-    if (dadosDestino[troca.horaDestino].length >= MAX_ALUNOS) return alert("Lotado!");
-    dadosDestino[troca.horaDestino].push({ id: troca.alunoId, nome: troca.nome, presenca: null });
-    await updateDoc(refOrigem, dadosOrigem);
-    if (snapDestino.exists()) await updateDoc(refDestino, dadosDestino); else await setDoc(refDestino, dadosDestino);
-    await deleteDoc(doc(db, "solicitacoes_troca", trocaId));
-    registrarLog(`Troca aprovada: ${troca.nome}`);
-    mostrarNotificacao("TROCA REALIZADA!");
-};
-
-window.rejeitarTroca = async (trocaId) => {
-    if (!confirm("Rejeitar?")) return;
-    await deleteDoc(doc(db, "solicitacoes_troca", trocaId));
-    mostrarNotificacao("REJEITADA.");
-};
-
-// ==========================================================================
-// 12. PRONTUÁRIO ELETRÔNICO (EVOLUÇÃO CLÍNICA)
+// 10. PRONTUÁRIO ELETRÔNICO
 // ==========================================================================
 
 window.filtrarSelectProntuario = () => {
@@ -1283,7 +1093,7 @@ window.baixarPdfEAbrirWpp = (id, nomePaciente, tel, valor, mesRef) => {
 };
 
 // ==========================================================================
-// 13. FINANCEIRO E FLUXO DE CAIXA
+// 11. FINANCEIRO E FLUXO DE CAIXA
 // ==========================================================================
 
 window.adicionarGasto = async () => {
@@ -1332,7 +1142,7 @@ window.renderizarFinanceiro = () => {
 window.rmGasto = async (id) => await deleteDoc(doc(db, "gastos", id));
 
 // ==========================================================================
-// 14. UTILITÁRIOS E NOTIFICAÇÕES DE SISTEMA
+// 12. UTILITÁRIOS E NOTIFICAÇÕES DE SISTEMA
 // ==========================================================================
 
 window.mudarCorTema = (corPrincipal) => {
