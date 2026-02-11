@@ -1,6 +1,6 @@
 /* ==========================================================================
    SISTEMA DE GESTÃO INTEGRADA - EDANIOS BELCHIOR
-   VERSÃO: 25.0 (AGENDA FIXA & CORREÇÃO PDF)
+   VERSÃO: 2.1 (CHANGELOG INTELIGENTE POR PERFIL)
    DATA: 2026
    ========================================================================== */
 
@@ -38,7 +38,7 @@ const auth = getAuth(app);
 const EMAIL_ADMIN = "edanios@studio.com";
 const SENHA_ALUNO_PADRAO_SUFIXO = "2026";
 const MAX_ALUNOS = 12;
-const diasSemana = ['segunda', 'terca', 'quarta', 'quinta', 'sexta'];
+const VERSAO_ATUAL = "2.1";
 
 // Cache Local
 let listaClientes = [];
@@ -47,6 +47,10 @@ let dbPagamentos = {};
 let dbGastos = [];
 let dbAgenda = {};
 let alunoLogado = null;
+
+// Variáveis do Changelog
+let activeChangelogList = []; // Lista filtrada de novidades
+let currentSlide = 0;
 
 // Estado da Interface
 let filtroAtualClientes = 'todos';
@@ -152,20 +156,37 @@ onAuthStateChanged(auth, (user) => {
 
         const isAdmin = user.email === EMAIL_ADMIN;
 
+        // Botões e Elementos da Interface
         const btnFin = document.querySelector("button[onclick=\"mostrarTela('financeiro')\"]");
         const btnLogs = document.getElementById('btnLogsAdmin');
         const statsCards = document.querySelector('.stats-alunos');
+        const fab = document.querySelector('.fab-container');
 
+        // CONTROLE DO BOTÃO FAB FINANCEIRO
+        const fabFin = document.getElementById('btnFabFinanceiro');
+        if (fabFin) {
+            fabFin.style.display = isAdmin ? 'flex' : 'none';
+        }
+
+        // Controle de visibilidade de elementos sensíveis
         if (btnFin) btnFin.style.display = isAdmin ? 'inline-block' : 'none';
         if (btnLogs) btnLogs.style.display = isAdmin ? 'inline-block' : 'none';
+        if (fab) fab.style.display = 'flex'; // FAB container visível para ambos
 
         if (statsCards) {
             statsCards.style.display = isAdmin ? 'grid' : 'none';
         }
 
-        if (!isAdmin) mostrarTela('clientes');
+        if (!isAdmin) {
+            // Assistente vai direto para clientes
+            mostrarTela('clientes');
+        }
 
         iniciarListeners(user);
+
+        // Verifica Changelog passando o nível de acesso
+        checkChangelog(isAdmin);
+
     } else {
         // ALUNO OU VISITANTE
         const sessaoAluno = sessionStorage.getItem('alunoLogado');
@@ -202,12 +223,10 @@ async function carregarAgendaDoAlunoHoje() {
     const diaHoje = diasMap[new Date().getDay()];
     const displayHorario = document.getElementById('horarioAulaAluno');
     const badge = document.getElementById('statusBadge');
-    const botoes = document.getElementById('acoesAluno');
     const motivoRecusa = document.getElementById('motivoRecusaAluno');
 
     if (displayHorario) displayHorario.innerText = "...";
     if (motivoRecusa) motivoRecusa.style.display = 'none';
-    if (botoes) botoes.style.display = 'none'; // Desativado na versão fixa
 
     if (diaHoje === 'sabado' || diaHoje === 'domingo') {
         if (displayHorario) displayHorario.innerText = "FIM DE SEMANA";
@@ -257,25 +276,6 @@ async function carregarAgendaDoAlunoHoje() {
         displayHorario.innerText = "SEM AULA";
     }
 }
-
-window.solicitarStatusAluno = async (tipo) => {
-    if (!confirm("Enviar atualização?")) return;
-    mostrarNotificacao("ENVIANDO...");
-    const ref = doc(db, "agenda", alunoLogado.diaHoje);
-    const snap = await getDoc(ref);
-    if (snap.exists()) {
-        let dados = snap.data();
-        const idx = dados[alunoLogado.horarioHoje].findIndex(a => a.id === alunoLogado.id);
-        if (idx !== -1) {
-            dados[alunoLogado.horarioHoje][idx].presenca = tipo;
-            delete dados[alunoLogado.horarioHoje][idx].motivoRecusa;
-            await updateDoc(ref, dados);
-            registrarLog(`Aluno ${alunoLogado.nome} solicitou: ${tipo}`);
-            carregarAgendaDoAlunoHoje();
-            mostrarNotificacao("ENVIADO!");
-        }
-    }
-};
 
 window.carregarMeusPagamentos = async () => {
     const div = document.getElementById('listaMeusPagamentos');
@@ -362,7 +362,7 @@ function carregarDadosDoMes(user = auth.currentUser) {
     if (unsubGastos) unsubGastos();
 
     if (user && user.email === EMAIL_ADMIN) {
-        // ADMIN: Carrega TUDO
+        // ADMIN: Carrega TUDO (incluindo status agendado de gastos)
         unsubPagamentos = onSnapshot(query(collection(db, "pagamentos"), where("mesReferencia", "==", mes)), (snap) => {
             dbPagamentos = {};
             snap.forEach(d => dbPagamentos[d.data().clienteId] = d.data());
@@ -375,7 +375,8 @@ function carregarDadosDoMes(user = auth.currentUser) {
             renderizarFinanceiro();
         });
     } else {
-        // ASSISTENTE: Apenas status de pagamentos
+        // ASSISTENTE: Apenas status de pagamentos para a tabela de alunos (PENDENTE/PAGO)
+        // Não carrega valores totais nem gastos
         unsubPagamentos = onSnapshot(query(collection(db, "pagamentos"), where("mesReferencia", "==", mes)), (snap) => {
             dbPagamentos = {};
             snap.forEach(d => dbPagamentos[d.data().clienteId] = d.data());
@@ -383,8 +384,11 @@ function carregarDadosDoMes(user = auth.currentUser) {
         });
         dbGastos = [];
 
+        // Esconde paineis financeiros
         const dash = document.querySelector('.dashboard-financeiro');
         if (dash) dash.style.display = 'none';
+        const fluxo = document.querySelector('.fluxo-detalhado-wrapper');
+        if (fluxo) fluxo.style.display = 'none';
     }
 }
 
@@ -662,7 +666,7 @@ window.removerCliente = async (id, nome) => {
 };
 
 // ==========================================================================
-// 8. RELATÓRIOS PDF (CORRIGIDO PARA NÃO TRAVAR E PAGINAÇÃO)
+// 8. RELATÓRIOS PDF (ATUALIZADO V2.0 - DRE e TABELA DE FORMAS)
 // ==========================================================================
 
 window.gerarRelatorioFinanceiroPDF = () => {
@@ -675,7 +679,7 @@ window.gerarRelatorioFinanceiroPDF = () => {
 
     doc.setFontSize(18);
     doc.setTextColor(27, 59, 111);
-    doc.text("EDANIOS BELCHIOR - RELATÓRIO FINANCEIRO", 105, 15, null, null, "center");
+    doc.text("EDANIOS BELCHIOR - RELATÓRIO MENSAL", 105, 15, null, null, "center");
 
     doc.setFontSize(12);
     doc.setTextColor(100);
@@ -683,6 +687,9 @@ window.gerarRelatorioFinanceiroPDF = () => {
 
     const dadosReceita = [];
     let totalReceita = 0;
+
+    // Contadores para o resumo dentro do PDF
+    let sumPix = 0, sumDin = 0, sumCard = 0;
 
     Object.values(dbPagamentos).forEach(pg => {
         if (pg.status === 'pago') {
@@ -693,7 +700,11 @@ window.gerarRelatorioFinanceiroPDF = () => {
                 const val = parseFloat(pg.valor || 0);
                 totalReceita += val;
 
-                // CORREÇÃO CRÍTICA: Usa "N/A" se a forma de pagamento estiver vazia
+                // Soma por tipo
+                if (pg.forma === 'pix') sumPix += val;
+                else if (pg.forma === 'dinheiro') sumDin += val;
+                else if (pg.forma === 'cartao') sumCard += val;
+
                 let formaPagamento = (pg.forma || "N/A").toUpperCase();
 
                 dadosReceita.push([
@@ -707,6 +718,7 @@ window.gerarRelatorioFinanceiroPDF = () => {
         }
     });
 
+    // Tabela Principal
     doc.autoTable({
         startY: 30,
         head: [['Mês', 'Aluno', 'Serviço', 'Forma', 'Valor']],
@@ -717,24 +729,30 @@ window.gerarRelatorioFinanceiroPDF = () => {
         margin: { top: 30, bottom: 20 }
     });
 
+    // Novo: Resumo por Forma de Pagamento no PDF
+    let finalY = doc.lastAutoTable.finalY + 10;
+    doc.setFontSize(10);
+    doc.setTextColor(50);
+    doc.text(`Resumo: PIX: R$ ${sumPix.toFixed(2)} | Dinheiro: R$ ${sumDin.toFixed(2)} | Cartão: R$ ${sumCard.toFixed(2)}`, marginX, finalY);
+
+    finalY += 10;
+
     const dadosDespesa = [];
     let totalDespesa = 0;
     dbGastos.forEach(g => {
-        const val = parseFloat(g.valor || 0);
-        totalDespesa += val;
-        dadosDespesa.push([g.categoria.toUpperCase(), g.desc, `R$ ${val.toFixed(2)}`]);
+        // Apenas despesas PAGAS entram no relatório mensal de caixa
+        if (g.status !== 'agendado') {
+            const val = parseFloat(g.valor || 0);
+            totalDespesa += val;
+            dadosDespesa.push([g.categoria.toUpperCase(), g.desc, `R$ ${val.toFixed(2)}`]);
+        }
     });
 
-    // Lógica Inteligente de Quebra de Página
-    let finalY = doc.lastAutoTable.finalY + 15;
-    if (finalY > 250) {
-        doc.addPage();
-        finalY = 20;
-    }
+    if (finalY > 240) { doc.addPage(); finalY = 20; }
 
     doc.setFontSize(12);
     doc.setTextColor(198, 40, 40);
-    doc.text("DESPESAS REGISTRADAS", marginX, finalY - 5);
+    doc.text("DESPESAS REALIZADAS", marginX, finalY - 5);
 
     doc.autoTable({
         startY: finalY,
@@ -772,6 +790,79 @@ window.gerarRelatorioFinanceiroPDF = () => {
     doc.text(`LUCRO LÍQUIDO: R$ ${lucro.toFixed(2)}`, marginX, finalY + 16);
 
     doc.save(`Relatorio_${mes}.pdf`);
+};
+
+// NOVA FUNÇÃO: RELATÓRIO ANUAL (DRE)
+window.gerarRelatorioAnualPDF = async () => {
+    if (!confirm("Gerar DRE Anual? Isso pode levar alguns segundos.")) return;
+    mostrarNotificacao("Gerando DRE...", "sucesso");
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const anoAtual = new Date().getFullYear();
+
+    // Busca TODOS os pagamentos e gastos do ano
+    // Nota: Em produção idealmente faria query com startAt/endAt, mas aqui vamos buscar e filtrar
+    // para manter simples e compatível.
+
+    const snapPags = await getDocs(collection(db, "pagamentos"));
+    const snapGastos = await getDocs(collection(db, "gastos"));
+
+    let dre = {}; // { '01': {receita:0, despesa:0}, '02': ... }
+
+    // Inicializa meses
+    for (let i = 1; i <= 12; i++) {
+        let m = String(i).padStart(2, '0');
+        dre[m] = { receita: 0, despesa: 0, lucro: 0 };
+    }
+
+    snapPags.forEach(d => {
+        const data = d.data();
+        if (data.mesReferencia && data.mesReferencia.startsWith(anoAtual) && data.status === 'pago') {
+            const mes = data.mesReferencia.split('-')[1];
+            dre[mes].receita += parseFloat(data.valor || 0);
+        }
+    });
+
+    snapGastos.forEach(d => {
+        const data = d.data();
+        if (data.mesReferencia && data.mesReferencia.startsWith(anoAtual) && data.status !== 'agendado') {
+            const mes = data.mesReferencia.split('-')[1];
+            dre[mes].despesa += parseFloat(data.valor || 0);
+        }
+    });
+
+    // Monta dados Tabela
+    const bodyTable = [];
+    let totalRec = 0, totalDesp = 0;
+
+    Object.keys(dre).sort().forEach(m => {
+        const r = dre[m].receita;
+        const d = dre[m].despesa;
+        const l = r - d;
+        totalRec += r;
+        totalDesp += d;
+        bodyTable.push([`${m}/${anoAtual}`, `R$ ${r.toFixed(2)}`, `R$ ${d.toFixed(2)}`, `R$ ${l.toFixed(2)}`]);
+    });
+
+    // Totalizador
+    bodyTable.push(['TOTAL', `R$ ${totalRec.toFixed(2)}`, `R$ ${totalDesp.toFixed(2)}`, `R$ ${(totalRec - totalDesp).toFixed(2)}`]);
+
+    doc.setFontSize(18);
+    doc.setTextColor(27, 59, 111);
+    doc.text(`DRE ANUAL - ${anoAtual}`, 105, 15, null, null, "center");
+
+    doc.autoTable({
+        startY: 25,
+        head: [['Mês', 'Receita Bruta', 'Despesas', 'Lucro Líquido']],
+        body: bodyTable,
+        theme: 'grid',
+        headStyles: { fillColor: [0, 0, 0] },
+        footStyles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], fontStyle: 'bold' }
+    });
+
+    doc.save(`DRE_${anoAtual}.pdf`);
+    mostrarNotificacao("DRE Gerado!");
 };
 
 // ==========================================================================
@@ -1093,15 +1184,32 @@ window.baixarPdfEAbrirWpp = (id, nomePaciente, tel, valor, mesRef) => {
 };
 
 // ==========================================================================
-// 11. FINANCEIRO E FLUXO DE CAIXA
+// 11. FINANCEIRO E FLUXO DE CAIXA (ATUALIZADO V2.0)
 // ==========================================================================
 
 window.adicionarGasto = async () => {
     const desc = document.getElementById('descGasto').value;
     const val = document.getElementById('valorGasto').value;
     const cat = document.getElementById('catGasto').value;
-    await addDoc(collection(db, "gastos"), { desc, valor: val, categoria: cat, mesReferencia: inputMes.value });
-    mostrarNotificacao("GASTO OK");
+
+    // Novo na v2.0: Checkbox "Agendar"
+    const isAgendado = document.getElementById('checkGastoFuturo').checked;
+    const status = isAgendado ? 'agendado' : 'pago';
+
+    await addDoc(collection(db, "gastos"), {
+        desc,
+        valor: val,
+        categoria: cat,
+        mesReferencia: inputMes.value,
+        status: status // Novo campo
+    });
+
+    // Reset
+    document.getElementById('descGasto').value = '';
+    document.getElementById('valorGasto').value = '';
+    document.getElementById('checkGastoFuturo').checked = false;
+
+    mostrarNotificacao(isAgendado ? "CONTA AGENDADA!" : "DESPESA PAGA!");
 };
 
 window.virarMes = () => mostrarNotificacao("MUDE A DATA NO SELETOR.");
@@ -1121,23 +1229,77 @@ window.exportarCSV = () => {
 
 window.renderizarFinanceiro = () => {
     if (auth.currentUser && auth.currentUser.email !== EMAIL_ADMIN) return;
-    const tbody = document.getElementById('tabelaGastos').querySelector('tbody');
-    tbody.innerHTML = '';
-    let despesas = 0, receita = 0, pix = 0, din = 0, car = 0;
+
+    // Tabelas
+    const tbodyPagos = document.getElementById('tabelaGastos').querySelector('tbody');
+    const tbodyFuturos = document.getElementById('tabelaGastosFuturos').querySelector('tbody');
+
+    tbodyPagos.innerHTML = '';
+    tbodyFuturos.innerHTML = '';
+
+    let despesas = 0, receita = 0;
+
+    // Detalhamento do Fluxo (Novo V2.0)
+    let totalPix = 0, totalDinheiro = 0, totalCartao = 0;
+
     Object.values(dbPagamentos).forEach(p => {
         if (listaClientes.some(c => c.id === p.clienteId) && p.status === 'pago') {
-            const v = Number(p.valor || 0); receita += v;
-            if (p.forma === 'pix') pix += v; else if (p.forma === 'dinheiro') din += v; else car += v;
+            const v = Number(p.valor || 0);
+            receita += v;
+
+            // Separação V2.0
+            if (p.forma === 'pix') totalPix += v;
+            else if (p.forma === 'dinheiro') totalDinheiro += v;
+            else totalCartao += v;
         }
     });
+
+    // Renderiza Gastos
     dbGastos.forEach(g => {
-        despesas += Number(g.valor);
-        tbody.innerHTML += `<tr><td>${g.desc.toUpperCase()}</td><td>${g.categoria}</td><td style="color:var(--danger)">R$ ${g.valor}</td><td><button onclick="rmGasto('${g.id}')">🗑️</button></td></tr>`;
+        const valorGasto = Number(g.valor);
+
+        if (g.status === 'agendado') {
+            // Conta a Pagar (Futuro)
+            tbodyFuturos.innerHTML += `
+                <tr>
+                    <td>${g.desc.toUpperCase()}</td>
+                    <td style="color:var(--warning)">R$ ${g.valor}</td>
+                    <td>
+                        <button onclick="confirmarPagamentoGasto('${g.id}')" title="Marcar como Pago">✅</button> 
+                        <button onclick="rmGasto('${g.id}')" title="Excluir">🗑️</button>
+                    </td>
+                </tr>`;
+        } else {
+            // Despesa Realizada
+            despesas += valorGasto;
+            tbodyPagos.innerHTML += `
+                <tr>
+                    <td>${g.desc.toUpperCase()}</td>
+                    <td>${g.categoria}</td>
+                    <td style="color:var(--danger)">R$ ${g.valor}</td>
+                    <td><button onclick="rmGasto('${g.id}')">🗑️</button></td>
+                </tr>`;
+        }
     });
+
+    // Atualiza Dash
     document.getElementById('dashReceita').innerText = `R$ ${receita.toFixed(2)}`;
     document.getElementById('dashDespesas').innerText = `R$ ${despesas.toFixed(2)}`;
     document.getElementById('dashLucro').innerText = `R$ ${(receita - despesas).toFixed(2)}`;
+
+    // Atualiza Cards de Fluxo Detalhado
+    if (document.getElementById('valPix')) {
+        document.getElementById('valPix').innerText = `R$ ${totalPix.toFixed(2)}`;
+        document.getElementById('valDin').innerText = `R$ ${totalDinheiro.toFixed(2)}`;
+        document.getElementById('valCar').innerText = `R$ ${totalCartao.toFixed(2)}`;
+    }
 };
+
+window.confirmarPagamentoGasto = async (id) => {
+    if (!confirm("Confirmar pagamento desta conta? Ela sairá do seu caixa agora.")) return;
+    await updateDoc(doc(db, "gastos", id), { status: 'pago' });
+    mostrarNotificacao("CONTA PAGA!");
+}
 
 window.rmGasto = async (id) => await deleteDoc(doc(db, "gastos", id));
 
@@ -1196,6 +1358,106 @@ window.abrirLogs = async () => {
         const d = doc.data();
         container.innerHTML += `<div style="border-bottom:1px solid #333; padding:8px; font-size:0.85rem;"><strong>${d.usuario.split('@')[0]}</strong> (${d.data})<br>${d.acao}</div>`;
     });
+};
+
+// ==========================================================================
+// 13. UI/UX: FAB & CHANGELOG (NOVO V2.1 - INTELIGENTE)
+// ==========================================================================
+
+// Lógica do Botão Flutuante (FAB)
+window.toggleFab = () => {
+    const menu = document.getElementById('fabMenu');
+    if (menu.style.display === 'flex') {
+        menu.style.display = 'none';
+        menu.style.opacity = '0';
+    } else {
+        menu.style.display = 'flex';
+        setTimeout(() => menu.style.opacity = '1', 10);
+    }
+};
+
+// Dados do Changelog com propriedade 'target'
+// 'admin' = apenas administrador
+// 'all' = todos (admin e assistente)
+const changelogData = [
+    {
+        title: "FINANCEIRO PRO",
+        desc: "Agora você pode agendar 'Contas a Pagar' sem descontar do caixa imediato. Além disso, veja quanto entrou separadamente em Pix, Dinheiro e Cartão.",
+        target: 'admin'
+    },
+    {
+        title: "RELATÓRIO DRE",
+        desc: "Gere um PDF Anual completo com todo o lucro e despesas de Janeiro a Dezembro para sua contabilidade.",
+        target: 'admin'
+    },
+    {
+        title: "EXPERIÊNCIA RÁPIDA",
+        desc: "Use o novo botão flutuante (+) no canto da tela para acesso rápido a Alunos, Agenda e Despesas.",
+        target: 'all'
+    },
+    {
+        title: "VISUAL RENOVADO",
+        desc: "Uma nova interface mais limpa e organizada para facilitar seus atendimentos no dia a dia.",
+        target: 'all'
+    }
+];
+
+window.checkChangelog = (isAdmin) => {
+    // 1. Verifica se já viu a versão atual
+    const seen = localStorage.getItem('changelog_seen_version');
+    if (seen === VERSAO_ATUAL) return;
+
+    // 2. Filtra as novidades baseado no perfil
+    activeChangelogList = changelogData.filter(slide => {
+        if (slide.target === 'all') return true;
+        if (isAdmin && slide.target === 'admin') return true;
+        return false;
+    });
+
+    if (activeChangelogList.length === 0) return;
+
+    // 3. Detecta dispositivo para Badge
+    const ua = navigator.userAgent;
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+    const deviceText = isMobile ? "MOBILE DETECTADO" : "DESKTOP DETECTADO";
+    document.getElementById('deviceBadge').innerText = deviceText;
+
+    // 4. Abre modal
+    currentSlide = 0;
+    renderChangelogSlide();
+    document.getElementById('modalChangelog').style.display = 'flex';
+};
+
+function renderChangelogSlide() {
+    if (activeChangelogList.length === 0) return;
+
+    const content = document.getElementById('changelogContent');
+    const slide = activeChangelogList[currentSlide];
+
+    content.innerHTML = `
+        <h2 style="color:var(--primary); margin-bottom:10px;">${slide.title}</h2>
+        <p>${slide.desc}</p>
+    `;
+    document.getElementById('slideIndicator').innerText = `${currentSlide + 1}/${activeChangelogList.length}`;
+}
+
+window.nextChangelog = () => {
+    if (currentSlide < activeChangelogList.length - 1) {
+        currentSlide++;
+        renderChangelogSlide();
+    }
+};
+
+window.prevChangelog = () => {
+    if (currentSlide > 0) {
+        currentSlide--;
+        renderChangelogSlide();
+    }
+};
+
+window.fecharChangelog = () => {
+    document.getElementById('modalChangelog').style.display = 'none';
+    localStorage.setItem('changelog_seen_version', VERSAO_ATUAL);
 };
 
 
