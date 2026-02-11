@@ -1,5 +1,5 @@
 /* ==========================================================================
-   EDANIOS BELCHIOR - BLUE INK (FINAL VERSION - LOGIN CENTERED)
+   EDANIOS BELCHIOR - BLUE INK v2.0
    ========================================================================== */
 
 /* 1. FONTES */
@@ -387,8 +387,9 @@ tr:hover td {
     background-color: #F8FAFC;
 }
 
-/* 9. DASHBOARD */
+/* 9. DASHBOARD (V2.0) */
 .dashboard-financeiro,
+.fluxo-detalhado-wrapper,
 .stats-alunos {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -397,7 +398,8 @@ tr:hover td {
 }
 
 .card-dash,
-.stat-card {
+.stat-card,
+.card-fluxo {
     background: white;
     padding: 25px;
     text-align: center;
@@ -405,6 +407,35 @@ tr:hover td {
     border-radius: var(--radius);
     box-shadow: var(--shadow);
 }
+
+/* FLUXO DETALHADO (NOVO) */
+.card-fluxo {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 20px;
+    text-align: left;
+    border-left: 4px solid var(--accent);
+}
+
+.icon-fluxo {
+    font-size: 2.5rem;
+    color: var(--primary);
+    opacity: 0.8;
+}
+
+.info-fluxo span {
+    font-family: var(--font-headline);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    display: block;
+}
+
+.info-fluxo strong {
+    font-size: 1.2rem;
+    color: var(--text-primary);
+}
+
 
 .stat-card .label,
 .card-dash span {
@@ -808,6 +839,99 @@ tr:hover td {
     margin-bottom: 5px;
 }
 
+/* 12. FAB E CHANGELOG (NOVO V2.0) */
+
+/* FAB Container */
+.fab-container {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    z-index: 5000;
+}
+
+.fab-main {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border: none;
+    font-size: 24px;
+    transition: transform 0.3s;
+}
+
+.fab-main:hover {
+    transform: scale(1.1);
+}
+
+.fab-menu {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.fab-menu button {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: white;
+    color: var(--primary);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Changelog Modal */
+.changelog-header {
+    background: var(--primary);
+    color: white;
+    padding: 20px;
+}
+
+.changelog-header h3 {
+    margin: 0;
+    color: white;
+    border: none;
+}
+
+.changelog-content {
+    padding: 30px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.changelog-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding-bottom: 20px;
+}
+
+.changelog-nav button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    padding: 0;
+}
+
 /* 13. RESPONSIVIDADE (MOBILE) */
 @media (max-width: 768px) {
     .header-top {
@@ -829,8 +953,14 @@ tr:hover td {
     }
 
     .stats-alunos,
-    .dashboard-financeiro {
+    .dashboard-financeiro,
+    .fluxo-detalhado-wrapper {
         grid-template-columns: 1fr;
+    }
+
+    .card-fluxo {
+        padding: 15px;
+        gap: 15px;
     }
 
     .painel-controle-fin,
@@ -862,6 +992,15 @@ tr:hover td {
         font-size: 0.85rem;
         padding: 10px;
     }
+
+    /* Ajuste para tabela mobile */
+    .lista-container {
+        margin-left: -10px;
+        margin-right: -10px;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+    }
 }
 
 /* 14. IMPRESSÃO */
@@ -874,7 +1013,8 @@ tr:hover td {
 
     .no-print,
     .main-header,
-    button {
+    button,
+    .fab-container {
         display: none !important;
     }
 
