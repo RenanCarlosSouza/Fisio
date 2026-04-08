@@ -14,7 +14,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
     <style>
-        /* Estilos inline específicos para a v2.0 que precisam carregar rápido */
+        /* Estilos inline específicos para a v3.0 que precisam carregar rápido */
+        body {
+            transition: background-color 1.5s ease-in-out, color 1s ease;
+        }
+
+        body.logged-in {
+            background-color: #FFFFFF;
+            /* Fundo branco e limpo */
+        }
+
         .agenda-subnav {
             display: flex;
             gap: 10px;
@@ -91,7 +100,7 @@
                 <input type="text" id="nomeAlunoLogin" placeholder="SEU NOME COMPLETO">
                 <input type="password" id="senhaAlunoLogin" placeholder="SENHA (Nome + 2026)">
                 <button onclick="fazerLoginAluno()"
-                    style="margin-top: 20px; background-color: var(--text-primary); color: var(--bg-body);">
+                    style="margin-top: 20px; background-color: var(--primary); color: white;">
                     ACESSAR MEU PRONTUÁRIO
                 </button>
                 <p
@@ -146,13 +155,15 @@
         <header class="main-header no-print">
             <div class="header-top">
                 <div class="logo">EDANIOS BELCHIOR <span
-                        style="font-size: 0.8rem; vertical-align: super; color: var(--accent);">2.1</span></div>
+                        style="font-size: 0.8rem; vertical-align: super; color: var(--accent);">3.0</span></div>
             </div>
             <nav class="main-nav">
                 <button onclick="mostrarTela('clientes')" class="active">ALUNOS</button>
                 <button onclick="mostrarTela('agenda')">AGENDA</button>
                 <button onclick="mostrarTela('prontuarios')">PRONTUÁRIOS</button>
                 <button onclick="mostrarTela('financeiro')">FINANCEIRO</button>
+                <button onclick="mostrarTela('amanda')" id="btnAmandaAdmin"
+                    style="display:none; color: var(--primary); font-weight: bold;">AMANDA</button>
                 <button onclick="abrirLogs()" id="btnLogsAdmin"
                     style="display:none; color:var(--text-muted);">LOGS</button>
                 <button onclick="fazerLogout()" class="btn-sair">SAIR</button>
@@ -306,7 +317,7 @@
 
             <section id="financeiro" class="tela">
                 <div class="header-section">
-                    <h2>THE VAULT (2.0)</h2>
+                    <h2>THE VAULT (3.0)</h2>
                 </div>
                 <div class="painel-controle-fin">
                     <div class="input-mes-wrapper">
@@ -421,6 +432,50 @@
                     </div>
                 </div>
             </section>
+
+            <section id="amanda" class="tela">
+                <div class="header-section">
+                    <h2>ESPAÇO DA AMANDA</h2>
+                </div>
+
+                <div class="stats-alunos" style="grid-template-columns: 1fr 1fr;">
+                    <div class="stat-card"><span class="label">TOTAL DE ALUNOS DELA</span><span class="value"
+                            id="statAmandaAlunos">0</span></div>
+                    <div class="stat-card recebido"><span class="label">ESPELHO DE RECEITA (PAGO)</span><span
+                            class="value" id="statAmandaReceita" style="color: var(--success);">R$ 0,00</span></div>
+                </div>
+
+                <div class="form-card">
+                    <h4>VINCULAR ALUNO À AMANDA:</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 15px;">Use a pesquisa
+                        para filtrar todos os alunos do sistema. O sistema puxará automaticamente os horários e
+                        pagamentos deles.</p>
+                    <div class="input-group" style="flex-direction: row; gap: 10px; align-items: center;">
+                        <input type="text" id="buscaAmanda" placeholder="🔍 PESQUISAR ALUNO..."
+                            oninput="filtrarSelectAmanda()" style="flex: 2;">
+                        <select id="selectAlunoAmanda" style="flex: 3;">
+                            <option value="">-- SELECIONE O ALUNO --</option>
+                        </select>
+                        <button onclick="vincularAlunoAmanda()" style="flex: 1;">+ VINCULAR</button>
+                    </div>
+                </div>
+
+                <div class="lista-container">
+                    <h4 style="padding: 10px 20px; background: var(--bg-input); color: var(--primary); margin: 0;">📋
+                        ALUNOS E HORÁRIOS DA AMANDA</h4>
+                    <table id="tabelaAmanda">
+                        <thead>
+                            <tr>
+                                <th>ALUNO</th>
+                                <th>DIAS E HORÁRIOS (AGENDA)</th>
+                                <th>AÇÕES</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+
         </main>
 
         <div class="fab-container">
@@ -455,12 +510,16 @@
     </div>
 
     <div id="modalLogs" class="modal-overlay">
-        <div class="modal-box" style="max-width: 600px;">
-            <h3>REGISTROS DO SISTEMA</h3>
-            <div id="listaLogs" class="historico-prontuario" style="text-align: left; height: 300px;"></div>
-            <div class="modal-footer">
-                <button onclick="document.getElementById('modalLogs').style.display='none'"
-                    class="btn-fechar">FECHAR</button>
+        <div class="modal-box" style="max-width: 450px; text-align: center; padding: 30px;">
+            <h3 style="margin-top: 0; margin-bottom: 20px;">LOGS DESCONTINUADOS</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 25px; line-height: 1.5;">
+                A aba de Logs foi descontinuada na <strong>versão 3.0</strong>.<br><br>
+                O sistema ganhou uma nova aba dedicada à <strong>Amanda</strong>, com espelho de pagamentos e gestão
+                integrada de agenda dos alunos dela.
+            </p>
+            <div class="modal-footer" style="padding: 0;">
+                <button onclick="document.getElementById('modalLogs').style.display='none'" class="btn-fechar"
+                    style="margin: 0;">CIENTE</button>
             </div>
         </div>
     </div>
@@ -468,7 +527,7 @@
     <div id="modalChangelog" class="modal-overlay">
         <div class="modal-box" style="max-width: 500px; padding: 0;">
             <div class="changelog-header">
-                <h3>NOVIDADES V2.1</h3>
+                <h3>NOVIDADES V3.0</h3>
                 <p id="deviceBadge"
                     style="font-size: 0.7rem; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px; display: inline-block;">
                     DETECTANDO DISPOSITIVO...</p>
@@ -488,5 +547,3 @@
 </body>
 
 </html>
-
-
