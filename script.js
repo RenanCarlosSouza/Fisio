@@ -1,6 +1,6 @@
 /* ==========================================================================
    SISTEMA DE GESTÃO INTEGRADA - EDANIOS BELCHIOR
-   VERSÃO: 2.1 (CHANGELOG INTELIGENTE POR PERFIL)
+   VERSÃO: 3.0 (ROSA SUAVE & BRANCO + ESPAÇO AMANDA)
    DATA: 2026
    ========================================================================== */
 
@@ -10,7 +10,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
     getFirestore, collection, addDoc, updateDoc, deleteDoc, doc,
-    onSnapshot, query, where, setDoc, getDoc, getDocs, arrayUnion, orderBy, limit
+    onSnapshot, query, where, setDoc, getDoc, getDocs, arrayUnion
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import {
     getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
@@ -38,7 +38,7 @@ const auth = getAuth(app);
 const EMAIL_ADMIN = "edanios@studio.com";
 const SENHA_ALUNO_PADRAO_SUFIXO = "2026";
 const MAX_ALUNOS = 12;
-const VERSAO_ATUAL = "2.1";
+const VERSAO_ATUAL = "3.0";
 
 // Cache Local
 let listaClientes = [];
@@ -114,7 +114,7 @@ window.fazerLoginAluno = async () => {
         const snapAll = await getDocs(collection(db, "clientes"));
 
         snapAll.forEach(d => {
-            if (d.data().nome.toLowerCase() === nome.toLowerCase()) {
+            if (d.data().nome && d.data().nome.toLowerCase() === nome.toLowerCase()) {
                 cadastroEncontrado = { id: d.id, ...d.data() };
             }
         });
@@ -149,6 +149,9 @@ window.fazerLogout = () => {
 // --- MONITOR DE SESSÃO E PERMISSÕES ---
 onAuthStateChanged(auth, (user) => {
     if (user) {
+        // Ativação da cor limpa do painel principal
+        document.body.classList.add('logged-in');
+
         // USUÁRIO LOGADO (Admin ou Assistente)
         document.getElementById('telaLogin').style.display = 'none';
         document.getElementById('appConteudo').style.display = 'block';
@@ -159,6 +162,7 @@ onAuthStateChanged(auth, (user) => {
         // Botões e Elementos da Interface
         const btnFin = document.querySelector("button[onclick=\"mostrarTela('financeiro')\"]");
         const btnLogs = document.getElementById('btnLogsAdmin');
+        const btnAmanda = document.getElementById('btnAmandaAdmin');
         const statsCards = document.querySelector('.stats-alunos');
         const fab = document.querySelector('.fab-container');
 
@@ -168,23 +172,21 @@ onAuthStateChanged(auth, (user) => {
             fabFin.style.display = isAdmin ? 'flex' : 'none';
         }
 
-        // Controle de visibilidade de elementos sensíveis
+        // Controle de visibilidade de elementos sensíveis e abas restritas
         if (btnFin) btnFin.style.display = isAdmin ? 'inline-block' : 'none';
         if (btnLogs) btnLogs.style.display = isAdmin ? 'inline-block' : 'none';
-        if (fab) fab.style.display = 'flex'; // FAB container visível para ambos
+        if (btnAmanda) btnAmanda.style.display = isAdmin ? 'inline-block' : 'none';
+        if (fab) fab.style.display = 'flex';
 
         if (statsCards) {
             statsCards.style.display = isAdmin ? 'grid' : 'none';
         }
 
         if (!isAdmin) {
-            // Assistente vai direto para clientes
             mostrarTela('clientes');
         }
 
         iniciarListeners(user);
-
-        // Verifica Changelog passando o nível de acesso
         checkChangelog(isAdmin);
 
     } else {
@@ -290,7 +292,7 @@ window.carregarMeusPagamentos = async () => {
     pags.sort((a, b) => b.mesReferencia.localeCompare(a.mesReferencia));
     pags.forEach(pg => {
         let btn = pg.status === 'pago' ?
-            `<button onclick="baixarPdfEAbrirWpp('${alunoLogado.id}', '${alunoLogado.nome}', '', '${pg.valor}', '${pg.mesReferencia}')" style="background:var(--success); color:black; padding:5px; font-size:0.8rem;">RECIBO</button>` :
+            `<button onclick="baixarPdfEAbrirWpp('${alunoLogado.id}', '${alunoLogado.nome}', '', '${pg.valor}', '${pg.mesReferencia}')" style="background:var(--success); color:white; padding:5px; font-size:0.8rem; border-color:var(--success);">RECIBO</button>` :
             `<span style="color:var(--imprevisto);">PENDENTE</span>`;
         div.innerHTML += `
             <div style="background:var(--bg-input); padding:10px; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center;">
@@ -316,16 +318,11 @@ window.carregarMeuProntuario = async () => {
 // 5. MÓDULO ADMINISTRATIVO - LISTENERS & SEGURANÇA
 // ======================================================
 
-function registrarLog(acao) {
-    let user = auth.currentUser ? auth.currentUser.email : (alunoLogado ? alunoLogado.nome : "Sistema");
-    addDoc(collection(db, "logs"), { data: new Date().toLocaleString(), usuario: user, acao }).catch(console.error);
-}
-
 // --- LISTENERS (ATUALIZAÇÃO EM TEMPO REAL) ---
 function iniciarListeners(user) {
     console.log("Iniciando sistema para:", user.email);
 
-    // 1. Serviços (Popula selects)
+    // 1. Serviços
     unsubServicos = onSnapshot(collection(db, "servicos"), (snap) => {
         listaServicos = [];
         snap.forEach(d => listaServicos.push({ id: d.id, ...d.data() }));
@@ -339,15 +336,17 @@ function iniciarListeners(user) {
         renderizarClientes();
         filtrarSelectProntuario();
         if (user.email === EMAIL_ADMIN) renderizarFinanceiro();
+        if (document.getElementById('amanda')) renderizarAreaAmanda();
     });
 
-    // 3. Agenda (Sem cálculo de pendências)
+    // 3. Agenda
     unsubAgenda = onSnapshot(collection(db, "agenda"), (snap) => {
         dbAgenda = { segunda: {}, terca: {}, quarta: {}, quinta: {}, sexta: {} };
         snap.forEach(d => dbAgenda[d.id] = d.data());
         renderizarAgenda();
         const viewHoje = document.getElementById('view-hoje');
         if (viewHoje && viewHoje.classList.contains('active')) renderizarAgendaDoDia();
+        if (document.getElementById('amanda')) renderizarAreaAmanda();
     });
 
     carregarDadosDoMes(user);
@@ -362,12 +361,12 @@ function carregarDadosDoMes(user = auth.currentUser) {
     if (unsubGastos) unsubGastos();
 
     if (user && user.email === EMAIL_ADMIN) {
-        // ADMIN: Carrega TUDO (incluindo status agendado de gastos)
         unsubPagamentos = onSnapshot(query(collection(db, "pagamentos"), where("mesReferencia", "==", mes)), (snap) => {
             dbPagamentos = {};
             snap.forEach(d => dbPagamentos[d.data().clienteId] = d.data());
             renderizarClientes();
             renderizarFinanceiro();
+            if (document.getElementById('amanda')) renderizarAreaAmanda();
         });
         unsubGastos = onSnapshot(query(collection(db, "gastos"), where("mesReferencia", "==", mes)), (snap) => {
             dbGastos = [];
@@ -375,16 +374,14 @@ function carregarDadosDoMes(user = auth.currentUser) {
             renderizarFinanceiro();
         });
     } else {
-        // ASSISTENTE: Apenas status de pagamentos para a tabela de alunos (PENDENTE/PAGO)
-        // Não carrega valores totais nem gastos
         unsubPagamentos = onSnapshot(query(collection(db, "pagamentos"), where("mesReferencia", "==", mes)), (snap) => {
             dbPagamentos = {};
             snap.forEach(d => dbPagamentos[d.data().clienteId] = d.data());
             renderizarClientes();
+            if (document.getElementById('amanda')) renderizarAreaAmanda();
         });
         dbGastos = [];
 
-        // Esconde paineis financeiros
         const dash = document.querySelector('.dashboard-financeiro');
         if (dash) dash.style.display = 'none';
         const fluxo = document.querySelector('.fluxo-detalhado-wrapper');
@@ -447,7 +444,7 @@ function renderizarServicos() {
             listaServicos.forEach(s => {
                 const btnDelete = isAdmin ? `<button onclick="removerServico('${s.id}')" style="background:none; color:red; border:none; cursor:pointer;">&times;</button>` : '';
                 lista.innerHTML += `
-                    <div style="background:var(--bg-input); padding:5px 10px; border-radius:4px; display:flex; gap:10px; border:1px solid #ddd; align-items:center;">
+                    <div style="background:var(--bg-input); padding:5px 10px; border-radius:4px; display:flex; gap:10px; border:1px solid var(--border); align-items:center;">
                         <span style="font-weight:bold;">${s.nome}</span>
                         <span style="color:var(--success);">R$ ${parseFloat(s.valor).toFixed(2)}</span>
                         ${btnDelete}
@@ -549,7 +546,7 @@ window.renderizarClientes = () => {
 
     let total = 0, pendentes = 0, receita = 0;
 
-    listaClientes.sort((a, b) => a.nome.localeCompare(b.nome));
+    listaClientes.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
 
     listaClientes.forEach(c => {
         const pg = dbPagamentos[c.id] || { status: 'pendente', forma: '', valor: c.valorContrato || 0 };
@@ -558,14 +555,14 @@ window.renderizarClientes = () => {
         if (pg.status === 'pendente') pendentes++;
         if (pg.status === 'pago') receita += Number(pg.valor || 0);
 
-        if (termo && !c.nome.toLowerCase().includes(termo)) return;
+        if (termo && c.nome && !c.nome.toLowerCase().includes(termo)) return;
         if (filtroAtualClientes !== 'todos' && pg.status !== filtroAtualClientes) return;
 
         const tr = document.createElement('tr');
         let displayServico = c.nomeServico || "-";
 
         tr.innerHTML = `
-            <td><strong>${c.nome.toUpperCase()}</strong><br><small style="color:#777;">${c.telefone}</small></td>
+            <td><strong>${(c.nome || 'Sem Nome').toUpperCase()}</strong><br><small style="color:#777;">${c.telefone || ''}</small></td>
             <td>
                 <select onchange="atualizarPg('${c.id}', 'status', this.value)" style="width:100%; font-weight:bold; ${pg.status === 'pago' ? 'color:var(--success);' : 'color:var(--imprevisto);'}">
                     <option value="pendente" ${pg.status === 'pendente' ? 'selected' : ''}>PENDENTE</option>
@@ -586,7 +583,7 @@ window.renderizarClientes = () => {
             <td>
                 <button onclick="editarCliente('${c.id}')" class="btn-tool" title="Editar">✏️</button>
                 <button onclick="confirmarAcao('EXCLUIR?', 'Apagar?', ()=>removerCliente('${c.id}', '${c.nome}'))" class="btn-tool danger" title="Excluir">🗑️</button>
-                ${(pg.status === 'pago') ? `<button onclick="baixarPdfEAbrirWpp('${c.id}', '${c.nome}', '${c.telefone}', '${pg.valor}', '${inputMes.value}')" class="btn-tool" style="color:var(--success);">PDF</button>` : ''}
+                ${(pg.status === 'pago') ? `<button onclick="baixarPdfEAbrirWpp('${c.id}', '${c.nome || ''}', '${c.telefone || ''}', '${pg.valor}', '${inputMes.value}')" class="btn-tool" style="color:var(--success);">PDF</button>` : ''}
             </td>
         `;
         tbody.appendChild(tr);
@@ -626,8 +623,8 @@ window.editarCliente = (id) => {
     const c = listaClientes.find(x => x.id === id);
     if (c) {
         document.getElementById('idClienteEditando').value = c.id;
-        document.getElementById('nomeCliente').value = c.nome;
-        document.getElementById('telefoneCliente').value = c.telefone;
+        document.getElementById('nomeCliente').value = c.nome || '';
+        document.getElementById('telefoneCliente').value = c.telefone || '';
         if (c.servicoId) document.getElementById('selectServicoCadastro').value = c.servicoId;
         document.getElementById('nascCliente').value = c.nascimento || '';
         document.getElementById('profissaoCliente').value = c.profissao || '';
@@ -660,13 +657,12 @@ window.removerCliente = async (id, nome) => {
         const snap = await getDocs(q);
         snap.forEach(d => deleteDoc(d.ref));
         await deleteDoc(doc(db, "prontuarios", id));
-        registrarLog(`Excluiu: ${nome}`);
         mostrarNotificacao("REMOVIDO!");
     } catch (e) { mostrarNotificacao("ERRO!", "erro"); }
 };
 
 // ==========================================================================
-// 8. RELATÓRIOS PDF (ATUALIZADO V2.0 - DRE e TABELA DE FORMAS)
+// 8. RELATÓRIOS PDF (AGORA COM COR ROSA)
 // ==========================================================================
 
 window.gerarRelatorioFinanceiroPDF = () => {
@@ -678,7 +674,7 @@ window.gerarRelatorioFinanceiroPDF = () => {
     const marginX = 14;
 
     doc.setFontSize(18);
-    doc.setTextColor(27, 59, 111);
+    doc.setTextColor(240, 98, 146); // ROSA CLARO (#F06292)
     doc.text("EDANIOS BELCHIOR - RELATÓRIO MENSAL", 105, 15, null, null, "center");
 
     doc.setFontSize(12);
@@ -688,48 +684,38 @@ window.gerarRelatorioFinanceiroPDF = () => {
     const dadosReceita = [];
     let totalReceita = 0;
 
-    // Contadores para o resumo dentro do PDF
     let sumPix = 0, sumDin = 0, sumCard = 0;
 
     Object.values(dbPagamentos).forEach(pg => {
         if (pg.status === 'pago') {
             const cliente = listaClientes.find(c => c.id === pg.clienteId);
             if (cliente) {
-                const nome = cliente.nome;
+                const nome = cliente.nome || 'Sem Nome';
                 const servico = cliente.nomeServico || "-";
                 const val = parseFloat(pg.valor || 0);
                 totalReceita += val;
 
-                // Soma por tipo
                 if (pg.forma === 'pix') sumPix += val;
                 else if (pg.forma === 'dinheiro') sumDin += val;
                 else if (pg.forma === 'cartao') sumCard += val;
 
                 let formaPagamento = (pg.forma || "N/A").toUpperCase();
 
-                dadosReceita.push([
-                    pg.mesReferencia,
-                    nome,
-                    servico,
-                    formaPagamento,
-                    `R$ ${val.toFixed(2)}`
-                ]);
+                dadosReceita.push([pg.mesReferencia, nome, servico, formaPagamento, `R$ ${val.toFixed(2)}`]);
             }
         }
     });
 
-    // Tabela Principal
     doc.autoTable({
         startY: 30,
         head: [['Mês', 'Aluno', 'Serviço', 'Forma', 'Valor']],
         body: dadosReceita,
         theme: 'striped',
-        headStyles: { fillColor: [27, 59, 111] },
+        headStyles: { fillColor: [240, 98, 146] }, // ROSA
         styles: { fontSize: 10 },
         margin: { top: 30, bottom: 20 }
     });
 
-    // Novo: Resumo por Forma de Pagamento no PDF
     let finalY = doc.lastAutoTable.finalY + 10;
     doc.setFontSize(10);
     doc.setTextColor(50);
@@ -740,7 +726,6 @@ window.gerarRelatorioFinanceiroPDF = () => {
     const dadosDespesa = [];
     let totalDespesa = 0;
     dbGastos.forEach(g => {
-        // Apenas despesas PAGAS entram no relatório mensal de caixa
         if (g.status !== 'agendado') {
             const val = parseFloat(g.valor || 0);
             totalDespesa += val;
@@ -767,10 +752,7 @@ window.gerarRelatorioFinanceiroPDF = () => {
     finalY = doc.lastAutoTable.finalY + 20;
     const espacoNecessario = 40;
 
-    if (finalY + espacoNecessario > 285) {
-        doc.addPage();
-        finalY = 20;
-    }
+    if (finalY + espacoNecessario > 285) { doc.addPage(); finalY = 20; }
 
     const lucro = totalReceita - totalDespesa;
 
@@ -779,11 +761,8 @@ window.gerarRelatorioFinanceiroPDF = () => {
     doc.text(`TOTAL RECEITA (ATIVOS): R$ ${totalReceita.toFixed(2)}`, marginX, finalY);
     doc.text(`TOTAL DESPESA: R$ ${totalDespesa.toFixed(2)}`, marginX, finalY + 7);
 
-    if (lucro >= 0) {
-        doc.setTextColor(46, 125, 50);
-    } else {
-        doc.setTextColor(198, 40, 40);
-    }
+    if (lucro >= 0) doc.setTextColor(46, 125, 50);
+    else doc.setTextColor(198, 40, 40);
 
     doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
@@ -792,7 +771,6 @@ window.gerarRelatorioFinanceiroPDF = () => {
     doc.save(`Relatorio_${mes}.pdf`);
 };
 
-// NOVA FUNÇÃO: RELATÓRIO ANUAL (DRE)
 window.gerarRelatorioAnualPDF = async () => {
     if (!confirm("Gerar DRE Anual? Isso pode levar alguns segundos.")) return;
     mostrarNotificacao("Gerando DRE...", "sucesso");
@@ -801,16 +779,10 @@ window.gerarRelatorioAnualPDF = async () => {
     const doc = new jsPDF();
     const anoAtual = new Date().getFullYear();
 
-    // Busca TODOS os pagamentos e gastos do ano
-    // Nota: Em produção idealmente faria query com startAt/endAt, mas aqui vamos buscar e filtrar
-    // para manter simples e compatível.
-
     const snapPags = await getDocs(collection(db, "pagamentos"));
     const snapGastos = await getDocs(collection(db, "gastos"));
 
-    let dre = {}; // { '01': {receita:0, despesa:0}, '02': ... }
-
-    // Inicializa meses
+    let dre = {};
     for (let i = 1; i <= 12; i++) {
         let m = String(i).padStart(2, '0');
         dre[m] = { receita: 0, despesa: 0, lucro: 0 };
@@ -832,7 +804,6 @@ window.gerarRelatorioAnualPDF = async () => {
         }
     });
 
-    // Monta dados Tabela
     const bodyTable = [];
     let totalRec = 0, totalDesp = 0;
 
@@ -845,11 +816,10 @@ window.gerarRelatorioAnualPDF = async () => {
         bodyTable.push([`${m}/${anoAtual}`, `R$ ${r.toFixed(2)}`, `R$ ${d.toFixed(2)}`, `R$ ${l.toFixed(2)}`]);
     });
 
-    // Totalizador
     bodyTable.push(['TOTAL', `R$ ${totalRec.toFixed(2)}`, `R$ ${totalDesp.toFixed(2)}`, `R$ ${(totalRec - totalDesp).toFixed(2)}`]);
 
     doc.setFontSize(18);
-    doc.setTextColor(27, 59, 111);
+    doc.setTextColor(240, 98, 146); // ROSA CLARO
     doc.text(`DRE ANUAL - ${anoAtual}`, 105, 15, null, null, "center");
 
     doc.autoTable({
@@ -857,8 +827,8 @@ window.gerarRelatorioAnualPDF = async () => {
         head: [['Mês', 'Receita Bruta', 'Despesas', 'Lucro Líquido']],
         body: bodyTable,
         theme: 'grid',
-        headStyles: { fillColor: [0, 0, 0] },
-        footStyles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], fontStyle: 'bold' }
+        headStyles: { fillColor: [240, 98, 146] },
+        footStyles: { fillColor: [252, 228, 236], textColor: [0, 0, 0], fontStyle: 'bold' }
     });
 
     doc.save(`DRE_${anoAtual}.pdf`);
@@ -893,7 +863,7 @@ window.renderizarAgenda = () => {
 
     horarios.forEach(hora => {
         const alunos = dadosDia[hora] || [];
-        if (busca && !alunos.some(a => a.nome.toLowerCase().includes(busca))) return;
+        if (busca && !alunos.some(a => (a.nome || '').toLowerCase().includes(busca))) return;
         if (filtro === 'ocupados' && alunos.length === 0) return;
         if (filtro === 'livres' && alunos.length >= MAX_ALUNOS) return;
 
@@ -953,7 +923,6 @@ window.addAgenda = async (hora) => {
     if (!dados[hora]) dados[hora] = [];
     dados[hora].push({ id, nome, presenca: null });
     await setDoc(ref, dados);
-    registrarLog(`Agendou ${nome} às ${hora}`);
 };
 
 window.rmAgenda = async (hora, idx) => {
@@ -962,7 +931,6 @@ window.rmAgenda = async (hora, idx) => {
     let dados = snap.data();
     dados[hora].splice(idx, 1);
     await updateDoc(ref, dados);
-    registrarLog(`Removeu aluno da agenda`);
 };
 
 window.mudarSubAbaAgenda = (abaId) => {
@@ -1021,7 +989,7 @@ window.filtrarSelectProntuario = () => {
     const sel = document.getElementById('selectProntuarioAluno');
     if (!sel) return;
     sel.innerHTML = '<option value="">-- SELECIONE --</option>';
-    const filtrados = listaClientes.filter(c => c.nome.toLowerCase().includes(termo)).sort((a, b) => a.nome.localeCompare(b.nome));
+    const filtrados = listaClientes.filter(c => (c.nome || '').toLowerCase().includes(termo)).sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
     filtrados.forEach(c => sel.innerHTML += `<option value="${c.id}">${c.nome}</option>`);
     if (filtrados.length === 1 && termo.length > 1) { sel.value = filtrados[0].id; carregarProntuarioSelecionado(); }
 }
@@ -1045,7 +1013,7 @@ window.carregarProntuarioSelecionado = async () => {
     if (aluno) {
         header.innerHTML = `
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; padding:15px;">
-                <div><strong>NOME:</strong> ${aluno.nome.toUpperCase()}</div>
+                <div><strong>NOME:</strong> ${(aluno.nome || '').toUpperCase()}</div>
                 <div><strong>IDADE:</strong> ${calcularIdade(aluno.nascimento)}</div>
                 <div><strong>PROFISSÃO:</strong> ${aluno.profissao || '-'}</div>
                 <div><strong>QUEIXA:</strong> ${aluno.queixa || '-'}</div>
@@ -1077,7 +1045,6 @@ window.adicionarEvolucao = async () => {
     const novo = { data: new Date().toLocaleDateString('pt-BR'), texto: texto };
     await setDoc(doc(db, "prontuarios", id), { historico: arrayUnion(novo) }, { merge: true });
     document.getElementById('textoNovaEvolucao').value = '';
-    registrarLog(`Adicionou evolução: ${aluno.nome}`);
     carregarProntuarioSelecionado();
     mostrarNotificacao("EVOLUÇÃO SALVA!");
 };
@@ -1089,7 +1056,6 @@ window.removerEvolucao = async (id, index) => {
     let historico = snap.data().historico;
     historico.splice(index, 1);
     await updateDoc(ref, { historico: historico });
-    registrarLog(`Removeu evolução`);
     carregarProntuarioSelecionado();
 };
 
@@ -1100,7 +1066,8 @@ window.gerarProntuarioPDF = async () => {
     const snap = await getDoc(doc(db, "prontuarios", id));
     const { jsPDF } = window.jspdf;
     const docPdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-    const azulReal = [27, 59, 111]; const cinzaTexto = [60, 60, 60];
+    const azulReal = [240, 98, 146]; // ROSA CLARO
+    const cinzaTexto = [60, 60, 60];
     docPdf.setDrawColor(...azulReal); docPdf.setLineWidth(1); docPdf.rect(5, 5, 200, 287);
     docPdf.setTextColor(...azulReal); docPdf.setFont("times", "bold"); docPdf.setFontSize(24);
     docPdf.text("EDANIOS BELCHIOR", 105, 25, null, null, "center");
@@ -1112,7 +1079,7 @@ window.gerarProntuarioPDF = async () => {
     docPdf.setFontSize(11); docPdf.setTextColor(...cinzaTexto); docPdf.setFont("times", "normal");
     let y = 65;
     docPdf.setFont("times", "bold"); docPdf.text("PACIENTE:", 20, y);
-    docPdf.setFont("times", "normal"); docPdf.text(aluno.nome.toUpperCase(), 45, y);
+    docPdf.setFont("times", "normal"); docPdf.text((aluno.nome || '').toUpperCase(), 45, y);
     docPdf.setFont("times", "bold"); docPdf.text("IDADE:", 130, y);
     docPdf.setFont("times", "normal"); docPdf.text(calcularIdade(aluno.nascimento), 145, y);
     y += 8;
@@ -1149,7 +1116,8 @@ window.gerarProntuarioPDF = async () => {
 window.baixarPdfEAbrirWpp = (id, nomePaciente, tel, valor, mesRef) => {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a5" });
-    const azulReal = [27, 59, 111]; const cinzaTexto = [60, 60, 60];
+    const azulReal = [240, 98, 146]; // ROSA CLARO
+    const cinzaTexto = [60, 60, 60];
     let textoMes = "";
     if (mesRef && mesRef.includes('-')) {
         const [ano, mes] = mesRef.split('-'); textoMes = ` referente ao mês de ${mes}/${ano}`;
@@ -1167,7 +1135,7 @@ window.baixarPdfEAbrirWpp = (id, nomePaciente, tel, valor, mesRef) => {
     doc.text(`R$ ${parseFloat(valor).toFixed(2)}`, 120, 60, null, null, "right");
     doc.setTextColor(...cinzaTexto); doc.setFontSize(11); doc.setFont("times", "normal");
     const dataHoje = new Date().toLocaleDateString('pt-BR');
-    const texto = `Recebi de ${nomePaciente.toUpperCase()} a importância supramencionada, referente aos serviços de Fisioterapia/Pilates prestados${textoMes}.`;
+    const texto = `Recebi de ${(nomePaciente || '').toUpperCase()} a importância supramencionada, referente aos serviços de Fisioterapia/Pilates prestados${textoMes}.`;
     const linhas = doc.splitTextToSize(texto, 110);
     doc.text(linhas, 20, 85);
     doc.setFontSize(10);
@@ -1178,13 +1146,12 @@ window.baixarPdfEAbrirWpp = (id, nomePaciente, tel, valor, mesRef) => {
     doc.text("Fisioterapeuta - CREFITO", 74, 159, null, null, "center");
     doc.save(`Recibo_${nomePaciente}.pdf`);
     mostrarNotificacao("PDF GERADO!");
-    const zap = tel.replace(/\D/g, '');
+    const zap = (tel || '').replace(/\D/g, '');
     if (zap.length > 8) setTimeout(() => window.open(`https://wa.me/55${zap}?text=Olá! Segue seu recibo digital.`, '_blank'), 1000);
-    registrarLog(`Gerou recibo PDF para ${nomePaciente}`);
 };
 
 // ==========================================================================
-// 11. FINANCEIRO E FLUXO DE CAIXA (ATUALIZADO V2.0)
+// 11. FINANCEIRO E FLUXO DE CAIXA
 // ==========================================================================
 
 window.adicionarGasto = async () => {
@@ -1192,7 +1159,6 @@ window.adicionarGasto = async () => {
     const val = document.getElementById('valorGasto').value;
     const cat = document.getElementById('catGasto').value;
 
-    // Novo na v2.0: Checkbox "Agendar"
     const isAgendado = document.getElementById('checkGastoFuturo').checked;
     const status = isAgendado ? 'agendado' : 'pago';
 
@@ -1201,10 +1167,9 @@ window.adicionarGasto = async () => {
         valor: val,
         categoria: cat,
         mesReferencia: inputMes.value,
-        status: status // Novo campo
+        status: status
     });
 
-    // Reset
     document.getElementById('descGasto').value = '';
     document.getElementById('valorGasto').value = '';
     document.getElementById('checkGastoFuturo').checked = false;
@@ -1230,7 +1195,6 @@ window.exportarCSV = () => {
 window.renderizarFinanceiro = () => {
     if (auth.currentUser && auth.currentUser.email !== EMAIL_ADMIN) return;
 
-    // Tabelas
     const tbodyPagos = document.getElementById('tabelaGastos').querySelector('tbody');
     const tbodyFuturos = document.getElementById('tabelaGastosFuturos').querySelector('tbody');
 
@@ -1239,7 +1203,6 @@ window.renderizarFinanceiro = () => {
 
     let despesas = 0, receita = 0;
 
-    // Detalhamento do Fluxo (Novo V2.0)
     let totalPix = 0, totalDinheiro = 0, totalCartao = 0;
 
     Object.values(dbPagamentos).forEach(p => {
@@ -1247,19 +1210,16 @@ window.renderizarFinanceiro = () => {
             const v = Number(p.valor || 0);
             receita += v;
 
-            // Separação V2.0
             if (p.forma === 'pix') totalPix += v;
             else if (p.forma === 'dinheiro') totalDinheiro += v;
             else totalCartao += v;
         }
     });
 
-    // Renderiza Gastos
     dbGastos.forEach(g => {
         const valorGasto = Number(g.valor);
 
         if (g.status === 'agendado') {
-            // Conta a Pagar (Futuro)
             tbodyFuturos.innerHTML += `
                 <tr>
                     <td>${g.desc.toUpperCase()}</td>
@@ -1270,7 +1230,6 @@ window.renderizarFinanceiro = () => {
                     </td>
                 </tr>`;
         } else {
-            // Despesa Realizada
             despesas += valorGasto;
             tbodyPagos.innerHTML += `
                 <tr>
@@ -1282,12 +1241,10 @@ window.renderizarFinanceiro = () => {
         }
     });
 
-    // Atualiza Dash
     document.getElementById('dashReceita').innerText = `R$ ${receita.toFixed(2)}`;
     document.getElementById('dashDespesas').innerText = `R$ ${despesas.toFixed(2)}`;
     document.getElementById('dashLucro').innerText = `R$ ${(receita - despesas).toFixed(2)}`;
 
-    // Atualiza Cards de Fluxo Detalhado
     if (document.getElementById('valPix')) {
         document.getElementById('valPix').innerText = `R$ ${totalPix.toFixed(2)}`;
         document.getElementById('valDin').innerText = `R$ ${totalDinheiro.toFixed(2)}`;
@@ -1306,10 +1263,6 @@ window.rmGasto = async (id) => await deleteDoc(doc(db, "gastos", id));
 // ==========================================================================
 // 12. UTILITÁRIOS E NOTIFICAÇÕES DE SISTEMA
 // ==========================================================================
-
-window.mudarCorTema = (corPrincipal) => {
-    document.documentElement.style.setProperty('--text-primary', corPrincipal);
-};
 
 window.mostrarNotificacao = (msg, tipo = 'sucesso') => {
     const antigo = document.querySelector('.snake-toast');
@@ -1346,25 +1299,15 @@ window.mostrarTela = (telaId) => {
     });
 };
 
-window.abrirLogs = async () => {
-    if (auth.currentUser.email !== EMAIL_ADMIN) return mostrarNotificacao("ACESSO NEGADO", "erro");
-    const container = document.getElementById('listaLogs');
-    container.innerHTML = "Carregando...";
+// Abre o modal de aviso sobre a descontinuação dos logs
+window.abrirLogs = () => {
     document.getElementById('modalLogs').style.display = 'flex';
-    const q = query(collection(db, "logs"), orderBy("data", "desc"), limit(50));
-    const snap = await getDocs(q);
-    container.innerHTML = "";
-    snap.forEach(doc => {
-        const d = doc.data();
-        container.innerHTML += `<div style="border-bottom:1px solid #333; padding:8px; font-size:0.85rem;"><strong>${d.usuario.split('@')[0]}</strong> (${d.data})<br>${d.acao}</div>`;
-    });
 };
 
 // ==========================================================================
-// 13. UI/UX: FAB & CHANGELOG (NOVO V2.1 - INTELIGENTE)
+// 13. UI/UX: FAB & CHANGELOG
 // ==========================================================================
 
-// Lógica do Botão Flutuante (FAB)
 window.toggleFab = () => {
     const menu = document.getElementById('fabMenu');
     if (menu.style.display === 'flex') {
@@ -1376,38 +1319,28 @@ window.toggleFab = () => {
     }
 };
 
-// Dados do Changelog com propriedade 'target'
-// 'admin' = apenas administrador
-// 'all' = todos (admin e assistente)
 const changelogData = [
     {
-        title: "FINANCEIRO PRO",
-        desc: "Agora você pode agendar 'Contas a Pagar' sem descontar do caixa imediato. Além disso, veja quanto entrou separadamente em Pix, Dinheiro e Cartão.",
-        target: 'admin'
-    },
-    {
-        title: "RELATÓRIO DRE",
-        desc: "Gere um PDF Anual completo com todo o lucro e despesas de Janeiro a Dezembro para sua contabilidade.",
-        target: 'admin'
-    },
-    {
-        title: "EXPERIÊNCIA RÁPIDA",
-        desc: "Use o novo botão flutuante (+) no canto da tela para acesso rápido a Alunos, Agenda e Despesas.",
+        title: "BEM-VINDA, AMANDA! 🌸",
+        desc: "Uma nova aba foi criada. Pesquise e adicione alunos a ela, e o sistema cruzará os dias da semana na agenda e o total de pagamentos automaticamente num espelho financeiro só para ela.",
         target: 'all'
     },
     {
-        title: "VISUAL RENOVADO",
-        desc: "Uma nova interface mais limpa e organizada para facilitar seus atendimentos no dia a dia.",
+        title: "VISUAL ROSA & BRANCO 🤍",
+        desc: "O site inteiro sofreu um re-design tipográfico e cromático para um estilo limpo e suave, com foco em uma paleta de cores rosa e branco.",
         target: 'all'
+    },
+    {
+        title: "LOGS SUBSTITUÍDOS",
+        desc: "A antiga aba de Logs foi oficialmente descontinuada para dar espaço de processamento e navegação para o Espaço da Amanda.",
+        target: 'admin'
     }
 ];
 
 window.checkChangelog = (isAdmin) => {
-    // 1. Verifica se já viu a versão atual
     const seen = localStorage.getItem('changelog_seen_version');
     if (seen === VERSAO_ATUAL) return;
 
-    // 2. Filtra as novidades baseado no perfil
     activeChangelogList = changelogData.filter(slide => {
         if (slide.target === 'all') return true;
         if (isAdmin && slide.target === 'admin') return true;
@@ -1416,13 +1349,11 @@ window.checkChangelog = (isAdmin) => {
 
     if (activeChangelogList.length === 0) return;
 
-    // 3. Detecta dispositivo para Badge
     const ua = navigator.userAgent;
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
     const deviceText = isMobile ? "MOBILE DETECTADO" : "DESKTOP DETECTADO";
     document.getElementById('deviceBadge').innerText = deviceText;
 
-    // 4. Abre modal
     currentSlide = 0;
     renderChangelogSlide();
     document.getElementById('modalChangelog').style.display = 'flex';
@@ -1436,7 +1367,7 @@ function renderChangelogSlide() {
 
     content.innerHTML = `
         <h2 style="color:var(--primary); margin-bottom:10px;">${slide.title}</h2>
-        <p>${slide.desc}</p>
+        <p style="color:var(--text-secondary); line-height:1.6;">${slide.desc}</p>
     `;
     document.getElementById('slideIndicator').innerText = `${currentSlide + 1}/${activeChangelogList.length}`;
 }
@@ -1460,5 +1391,99 @@ window.fecharChangelog = () => {
     localStorage.setItem('changelog_seen_version', VERSAO_ATUAL);
 };
 
+// ==========================================================================
+// 14. GESTÃO DA AMANDA (V3.0) - COM FILTRO SEGURO
+// ==========================================================================
 
+window.filtrarSelectAmanda = () => {
+    const inputBusca = document.getElementById('buscaAmanda');
+    const termo = inputBusca ? inputBusca.value.toLowerCase() : '';
+    const sel = document.getElementById('selectAlunoAmanda');
+    if (!sel) return;
 
+    sel.innerHTML = '<option value="">-- SELECIONE O ALUNO --</option>';
+
+    // Filtra de forma robusta e garante que TODOS os alunos válidos não atribuídos à Amanda apareçam
+    const filtrados = listaClientes.filter(c => {
+        const isNotAmanda = c.professor !== 'amanda';
+        const nomeStr = c.nome ? c.nome.toLowerCase() : ''; // Previne erros caso o BD tenha um nome nulo
+        return isNotAmanda && nomeStr.includes(termo);
+    }).sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+
+    filtrados.forEach(c => {
+        sel.innerHTML += `<option value="${c.id}">${c.nome || 'Sem Nome'}</option>`;
+    });
+};
+
+window.renderizarAreaAmanda = () => {
+    // 1. Popular e respeitar a filtragem atual do Select de forma limpa e segura
+    window.filtrarSelectAmanda();
+
+    // 2. Popular Tabela e Calcular Stats
+    const tbody = document.getElementById('tabelaAmanda').querySelector('tbody');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+    let totalAlunos = 0;
+    let receitaAmanda = 0;
+
+    listaClientes.forEach(c => {
+        if (c.professor === 'amanda') {
+            totalAlunos++;
+
+            // Somar Pagamentos (Espelho)
+            const pg = dbPagamentos[c.id];
+            if (pg && pg.status === 'pago') {
+                receitaAmanda += Number(pg.valor || 0);
+            }
+
+            // Mapear Horários do Aluno puxados da Agenda
+            let horariosDoAluno = [];
+            Object.keys(dbAgenda).forEach(dia => {
+                const horas = dbAgenda[dia];
+                Object.keys(horas).forEach(hora => {
+                    if (Array.isArray(horas[hora])) {
+                        if (horas[hora].some(a => a.id === c.id)) {
+                            horariosDoAluno.push(`<b>${dia.toUpperCase()}</b> às ${hora}`);
+                        }
+                    }
+                });
+            });
+
+            const displayHorarios = horariosDoAluno.length > 0 ? horariosDoAluno.join('<br>') : '<i style="color:var(--text-muted);">Sem horário na agenda</i>';
+
+            // Montar Linha
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${(c.nome || 'Sem Nome').toUpperCase()}</strong></td>
+                    <td style="font-family: monospace; font-size: 0.85rem;">${displayHorarios}</td>
+                    <td>
+                        <button class="btn-tool danger" title="Desvincular" onclick="removerAlunoAmanda('${c.id}')">❌</button>
+                    </td>
+                </tr>
+            `;
+        }
+    });
+
+    if (document.getElementById('statAmandaAlunos')) document.getElementById('statAmandaAlunos').innerText = totalAlunos;
+    if (document.getElementById('statAmandaReceita')) document.getElementById('statAmandaReceita').innerText = `R$ ${receitaAmanda.toFixed(2)}`;
+};
+
+window.vincularAlunoAmanda = async () => {
+    const id = document.getElementById('selectAlunoAmanda').value;
+    if (!id) return mostrarNotificacao("Selecione um aluno primeiro!", "erro");
+
+    await updateDoc(doc(db, "clientes", id), { professor: 'amanda' });
+
+    const inputBusca = document.getElementById('buscaAmanda');
+    if (inputBusca) inputBusca.value = ''; // Limpa pesquisa após vincular
+
+    mostrarNotificacao("Aluno vinculado à Amanda!");
+};
+
+window.removerAlunoAmanda = async (id) => {
+    if (!confirm("Remover este aluno da gestão da Amanda?")) return;
+
+    await updateDoc(doc(db, "clientes", id), { professor: null });
+    mostrarNotificacao("Aluno removido da Amanda.");
+};
