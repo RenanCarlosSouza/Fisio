@@ -1,13 +1,13 @@
 /* ==========================================================================
    SISTEMA DE GESTÃO INTEGRADA - EDANIOS BELCHIOR
-   VERSÃO: 4.0 (PREMIUM WELLNESS & PILATES)
-   ESTILO: MINIMALISTA, SERENO E CLÍNICO (VERDE SÁLVIA & TONS TERRA)
+   VERSÃO: 7.4 (ITAÚ DIGITAL BANKING EDITION - CORREÇÃO DA AGENDA LADO A LADO)
+   ESTILO: APP BANCÁRIO, LARANJA & AZUL, FLUIDO E MOBILE-FIRST
    ========================================================================== */
 
 /* ==========================================================================
    1. IMPORTAÇÕES DE FONTES E ÍCONES
    ========================================================================== */
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Courier+Prime:wght@400;700&family=Lato:wght@300;400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Courier+Prime:wght@400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
 
 
@@ -15,76 +15,80 @@
    2. VARIÁVEIS GLOBAIS (CSS CUSTOM PROPERTIES)
    ========================================================================== */
 :root {
-    /* --- PALETA BEM-ESTAR (SAGE GREEN & CREAM) --- */
-    --bg-body: #F4F7F5; /* Fundo cinza/verde muito suave para conforto visual */
-    --bg-card: #FFFFFF; /* Branco puro para contraste dos cartões */
-    --bg-input: #EBF0EC; /* Fundo de inputs mais fechado e suave */
-    --bg-hover-light: #FAFCFA; /* Fundo sutil para hover em tabelas */
+    /* --- PALETA BANKING (LARANJA & AZUL ITAÚ) --- */
 
-    /* Cores Principais */
-    --primary: #4A6A5D; /* Verde Sálvia Intenso (Identidade Principal) */
-    --primary-hover: #354F44; /* Verde Sálvia Escuro (Interações) */
-    --primary-light: #7E9C8F; /* Verde Sálvia Claro (Bordas ativas) */
-    
-    /* Cores Secundárias e Acentos */
-    --accent: #D4A373; /* Tom Areia/Terra (Destaques, ícones) */
-    --accent-hover: #BC8A5A; /* Tom Areia Escuro */
-    
-    /* Tipografia e Cores de Texto */
-    --text-primary: #2B302D; /* Quase preto, com tom esverdeado para harmonia */
-    --text-secondary: #6B756F; /* Cinza médio esverdeado para legendas e labels */
-    --text-muted: #9AA39E; /* Cinza claro para placeholders e textos sem destaque */
-    --text-inverse: #FFFFFF; /* Texto branco puro sobre fundos escuros */
+    --bg-body: #F4F5F7;
+    --bg-card: #FFFFFF;
+    --bg-input: #F0F1F5;
+    --bg-hover-light: #FAFAFA;
+    --bg-overlay: rgba(0, 41, 90, 0.7);
 
-    /* Cores de Estado e Feedback */
-    --success-bg: #E8F5E9;
-    --success-text: #2E7D32;
-    --success: #388E3C;
-    
-    --danger-bg: #FFEBEE;
-    --danger-text: #C62828;
-    --danger: #D32F2F;
-    
-    --warning-bg: #FFF3E0;
-    --warning-text: #EF6C00;
-    --warning: #F57C00;
-    
-    --info-bg: #E3F2FD;
-    --info-text: #1565C0;
-    --imprevisto: #F57C00; /* Usado na agenda */
+    /* Laranja Itaú */
+    --primary: #EC7000;
+    --primary-hover: #CC6000;
+    --primary-light: #FFF0E5;
+    --primary-transparent: rgba(236, 112, 0, 0.15);
 
-    /* Estrutura da Interface (Bordas e Sombras) */
-    --border: #DCE3DE; /* Borda padrão bem suave */
-    --border-strong: #C4D1C9; /* Borda reforçada */
-    
-    /* Raios de Borda (Border Radius) */
-    --radius-sm: 6px;
-    --radius: 12px; /* Arredondamento elegante padrão */
-    --radius-lg: 24px; /* Arredondamento para modais e cabeçalho */
-    --radius-pill: 50px; /* Arredondamento total para botões */
-    
-    /* Sombras e Efeitos 3D */
-    --shadow-sm: 0 2px 8px rgba(74, 106, 93, 0.05);
-    --shadow: 0 8px 24px rgba(74, 106, 93, 0.08); /* Sombra difusa verde */
-    --shadow-lg: 0 15px 40px rgba(74, 106, 93, 0.12);
-    --shadow-floating: 0 20px 50px rgba(0, 0, 0, 0.1); /* Para modais e FAB */
+    /* Azul Itaú */
+    --accent: #004990;
+    --accent-hover: #003366;
+    --accent-light: #E5F0FA;
 
-    /* Famílias Tipográficas */
-    --font-headline: 'Cinzel', serif; /* Títulos principais e elegância */
-    --font-body: 'Lato', sans-serif; /* Leitura geral e dados */
-    --font-mono: 'Courier Prime', monospace; /* Recibos, relatórios e labels numéricas */
-    
-    /* Transições Padrão */
-    --transition-fast: 0.15s ease-in-out;
-    --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-slow: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    /* Tipografia */
+    --text-primary: #1E2022;
+    --text-secondary: #687077;
+    --text-muted: #9AA0A6;
+    --text-inverse: #FFFFFF;
+
+    /* Estados */
+    --success-bg: #E6F4EA;
+    --success-text: #1E8E3E;
+    --success: #1E8E3E;
+
+    --danger-bg: #FCE8E6;
+    --danger-text: #D93025;
+    --danger: #D93025;
+
+    --warning-bg: #FEF7E0;
+    --warning-text: #E37400;
+    --warning: #F9AB00;
+
+    --info-bg: #E8F0FE;
+    --info-text: #1A73E8;
+    --imprevisto: #F9AB00;
+
+    /* Interface */
+    --border: #E1E3E6;
+    --border-strong: #C8CCD0;
+    --border-dashed: #D1D5DB;
+
+    --radius-xs: 4px;
+    --radius-sm: 8px;
+    --radius: 12px;
+    --radius-lg: 16px;
+    --radius-pill: 50px;
+
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+    --shadow-floating: 0 16px 32px rgba(0, 0, 0, 0.15);
+
+    --font-headline: 'Inter', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'Courier Prime', monospace;
+
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.25s ease-out;
+    --transition-slow: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 
 /* ==========================================================================
-   3. RESET E CONFIGURAÇÕES BASES GERAIS
+   3. RESET CSS E CONFIGURAÇÕES BASES GERAIS
    ========================================================================== */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -95,44 +99,55 @@
 html {
     font-size: 16px;
     scroll-behavior: smooth;
+    height: 100%;
 }
 
 body {
     font-family: var(--font-body);
     background-color: var(--bg-body);
     color: var(--text-primary);
-    line-height: 1.6;
-    padding-bottom: 100px;
-    min-height: 100vh;
+    line-height: 1.5;
+    width: 100%;
+    max-width: 100vw;
     overflow-x: hidden;
-    position: relative;
-    /* Transição suave ao carregar ou mudar temas */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
     transition: background-color var(--transition-slow), color var(--transition-slow);
 }
 
-/* Fundo limpo após login */
 body.logged-in {
     background-color: var(--bg-body);
 }
 
+:focus {
+    outline: none;
+}
+
+img,
+svg {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
 
 /* ==========================================================================
-   4. SCROLLBAR E SELEÇÃO DE TEXTO
+   4. SCROLLBAR CUSTOMIZADA E SELEÇÃO DE TEXTO
    ========================================================================== */
 ::selection {
-    background-color: var(--primary-light);
+    background-color: var(--primary);
     color: var(--text-inverse);
 }
 
 ::-moz-selection {
-    background-color: var(--primary-light);
+    background-color: var(--primary);
     color: var(--text-inverse);
 }
 
-/* Scrollbar Customizada Elegante */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -140,259 +155,254 @@ body.logged-in {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #C4CFC8;
+    background-color: var(--border-strong);
     border-radius: var(--radius-pill);
-    border: 2px solid var(--bg-body);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--primary);
+    background-color: var(--text-secondary);
 }
 
 
 /* ==========================================================================
-   5. CABEÇALHO FLUTUANTE (DYNAMIC ISLAND LAYOUT)
+   5. CABEÇALHO SÓLIDO BANCÁRIO (APP TOP BAR)
    ========================================================================== */
 .main-header {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 95%;
-    max-width: 1100px;
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: var(--radius-lg);
+    position: sticky;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--primary);
+    z-index: 1000;
     display: flex;
     flex-direction: column;
-    padding: 15px 30px;
-    z-index: 1000;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
-    transition: all var(--transition-normal);
+    box-shadow: 0 4px 15px rgba(236, 112, 0, 0.4);
+    padding-top: env(safe-area-inset-top);
 }
 
-/* Comportamento da logo no Header */
 .header-top {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     width: 100%;
-    margin-bottom: 10px;
-    position: relative;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 24px 10px 24px;
 }
 
 .logo {
     font-family: var(--font-headline);
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--primary);
-    text-align: center;
-    letter-spacing: 2px;
-    text-transform: uppercase;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--text-inverse);
+    text-align: left;
+    letter-spacing: -0.5px;
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
 .logo span {
-    font-size: 0.8rem;
-    vertical-align: super;
-    color: var(--accent);
-    font-family: var(--font-body);
-    background: rgba(212, 163, 115, 0.1);
-    padding: 2px 6px;
-    border-radius: var(--radius-sm);
-    letter-spacing: 0;
+    font-size: 0.75rem;
+    color: var(--primary);
+    background: var(--text-inverse);
+    padding: 3px 8px;
+    border-radius: var(--radius-pill);
+    font-weight: 800;
+    box-shadow: var(--shadow-sm);
 }
 
 
 /* ==========================================================================
-   6. NAVEGAÇÃO PRINCIPAL (MAIN NAV)
+   6. NAVEGAÇÃO PRINCIPAL (ABAS HORIZONTAIS FIX)
    ========================================================================== */
 .main-nav {
     display: flex;
-    justify-content: center;
+    flex-direction: row;
+    justify-content: flex-start;
     align-items: center;
-    gap: 8px;
-    overflow-x: auto;
-    padding-bottom: 5px;
+    gap: 15px;
+    flex-wrap: nowrap !important;
     width: 100%;
-    
-    /* Esconde barra de rolagem horizontal nativa na navegação */
-    -ms-overflow-style: none; 
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 10px 24px 20px 24px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
 .main-nav::-webkit-scrollbar {
-    display: none; 
+    display: none;
 }
 
 .main-nav button {
+    flex-shrink: 0;
     background: transparent;
-    border: 1px solid transparent;
-    color: var(--text-secondary);
-    padding: 8px 20px;
+    border: none;
+    color: rgba(255, 255, 255, 0.8) !important;
+    padding: 8px 12px;
     font-family: var(--font-headline);
-    font-size: 0.85rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    font-size: 0.95rem;
+    font-weight: 600 !important;
+    text-transform: capitalize;
     cursor: pointer;
-    transition: all var(--transition-normal);
-    border-radius: var(--radius-pill);
+    transition: all var(--transition-fast);
+    border-radius: 0;
+    border-bottom: 3px solid transparent !important;
     white-space: nowrap;
-    outline: none;
-    width: auto;
+    width: auto !important;
+    display: inline-block;
 }
 
 .main-nav button:hover {
-    color: var(--primary);
-    background-color: var(--bg-input);
-}
-
-.main-nav button:focus-visible {
-    box-shadow: 0 0 0 3px rgba(74, 106, 93, 0.3);
+    color: var(--text-inverse) !important;
 }
 
 .main-nav button.active {
-    color: var(--text-inverse);
-    background-color: var(--primary);
-    box-shadow: 0 4px 12px rgba(74, 106, 93, 0.2);
+    color: #FFFFFF !important;
+    font-weight: 800 !important;
+    border-bottom: 3px solid #FFFFFF !important;
 }
 
-/* Botão Sair Especial na Nav */
 .main-nav .btn-sair {
-    border: 1px solid var(--border) !important;
-    color: var(--text-secondary);
-    margin-left: 10px;
+    margin-left: auto;
+    color: #FFFFFF !important;
+    background: rgba(0, 0, 0, 0.2) !important;
+    padding: 6px 18px;
+    border-radius: var(--radius-pill);
+    border-bottom: none !important;
+    display: inline-flex;
+    align-items: center;
 }
 
 .main-nav .btn-sair:hover {
-    background-color: var(--danger-bg);
-    color: var(--danger);
-    border-color: var(--danger);
+    background-color: var(--accent) !important;
 }
 
 
 /* ==========================================================================
-   7. ESTRUTURA DE PÁGINAS E LAYOUT DO CONTEÚDO
+   7. ESTRUTURA DE PÁGINAS E CONTEÚDO PRINCIPAL
    ========================================================================== */
 #appConteudo {
-    display: block !important;
+    display: flex !important;
+    flex-direction: column;
+    flex-grow: 1;
+    width: 100%;
 }
 
 .content {
     max-width: 1100px;
     margin: 0 auto;
-    /* O padding-top enorme compensa o Header Flutuante que é Fixed */
-    padding: 160px 20px 40px 20px; 
+    margin-top: -15px;
+    z-index: 10;
+    position: relative;
+    padding: 0 20px 120px 20px;
     width: 100%;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .tela {
     display: none;
     opacity: 0;
-    transform: translateY(15px);
+    transform: translateY(10px);
+    width: 100%;
+    flex-grow: 1;
 }
 
 .tela.ativa {
     display: block;
-    animation: fadeInSlideUp var(--transition-slow) forwards;
+    animation: fadeInSlideUp var(--transition-normal) forwards;
 }
 
 
 /* ==========================================================================
-   8. CARTÕES E CONTAINERS (FORM CARDS)
+   8. CARTÕES BANCÁRIOS (FORM CARDS)
    ========================================================================== */
 .form-card {
     background: var(--bg-card);
-    padding: 40px;
+    padding: 30px;
     border: 1px solid var(--border);
     box-shadow: var(--shadow);
-    margin-bottom: 30px;
+    margin-bottom: 24px;
     border-radius: var(--radius);
     position: relative;
     overflow: hidden;
-    transition: box-shadow var(--transition-normal);
+    transition: box-shadow var(--transition-fast);
 }
 
 .form-card:hover {
     box-shadow: var(--shadow-lg);
 }
 
-/* Barra de cor superior em alguns cartões importantes */
-.form-card.highlight::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background: var(--primary);
+.form-card.highlight {
+    border-top: 4px solid var(--accent);
 }
 
 
 /* ==========================================================================
-   9. TIPOGRAFIA INTERNA (TÍTULOS E TEXTOS)
+   9. TIPOGRAFIA INTERNA
    ========================================================================== */
 .header-section {
-    margin-bottom: 30px;
+    margin-bottom: 25px;
+    padding-top: 10px;
 }
 
 .header-section h2 {
     font-family: var(--font-headline);
-    font-size: 2.5rem;
+    font-size: 2rem;
+    font-weight: 800;
     text-align: left;
     color: var(--text-primary);
-    margin-bottom: 10px;
-    letter-spacing: 1px;
-    border-bottom: 2px solid var(--bg-input);
-    padding-bottom: 15px;
-    line-height: 1.2;
+    margin-bottom: 5px;
+    letter-spacing: -0.5px;
 }
 
-h3, h4 {
+h3,
+h4 {
     font-family: var(--font-headline);
-    text-transform: uppercase;
-    font-size: 1.05rem;
-    color: var(--primary);
-    margin-bottom: 25px;
+    font-size: 1.15rem;
+    color: var(--accent);
+    margin-bottom: 20px;
     font-weight: 700;
     display: flex;
     align-items: center;
-    gap: 10px;
-    letter-spacing: 0.5px;
+    gap: 8px;
+    letter-spacing: -0.2px;
+    text-transform: none;
 }
 
-h3::before, h4::before {
-    content: '';
-    display: inline-block;
-    width: 6px;
-    height: 18px;
-    background: var(--accent);
-    border-radius: 3px;
+h3::before,
+h4::before {
+    content: none;
 }
 
 p {
     margin-bottom: 15px;
-    color: var(--text-primary);
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+small {
+    font-size: 0.85em;
+    color: var(--text-muted);
 }
 
 
 /* ==========================================================================
-   10. FORMULÁRIOS E INPUTS
+   10. FORMULÁRIOS E INPUTS DE DADOS
    ========================================================================== */
 .input-group {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
     margin-bottom: 25px;
     width: 100%;
 }
 
-/* Modificadores do Input Group */
 .input-group.row {
     flex-direction: row;
     align-items: center;
@@ -400,17 +410,16 @@ p {
 }
 
 label {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    font-weight: 700;
+    font-family: var(--font-headline);
+    font-size: 0.85rem;
+    font-weight: 600;
     color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 1px;
     margin-left: 2px;
+    margin-bottom: -10px;
     display: inline-block;
+    z-index: 1;
 }
 
-/* Campos de Texto, Selects e Textareas */
 input[type="text"],
 input[type="number"],
 input[type="email"],
@@ -421,77 +430,94 @@ select,
 textarea {
     background-color: var(--bg-input);
     color: var(--text-primary);
-    border: 1px solid transparent;
-    padding: 14px 18px;
+    border: 2px solid transparent;
+    padding: 16px 16px;
     font-family: var(--font-body);
     font-size: 1rem;
+    font-weight: 500;
     width: 100%;
-    transition: all var(--transition-normal);
+    transition: all var(--transition-fast);
     border-radius: var(--radius-sm);
-    appearance: none; /* Remove seta padrão de selects no mobile */
+    appearance: none;
     -webkit-appearance: none;
 }
 
-/* Placeholder Styling */
+textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
 input::placeholder,
 textarea::placeholder {
     color: var(--text-muted);
-    opacity: 1;
+    font-weight: 400;
 }
 
-/* Estados de Foco */
-input:focus, 
-select:focus, 
+input:focus,
+select:focus,
 textarea:focus {
     border-color: var(--primary);
-    background: var(--bg-card);
-    outline: none;
-    box-shadow: 0 0 0 4px rgba(74, 106, 93, 0.15);
+    background-color: var(--bg-card);
 }
 
-/* Disabled e Readonly */
 input:disabled,
 select:disabled,
-textarea:disabled {
-    background-color: #F0F0F0;
+textarea:disabled,
+input[readonly] {
+    background-color: #E5E7EB;
     color: var(--text-muted);
     cursor: not-allowed;
-    border-color: var(--border);
 }
 
-/* Customização do Select (Adicionando Seta customizada via SVG Base64) */
 select {
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234A6A5D' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
     background-repeat: no-repeat;
-    background-position: right 15px center;
+    background-position: right 16px center;
     background-size: 16px;
     padding-right: 40px;
     cursor: pointer;
 }
 
-/* Checkboxes Customizados */
 input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-xs);
     cursor: pointer;
     accent-color: var(--primary);
-    padding: 0;
+    margin: 0;
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+    cursor: pointer;
+    padding: 12px;
+    background: var(--bg-input);
+    border-radius: var(--radius-sm);
+}
+
+.checkbox-wrapper label {
+    margin-bottom: 0;
+    cursor: pointer;
+    color: var(--text-primary);
+    font-weight: 500;
 }
 
 
 /* ==========================================================================
-   11. BOTÕES GERAIS DO SISTEMA
+   11. BOTÕES DE AÇÃO E FERRAMENTAS
    ========================================================================== */
 button {
     background-color: var(--primary);
     color: var(--text-inverse);
-    border: 1px solid var(--primary);
-    padding: 14px 28px;
+    border: none;
+    padding: 16px 24px;
     font-family: var(--font-headline);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: none;
     cursor: pointer;
     transition: all var(--transition-fast);
     width: 100%;
@@ -500,292 +526,281 @@ button {
     justify-content: center;
     align-items: center;
     gap: 8px;
+    user-select: none;
 }
 
-/* Efeito de Hover e Active */
 button:hover {
     background-color: var(--primary-hover);
-    border-color: var(--primary-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(74, 106, 93, 0.25);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(236, 112, 0, 0.25);
 }
 
 button:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 5px rgba(74, 106, 93, 0.2);
+    transform: scale(0.98);
+    box-shadow: none;
 }
 
-/* Botões de Ação Perigosa (Excluir, Cancelar) */
+button.secondary {
+    background-color: var(--accent);
+    color: var(--text-inverse);
+}
+
+button.secondary:hover {
+    background-color: var(--accent-hover);
+    box-shadow: 0 4px 12px rgba(0, 73, 144, 0.3);
+}
+
 button.danger {
-    background-color: transparent;
+    background-color: var(--danger-bg);
     color: var(--danger);
-    border: 1px solid var(--danger);
-    box-shadow: none;
 }
 
 button.danger:hover {
     background-color: var(--danger);
     color: var(--text-inverse);
-    border-color: var(--danger);
 }
 
-/* Botões Sucesso */
 button.success {
     background-color: var(--success);
-    border-color: var(--success);
     color: var(--text-inverse);
 }
-button.success:hover {
-    background-color: #2E7D32;
-}
 
-/* Pequenos Botões de Ferramentas (Tabelas e Listas) */
 .btn-tool {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    color: var(--text-secondary);
-    width: 38px; 
-    height: 38px;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    width: 40px;
+    height: 40px;
     padding: 0;
-    display: inline-flex; 
-    align-items: center; 
-    justify-content: center;
-    border-radius: var(--radius-pill);
-    box-shadow: var(--shadow-sm);
+    border-radius: var(--radius-sm);
+    box-shadow: none;
     font-size: 1.1rem;
+    flex-shrink: 0;
 }
 
 .btn-tool:hover {
-    color: var(--primary);
-    border-color: var(--primary);
-    background: var(--bg-input);
-    transform: scale(1.05);
+    color: var(--text-inverse);
+    background: var(--accent);
+}
+
+.btn-tool.danger {
+    color: var(--danger);
+    background: var(--danger-bg);
 }
 
 .btn-tool.danger:hover {
-    background: var(--danger-bg);
-    color: var(--danger);
-    border-color: var(--danger);
+    background: var(--danger);
+    color: var(--text-inverse);
 }
 
 
 /* ==========================================================================
-   12. TABELAS DE DADOS (LISTAS DE CLIENTES, AMANDA, FINANÇAS)
+   12. TABELAS DE DADOS (EXTRATOS/LISTAS BANCÁRIAS)
    ========================================================================== */
 .lista-container {
     background: var(--bg-card);
     border: 1px solid var(--border);
-    margin-top: 25px;
+    margin-top: 20px;
     border-radius: var(--radius);
     overflow-x: auto;
     box-shadow: var(--shadow-sm);
-    
-    /* Scroll horizontal suave se a tabela vazar */
     -webkit-overflow-scrolling: touch;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 750px; /* Garante que não esmague os dados no mobile */
+    min-width: 750px;
 }
 
 th {
-    background: var(--bg-body);
-    padding: 18px 20px;
+    background: var(--bg-card);
+    padding: 16px 24px;
     text-align: left;
     font-family: var(--font-headline);
     font-size: 0.8rem;
     text-transform: uppercase;
-    color: var(--primary);
+    color: var(--text-secondary);
     border-bottom: 2px solid var(--border);
     white-space: nowrap;
     font-weight: 700;
 }
 
 td {
-    padding: 15px 20px;
-    border-bottom: 1px solid var(--bg-input);
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
     font-family: var(--font-body);
     color: var(--text-primary);
     vertical-align: middle;
 }
 
-/* Destaque em negrito na primeira coluna (Nome do Aluno) */
+tr:last-child td {
+    border-bottom: none;
+}
+
 td strong {
     color: var(--text-primary);
-    font-weight: 700;
+    font-weight: 600;
+    font-size: 1rem;
 }
 
 td small {
-    color: var(--text-muted);
-    font-family: var(--font-mono);
+    color: var(--text-secondary);
     display: block;
     margin-top: 4px;
-}
-
-tr {
-    transition: background-color var(--transition-fast);
+    font-size: 0.8rem;
 }
 
 tr:hover td {
     background-color: var(--bg-hover-light);
 }
 
-/* Modificadores de selects dentro das tabelas (para pagamentos) */
 td select {
     padding: 8px 12px;
     border-radius: var(--radius-sm);
-    background-color: transparent;
-    border: 1px solid transparent;
+    background-color: var(--bg-input);
+    border: none;
     font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 600;
+    width: auto;
+    min-width: 110px;
+    color: var(--text-primary);
 }
 
 td select:hover {
-    border-color: var(--border);
-    background-color: var(--bg-card);
+    background-color: var(--border);
 }
 
 
 /* ==========================================================================
-   13. DASHBOARD E MÓDULOS FINANCEIROS (CARDS SUPERIORES)
+   13. DASHBOARD BANCÁRIO (CARTÕES DE SALDO)
    ========================================================================== */
 .dashboard-financeiro,
 .fluxo-detalhado-wrapper,
 .stats-alunos {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    margin-bottom: 40px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin-bottom: 30px;
 }
 
-.card-dash, 
-.stat-card, 
+.card-dash,
+.stat-card,
 .card-fluxo {
     background: var(--bg-card);
-    padding: 30px;
-    text-align: left; /* Alinhamento à esquerda para aspeto mais clínico e sério */
+    padding: 24px;
+    text-align: left;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    transition: transform var(--transition-normal), box-shadow var(--transition-normal);
-    position: relative;
-    overflow: hidden;
-}
-
-.card-dash:hover, 
-.stat-card:hover,
-.card-fluxo:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-}
-
-/* Efeito de barra lateral sutil nos cards de Dashboard */
-.card-dash::after,
-.stat-card::after {
-    content: '';
-    position: absolute;
-    top: 0; right: 0; bottom: 0;
-    width: 4px;
-    background: var(--primary-light);
-    opacity: 0.5;
-}
-
-.card-dash.entrada::after, .stat-card.recebido::after { background: var(--success); }
-.card-dash.saida::after, .stat-card.pendente::after { background: var(--warning); }
-.card-dash.lucro::after { background: var(--primary); }
-
-
-/* Componente Fluxo Detalhado */
-.card-fluxo {
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--transition-fast);
     display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.card-dash:hover,
+.stat-card:hover {
+    transform: scale(1.02);
+}
+
+.card-fluxo {
+    flex-direction: row;
     align-items: center;
     gap: 20px;
-    border-left: 5px solid var(--accent);
 }
 
 .icon-fluxo {
-    font-size: 2.8rem;
-    color: var(--primary);
-    background: var(--bg-input);
-    padding: 10px;
+    font-size: 2rem;
+    color: var(--accent);
+    background: var(--accent-light);
+    padding: 12px;
     border-radius: var(--radius-sm);
 }
 
-/* Tipografia interna dos Dashboards */
-.info-fluxo span, 
-.stat-card .label, 
+.info-fluxo span,
+.stat-card .label,
 .card-dash span {
     font-family: var(--font-headline);
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    color: var(--text-muted);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
     display: block;
-    margin-bottom: 5px;
-    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    font-weight: 500;
 }
 
-.info-fluxo strong, 
-.card-dash strong {
-    font-family: var(--font-body);
-    font-size: 2.2rem;
-    color: var(--text-primary);
-    font-weight: 700;
-}
-
+.info-fluxo strong,
+.card-dash strong,
 .stat-card .value {
-    font-family: var(--font-body);
-    font-size: 2.4rem;
-    color: var(--primary);
-    font-weight: 900;
+    font-family: var(--font-headline);
+    font-size: 2rem;
+    color: var(--text-primary);
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.card-dash.entrada strong,
+.stat-card.recebido .value {
+    color: var(--success);
+}
+
+.card-dash.saida strong {
+    color: var(--text-primary);
+}
+
+.card-dash.lucro strong {
+    color: var(--accent);
 }
 
 
 /* ==========================================================================
-   14. PAINEL DE CONTROLE (FILTROS SUPERIORES E AGENDAS)
+   14. FILTROS E PAINÉIS DE CONTROLE
    ========================================================================== */
 .painel-controle-fin {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
-    align-items: flex-end;
+    gap: 16px;
+    align-items: center;
     margin-bottom: 30px;
     background: var(--bg-card);
-    padding: 25px;
+    padding: 20px 24px;
     border: 1px solid var(--border);
     border-radius: var(--radius);
     box-shadow: var(--shadow-sm);
 }
 
 .input-mes-wrapper {
-    flex: 1 1 300px;
+    flex: 1 1 200px;
 }
 
 .tools-fin {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
-    flex: 0 0 auto;
 }
 
 .tools-fin button {
     width: auto !important;
     padding: 12px 20px;
+    background: var(--bg-input);
+    color: var(--text-primary);
 }
 
-/* Filtros Agenda e Alunos */
+.tools-fin button:hover {
+    background: var(--border);
+}
+
 .agenda-filtros,
 .barra-filtros-alunos {
     background: var(--bg-card);
+    padding: 20px 24px;
     border: 1px solid var(--border);
-    padding: 20px;
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
-    margin-bottom: 30px;
+    gap: 16px;
+    margin-bottom: 20px;
     border-radius: var(--radius);
     align-items: center;
-    justify-content: space-between;
     box-shadow: var(--shadow-sm);
 }
 
@@ -793,119 +808,112 @@ td select:hover {
 .agenda-filtros select,
 .barra-filtros-alunos input {
     flex: 1;
-    min-width: 250px;
+    min-width: 200px;
+    margin-bottom: 0;
 }
 
 .botoes-filtro {
     display: flex;
-    gap: 5px;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .btn-filtro {
-    background: transparent;
+    background: var(--bg-input);
     color: var(--text-secondary);
-    border: 1px solid var(--border);
-    padding: 10px 15px;
-    font-size: 0.8rem;
+    padding: 10px 16px;
+    font-size: 0.85rem;
     width: auto;
+    border-radius: var(--radius-pill);
+    font-weight: 600;
 }
 
 .btn-filtro.active {
-    background: var(--primary);
+    background: var(--accent);
     color: var(--text-inverse);
-    border-color: var(--primary);
 }
 
 
 /* ==========================================================================
-   15. GESTÃO DE AGENDA (VISÃO SEMANAL E DIÁRIA)
+   15. GESTÃO DE AGENDA (CORRIGIDA: DIAS LADO A LADO E IGUAIS)
    ========================================================================== */
 .agenda-subnav {
     display: flex;
     gap: 10px;
     margin-bottom: 25px;
     flex-wrap: wrap;
-    border-bottom: 2px solid var(--border);
-    padding-bottom: 15px;
 }
 
 .agenda-subnav button {
-    background: transparent;
-    border: 1px solid transparent;
+    flex-shrink: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
     color: var(--text-secondary);
     padding: 10px 20px;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     width: auto;
     border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-sm);
 }
 
 .agenda-subnav button.active {
-    background: var(--bg-input);
-    color: var(--primary);
-    border: 1px solid var(--primary-light);
-    font-weight: bold;
+    background: var(--accent);
+    color: var(--text-inverse);
+    border-color: var(--accent);
 }
 
 .agenda-view {
     display: none;
-    animation: fadeInSlideUp var(--transition-normal) ease;
 }
 
 .agenda-view.active {
     display: block;
+    animation: fadeIn var(--transition-normal) forwards;
 }
 
-/* Seletor de Dias da Semana */
 .dias-semana {
     display: flex;
-    gap: 10px;
-    margin-bottom: 25px;
-    overflow-x: auto;
-    padding-bottom: 10px;
-    
-    -ms-overflow-style: none; 
-    scrollbar-width: none;
-}
-
-.dias-semana::-webkit-scrollbar {
-    display: none;
+    gap: 8px;
+    margin-bottom: 24px;
+    width: 100%;
+    /* Mantém os botões perfeitamente distribuídos na mesma linha */
 }
 
 .btn-dia {
+    flex: 1;
+    /* OBRIGA TODOS A PARTILHAREM O ESPAÇO IGUALMENTE LADO A LADO */
     background: var(--bg-card);
     border: 1px solid var(--border);
     color: var(--text-secondary);
     font-size: 0.9rem;
-    padding: 12px 10px;
-    border-radius: var(--radius-sm);
-    flex: 1;
-    min-width: 80px;
+    font-weight: 600;
+    padding: 12px 5px;
+    border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-sm);
     text-align: center;
+    white-space: nowrap;
 }
 
 .btn-dia.active {
     background: var(--primary);
     color: var(--text-inverse);
     border-color: var(--primary);
-    box-shadow: 0 4px 12px rgba(74, 106, 93, 0.2);
-    font-weight: bold;
 }
 
-/* Cartões de Horário (Dentro da Agenda) */
 .horario-card {
-    border: 1px solid var(--border);
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     background: var(--bg-card);
+    border: 1px solid var(--border);
     border-radius: var(--radius);
     overflow: hidden;
     box-shadow: var(--shadow-sm);
 }
 
 .horario-titulo {
-    background: var(--bg-body);
-    padding: 15px 20px;
-    font-family: var(--font-mono);
-    font-weight: 700;
+    background: transparent;
+    padding: 16px 20px;
+    font-family: var(--font-headline);
+    font-weight: 800;
     color: var(--text-primary);
     border-bottom: 1px solid var(--border);
     display: flex;
@@ -914,101 +922,102 @@ td select:hover {
 }
 
 .aluno-item {
-    padding: 14px 20px;
-    border-bottom: 1px dashed var(--border);
-    display: flex; 
-    justify-content: space-between; 
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    transition: background-color var(--transition-fast);
+    font-size: 1rem;
 }
 
 .aluno-item:last-child {
     border-bottom: none;
 }
 
-/* Estados da chamada do Aluno */
-.aluno-item.presente { 
-    background-color: var(--success-bg); 
-    border-left: 3px solid var(--success);
+.aluno-item span {
+    font-weight: 500;
 }
 
-.aluno-item.falta { 
-    background-color: var(--danger-bg); 
-    opacity: 0.7; 
-    border-left: 3px solid var(--danger);
+.aluno-item.presente {
+    background-color: var(--success-bg);
 }
 
-.aluno-item.imprevisto {
-    background-color: var(--warning-bg);
-    border-left: 3px solid var(--warning);
+.aluno-item.presente span {
+    color: var(--success-text);
+    font-weight: 600;
 }
 
-/* Estilo específico para Agenda do Dia (Card Destaque) */
-.card-agenda-hoje {
-    background: var(--bg-card);
-    padding: 20px 25px;
-    border-left: 5px solid var(--primary);
-    margin-bottom: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: var(--shadow);
-    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+.aluno-item.falta {
+    background-color: var(--danger-bg);
+    opacity: 0.8;
+}
+
+.aluno-item.falta span {
+    text-decoration: line-through;
+    color: var(--danger-text);
 }
 
 
 /* ==========================================================================
-   16. PRONTUÁRIOS E HISTÓRICO CLÍNICO
+   16. PRONTUÁRIOS E HISTÓRICO
    ========================================================================== */
 .historico-prontuario {
     max-height: 500px;
     overflow-y: auto;
-    padding: 15px;
-    background: var(--bg-body);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border);
+    padding: 10px 0;
 }
 
 .evolucao-item {
-    padding: 20px;
+    padding: 24px;
     border-bottom: 1px solid var(--border);
-    margin-bottom: 15px;
     background: var(--bg-card);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius);
     box-shadow: var(--shadow-sm);
+    margin-bottom: 16px;
     border-left: 4px solid var(--accent);
 }
 
 .evolucao-data {
-    font-family: var(--font-mono);
+    font-family: var(--font-headline);
     font-size: 0.85rem;
     color: var(--text-muted);
     display: block;
-    margin-bottom: 10px;
-    font-weight: 700;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+#dadosPacienteHeader {
+    background: var(--bg-input);
+    padding: 24px;
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+}
+
+#dadosPacienteHeader div {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    margin-bottom: 8px;
+}
+
+#dadosPacienteHeader strong {
+    color: var(--text-secondary);
+    margin-right: 5px;
 }
 
 
 /* ==========================================================================
-   17. PORTAL DO ALUNO E STATUS BADGES
+   17. STATUS BADGES
    ========================================================================== */
-.info-aula {
-    background: var(--bg-input);
-    padding: 30px;
-    border-radius: var(--radius);
-    margin-top: 20px;
-}
-
 .status-badge {
-    display: inline-block;
-    padding: 8px 18px;
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 14px;
+    font-size: 0.8rem;
     text-transform: uppercase;
     margin-top: 15px;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-pill);
     font-weight: 700;
-    letter-spacing: 1px;
 }
 
 .status-badge.sucesso {
@@ -1028,21 +1037,22 @@ td select:hover {
 
 .status-badge.neutro {
     color: var(--text-secondary);
-    background: #E0E0E0;
+    background: var(--border);
 }
 
 
 /* ==========================================================================
    18. MODAIS, OVERLAYS E TELA DE LOGIN
    ========================================================================== */
-.modal-overlay, 
+.modal-overlay,
 .login-overlay {
-    background: rgba(244, 247, 245, 0.92); /* Vidro fosco branco/verde */
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: var(--bg-overlay);
+    backdrop-filter: blur(8px);
     position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
     z-index: 99999;
     display: none;
     justify-content: center;
@@ -1050,107 +1060,107 @@ td select:hover {
     padding: 20px;
 }
 
-/* Força Display Flex via In-line Style do JS */
 .modal-overlay[style*="display: flex"],
 .login-overlay[style*="display: flex"] {
     display: flex !important;
-    animation: fadeIn var(--transition-normal) ease-out;
+    animation: fadeIn var(--transition-fast);
 }
 
-/* Caixas de Modal Gerais */
-.login-box, 
+.login-box,
 .modal-box {
     background: var(--bg-card);
-    border: 1px solid var(--border-strong);
-    padding: 50px 45px;
+    padding: 40px;
     border-radius: var(--radius-lg);
     width: 100%;
-    max-width: 480px;
+    max-width: 420px;
     max-height: 90vh;
-    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.12);
+    overflow-y: auto;
+    box-shadow: var(--shadow-floating);
     text-align: center;
     position: relative;
     display: flex;
     flex-direction: column;
-    animation: scaleUp var(--transition-normal) cubic-bezier(0.16, 1, 0.3, 1);
+    animation: scaleUp var(--transition-normal);
 }
 
-/* Específicos do Login */
 .login-box h2 {
     font-family: var(--font-headline);
-    font-size: 3.2rem;
-    color: var(--primary);
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: var(--accent);
     margin-bottom: 5px;
-    line-height: 1.1;
     letter-spacing: -1px;
 }
 
 .theme-subtitle {
-    font-family: var(--font-mono);
-    font-size: 1.05rem;
-    letter-spacing: 4px;
-    margin-bottom: 40px;
-    color: var(--accent);
-    text-transform: uppercase;
+    font-family: var(--font-headline);
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 30px;
+    color: var(--primary);
 }
 
-/* Tabs do Login (Admin / Aluno) */
 .login-tabs {
     display: flex;
     justify-content: center;
-    gap: 20px;
+    gap: 8px;
     margin-bottom: 30px;
-    border-bottom: 2px solid var(--bg-input);
-    padding-bottom: 5px;
+    background: var(--bg-input);
+    padding: 4px;
+    border-radius: var(--radius-sm);
 }
 
 .login-tabs button {
     background: transparent;
-    border: none;
-    color: var(--text-muted);
-    font-family: var(--font-headline);
-    font-size: 1.1rem;
-    padding: 10px 15px;
-    font-weight: 700;
-    width: auto;
-    border-radius: 0;
-    transition: color var(--transition-fast);
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    padding: 10px;
+    width: 50%;
+    border-radius: var(--radius-xs);
+    transition: all var(--transition-fast);
 }
 
 .login-tabs button.active {
-    color: var(--primary);
-    border-bottom: 3px solid var(--primary);
-    box-shadow: none;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-sm);
 }
 
-/* Rodapés de Modais Gerais */
-.modal-footer {
-    padding: 25px 0 0 0;
-    display: flex;
-    gap: 15px;
+.modal-box {
+    max-width: 500px;
+}
+
+.modal-box h3 {
+    margin-bottom: 20px;
+    font-size: 1.5rem;
     justify-content: center;
-    margin-top: 15px;
+    color: var(--text-primary);
+}
+
+.modal-footer {
+    padding: 24px 0 0 0;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: auto;
 }
 
 .modal-footer button {
-    width: auto;
-    min-width: 130px;
+    width: 50%;
 }
 
 .btn-fechar {
-    background: transparent;
-    color: var(--text-secondary);
-    border: 1px solid var(--border-strong);
+    background: var(--bg-input);
+    color: var(--text-primary);
 }
 
 .btn-fechar:hover {
-    background: var(--bg-input);
-    color: var(--primary);
+    background: var(--border);
 }
 
 
 /* ==========================================================================
-   19. MODAL CHANGELOG ESPECÍFICO
+   19. MODAL CHANGELOG
    ========================================================================== */
 #modalChangelog .modal-box {
     padding: 0;
@@ -1160,35 +1170,31 @@ td select:hover {
 .changelog-header {
     background: var(--primary);
     color: var(--text-inverse);
-    padding: 25px 20px;
+    padding: 30px 24px;
     text-align: center;
 }
 
 .changelog-header h3 {
-    margin: 0;
     color: var(--text-inverse);
-    border: none;
-    justify-content: center;
     font-size: 1.5rem;
+    margin: 0;
 }
 
 .changelog-content {
     padding: 40px 30px;
-    min-height: 220px;
+    min-height: 200px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    text-align: center;
 }
 
 .changelog-nav {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 25px;
-    padding-bottom: 25px;
-    background: var(--bg-card);
+    gap: 20px;
+    padding-bottom: 30px;
 }
 
 .changelog-nav button {
@@ -1196,54 +1202,46 @@ td select:hover {
     height: 45px;
     border-radius: 50%;
     padding: 0;
-    font-size: 1.2rem;
+    background: var(--bg-input);
+    color: var(--text-primary);
 }
 
 #slideIndicator {
-    font-family: var(--font-mono);
     font-weight: 700;
     color: var(--text-secondary);
 }
 
 
 /* ==========================================================================
-   20. SISTEMA DE TOAST NOTIFICATIONS (SNAKE-TOAST)
+   20. TOAST NOTIFICATIONS
    ========================================================================== */
 .snake-toast {
     position: fixed;
-    bottom: 30px;
-    right: 30px;
-    background: var(--bg-card);
-    color: var(--text-primary);
+    top: calc(20px + env(safe-area-inset-top));
+    left: 50%;
+    transform: translate(-50%, -100px);
+    background: var(--text-primary);
+    color: var(--text-inverse);
     font-family: var(--font-body);
-    font-weight: 700;
-    border-left: 5px solid var(--success);
-    padding: 16px 28px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    font-weight: 500;
+    padding: 16px 24px;
+    box-shadow: var(--shadow-floating);
     z-index: 110000;
     display: flex;
     align-items: center;
-    gap: 15px;
-    border-radius: var(--radius-sm);
-    
-    /* Configuração da animação de entrada */
-    transform: translateX(150%);
+    gap: 12px;
+    border-radius: var(--radius-pill);
     opacity: 0;
     transition: all var(--transition-slow);
 }
 
 .snake-toast.show {
-    transform: translateX(0);
+    transform: translate(-50%, 0);
     opacity: 1;
 }
 
-.snake-toast.error {
-    border-left-color: var(--danger);
-}
-
 .snake-toast span.material-symbols-outlined {
-    font-size: 24px;
-    color: var(--success);
+    color: var(--primary);
 }
 
 .snake-toast.error span.material-symbols-outlined {
@@ -1252,42 +1250,31 @@ td select:hover {
 
 
 /* ==========================================================================
-   21. FAB CONTAINER (BOTÃO DE AÇÃO FLUTUANTE)
+   21. FAB CONTAINER (BOTÃO AZUL)
    ========================================================================== */
 .fab-container {
     position: fixed;
-    bottom: 40px;
-    right: 40px;
+    bottom: calc(30px + env(safe-area-inset-bottom));
+    right: 24px;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 15px;
+    gap: 16px;
     z-index: 5000;
 }
 
 .fab-main {
-    width: 65px; 
-    height: 65px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
-    background: var(--primary);
+    background: var(--accent);
     color: var(--text-inverse);
-    display: flex; 
-    align-items: center; 
-    justify-content: center;
-    box-shadow: 0 8px 25px rgba(74, 106, 93, 0.4);
-    border: none;
+    box-shadow: 0 4px 16px rgba(0, 73, 144, 0.4);
     padding: 0;
-    transition: transform var(--transition-normal), box-shadow var(--transition-normal);
-}
-
-.fab-main span {
-    font-size: 32px;
 }
 
 .fab-main:hover {
-    transform: scale(1.08) rotate(90deg);
-    box-shadow: 0 12px 30px rgba(74, 106, 93, 0.5);
-    background: var(--primary-hover);
+    transform: scale(1.05);
 }
 
 .fab-menu {
@@ -1295,47 +1282,41 @@ td select:hover {
     flex-direction: column;
     gap: 12px;
     opacity: 0;
-    transition: opacity var(--transition-normal);
 }
 
 .fab-menu button {
-    width: 50px;
-    height: 50px;
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
     background: var(--bg-card);
-    color: var(--primary);
-    border: 1px solid var(--border-strong);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    color: var(--accent);
+    box-shadow: var(--shadow);
     padding: 0;
-}
-
-.fab-menu button:hover {
-    background: var(--bg-input);
-    transform: scale(1.1);
-    color: var(--primary-hover);
 }
 
 
 /* ==========================================================================
-   22. ANIMAÇÕES GERAIS KEYFRAMES
+   22. ANIMAÇÕES
    ========================================================================== */
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes fadeInSlideUp {
-    from { 
-        opacity: 0; 
-        transform: translateY(20px); 
+    from {
+        opacity: 0;
+        transform: translateY(15px);
     }
-    to { 
-        opacity: 1; 
-        transform: translateY(0); 
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
@@ -1344,6 +1325,7 @@ td select:hover {
         opacity: 0;
         transform: scale(0.95);
     }
+
     to {
         opacity: 1;
         transform: scale(1);
@@ -1352,19 +1334,10 @@ td select:hover {
 
 
 /* ==========================================================================
-   23. RESPONSIVIDADE - MEDIA QUERIES
+   23. RESPONSIVIDADE (MOBILE FIX PARA OS DIAS DA SEMANA)
    ========================================================================== */
-
-/* Telas Médias (Tablets, Laptops pequenos) */
 @media (max-width: 1024px) {
-    .content {
-        padding-top: 140px; /* Reduz espaço do topo */
-    }
-    
-    .main-header {
-        width: 90%;
-    }
-    
+
     .dashboard-financeiro,
     .fluxo-detalhado-wrapper,
     .stats-alunos {
@@ -1372,130 +1345,84 @@ td select:hover {
     }
 }
 
-/* Telas Pequenas (Smartphones) */
 @media (max-width: 768px) {
-    /* Ajuste crítico do cabeçalho flutuante para mobile */
-    .main-header {
-        position: relative;
-        top: 0;
-        left: 0;
-        transform: none;
-        width: 100%;
-        max-width: 100%;
-        border-radius: 0;
-        border-bottom: 1px solid var(--border);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        padding: 15px 15px;
-    }
-    
-    .content {
-        padding-top: 30px; /* Retira o padding excessivo pois o header não é mais fixed */
-        padding-bottom: 80px;
-    }
-
-    .header-top {
-        flex-direction: column;
-        gap: 10px;
-    }
-
     .main-nav {
-        flex-wrap: nowrap;
-        justify-content: flex-start;
-        overflow-x: auto;
-        padding-bottom: 10px;
+        justify-content: flex-start !important;
+        padding: 5px 20px 15px 20px;
     }
-    
-    .main-nav button {
-        font-size: 0.8rem;
-        padding: 8px 15px;
+
+    .main-nav .btn-sair {
+        margin-left: 10px !important;
     }
-    
-    /* Reorganização de Grids para 1 Coluna */
+
+    .content {
+        margin-top: 0;
+        padding: 20px 20px calc(100px + env(safe-area-inset-bottom)) 20px;
+    }
+
     .stats-alunos,
     .dashboard-financeiro,
     .fluxo-detalhado-wrapper {
         grid-template-columns: 1fr;
+        gap: 12px;
     }
 
-    /* Redução de Fontes */
-    .header-section h2 {
-        font-size: 2rem;
-    }
-    
-    .login-box h2 {
-        font-size: 2.5rem;
-    }
-    
-    .theme-subtitle {
-        font-size: 0.85rem;
-        letter-spacing: 2px;
-    }
-
-    /* Ajustes em Cartões e Filtros */
     .form-card {
-        padding: 25px 20px;
+        padding: 24px 20px;
+        border-radius: var(--radius);
+    }
+
+    .header-section h2 {
+        font-size: 1.8rem;
     }
 
     .painel-controle-fin,
-    .botoes-filtro,
     .agenda-filtros,
     .barra-filtros-alunos {
         flex-direction: column;
         align-items: stretch;
-        gap: 15px;
     }
 
-    .tools-fin {
-        flex-direction: column;
-    }
-
-    .tools-fin button {
+    .tools-fin button,
+    .agenda-tools button {
         width: 100% !important;
     }
 
+    /* CORREÇÃO CRÍTICA APLICADA AO MOBILE: NUNCA USAR WIDTH 100% NOS DIAS */
     .btn-dia {
-        width: 100%;
-        padding: 15px;
+        padding: 10px 2px;
+        font-size: 0.8rem;
+        flex: 1;
+        /* Força os elementos a continuarem lado a lado dividindo o espaço total */
     }
 
-    /* Tabelas em Mobile - Remove bordas e adiciona scroll */
     .lista-container {
         margin-left: -20px;
         margin-right: -20px;
         border-radius: 0;
-        border-left: none;
-        border-right: none;
+        box-shadow: none;
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
     }
-    
-    /* FAB reposicionamento */
-    .fab-container {
-        bottom: 20px;
-        right: 20px;
+
+    .snake-toast {
+        top: calc(80px + env(safe-area-inset-top));
     }
 }
 
-/* Dispositivos Muito Pequenos (iPhone SE, etc) */
-@media (max-width: 480px) {
-    .login-box {
-        padding: 40px 20px;
+@media (max-width: 400px) {
+
+    .login-box,
+    .modal-box {
+        padding: 30px 20px;
     }
-    
+
     .login-box h2 {
         font-size: 2.2rem;
     }
-    
-    .login-tabs button {
-        font-size: 0.95rem;
-        padding: 8px 10px;
-    }
-    
-    .card-dash, 
-    .stat-card {
-        padding: 20px;
-    }
-    
-    .info-fluxo strong, 
-    .stat-card .value, 
+
+    .info-fluxo strong,
+    .stat-card .value,
     .card-dash strong {
         font-size: 1.8rem;
     }
@@ -1503,73 +1430,78 @@ td select:hover {
 
 
 /* ==========================================================================
-   24. ESTILOS DE IMPRESSÃO (PRINT MEDIA QUERIES)
-   Garante que papéis gastem menos tinta e fiquem legíveis
+   24. IMPRESSÃO
    ========================================================================== */
 @media print {
-    body { 
-        background: white !important; 
-        color: black !important; 
+    body {
+        background: white !important;
+        color: black !important;
         font-size: 12pt;
     }
-    
-    /* Esconder tudo que for interface pura */
-    .no-print, 
-    .main-header, 
-    button, 
+
+    .no-print,
+    .main-header,
+    button,
     .fab-container,
     .agenda-subnav,
     .agenda-filtros,
-    .painel-controle-fin { 
-        display: none !important; 
+    .botoes-filtro,
+    .painel-controle-fin {
+        display: none !important;
     }
-    
+
     .content {
         padding: 0 !important;
         margin: 0 !important;
         max-width: 100% !important;
+        display: block !important;
     }
-    
+
     .tela {
-        animation: none !important;
-        transform: none !important;
         opacity: 1 !important;
+        transform: none !important;
+        display: block !important;
+        animation: none !important;
     }
-    
-    /* Remover Sombras e Fundo dos Cartões para economizar tinta */
-    .form-card, 
-    .card-dash, 
+
+    .tela:not(.ativa) {
+        display: none !important;
+    }
+
+    .form-card,
+    .card-dash,
     .stat-card,
-    .lista-container { 
-        border: 1px solid #CCC !important; 
-        box-shadow: none !important; 
-        padding: 15px !important; 
+    .lista-container {
+        border: 1px solid #DDD !important;
+        box-shadow: none !important;
+        padding: 0 !important;
         margin-bottom: 20px !important;
         background: transparent !important;
         page-break-inside: avoid;
     }
-    
-    /* Tabelas preparadas para impressão */
+
     table {
-        border-collapse: collapse !important;
         width: 100% !important;
+        border-collapse: collapse !important;
     }
-    
-    th, td {
-        border: 1px solid #999 !important;
-        padding: 8px !important;
+
+    th,
+    td {
+        border: 1px solid #CCC !important;
+        padding: 6px !important;
         color: black !important;
-        background: transparent !important;
     }
-    
+
     th {
         background-color: #EEE !important;
-        -webkit-print-color-adjust: exact; 
+        -webkit-print-color-adjust: exact;
         color-adjust: exact;
     }
-    
-    /* Links ou textos coloridos devem ficar pretos na impressão */
-    h2, h3, h4, strong, span, .stat-card .value {
+
+    h2,
+    h3,
+    h4,
+    strong {
         color: black !important;
     }
 }
