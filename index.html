@@ -249,15 +249,16 @@
         <header class="main-header no-print">
             <div class="header-top">
                 <div class="logo">EDANIOS BELCHIOR <span
-                        style="font-size: 0.8rem; vertical-align: super; color: var(--accent);">3.1</span></div>
+                        style="font-size: 0.8rem; vertical-align: super; color: var(--accent);">3.2</span></div>
                 <button onclick="fazerLogout()" class="btn-sair-header">SAIR</button>
             </div>
             <nav class="main-nav">
                 <button onclick="mostrarTela('inicio')" class="active">INÍCIO</button>
                 <button onclick="mostrarTela('clientes')">ALUNOS</button>
+                <button onclick="mostrarTela('lancamentos')" id="btnLancAdmin" style="display:none;">LANÇAR</button>
                 <button onclick="mostrarTela('agenda')">AGENDA</button>
                 <button onclick="mostrarTela('prontuarios')">PRONTUÁRIOS</button>
-                <button onclick="mostrarTela('financeiro')" id="btnFinAdmin" style="display:none;">FINANCEIRO</button>
+                <button onclick="mostrarTela('financeiro')" id="btnFinAdmin" style="display:none;">RELATÓRIOS</button>
                 <button onclick="mostrarTela('amanda')" id="btnAmandaAdmin"
                     style="display:none; color: var(--primary); font-weight: bold;">AMANDA</button>
                 <button onclick="abrirLogs()" id="btnLogsAdmin"
@@ -276,6 +277,13 @@
                         <p>Gestão de cadastros</p>
                     </div>
 
+                    <div class="nav-card" onclick="mostrarTela('lancamentos')" id="cardLancInicio"
+                        style="display:none;">
+                        <span class="material-symbols-outlined nav-icon">account_balance_wallet</span>
+                        <h3>LANÇAR</h3>
+                        <p>Novas despesas e saídas</p>
+                    </div>
+
                     <div class="nav-card" onclick="mostrarTela('agenda')">
                         <span class="material-symbols-outlined nav-icon">calendar_month</span>
                         <h3>AGENDA</h3>
@@ -289,9 +297,9 @@
                     </div>
 
                     <div class="nav-card" onclick="mostrarTela('financeiro')" id="cardFinInicio" style="display:none;">
-                        <span class="material-symbols-outlined nav-icon">account_balance</span>
-                        <h3>FINANCEIRO</h3>
-                        <p>Controle de caixa</p>
+                        <span class="material-symbols-outlined nav-icon">insights</span>
+                        <h3>RELATÓRIOS</h3>
+                        <p>Fluxo e Caixa</p>
                     </div>
 
                     <div class="nav-card" onclick="mostrarTela('amanda')" id="cardAmandaInicio" style="display:none;">
@@ -377,6 +385,33 @@
                 </div>
             </section>
 
+            <section id="lancamentos" class="tela">
+                <div class="header-section">
+                    <h2>LANÇAR DESPESAS</h2>
+                </div>
+                <div class="form-card highlight no-print">
+                    <h4>NOVA DESPESA:</h4>
+                    <div class="input-group">
+                        <input type="text" id="descGasto" placeholder="DESCRIÇÃO (Ex: Luz, Água, Internet, Aluguel)">
+                        <select id="catGasto">
+                            <option value="fixo">CUSTO FIXO</option>
+                            <option value="variavel">CUSTO VARIÁVEL</option>
+                            <option value="pessoal">RETIRADA PESSOAL</option>
+                        </select>
+                        <input type="number" id="valorGasto" placeholder="VALOR (R$)">
+
+                        <div class="checkbox-wrapper"
+                            style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                            <input type="checkbox" id="checkGastoFuturo" style="width: 20px;">
+                            <label for="checkGastoFuturo" style="cursor:pointer; color: var(--text-primary);">AGENDAR
+                                PARA O FUTURO (CONTAS A PAGAR)</label>
+                        </div>
+
+                        <button onclick="adicionarGasto()"
+                            style="background-color: var(--danger); margin-top: 10px;">CONFIRMAR LANÇAMENTO</button>
+                    </div>
+                </div>
+            </section>
             <section id="agenda" class="tela">
                 <div class="header-section">
                     <h2>GESTÃO DE AGENDA</h2>
@@ -448,7 +483,7 @@
 
             <section id="financeiro" class="tela">
                 <div class="header-section">
-                    <h2>THE VAULT (3.1)</h2>
+                    <h2>FLUXO DE CAIXA E RELATÓRIOS</h2>
                 </div>
                 <div class="painel-controle-fin">
                     <div class="input-mes-wrapper">
@@ -495,28 +530,6 @@
                     <div class="card-dash saida"><span>DESPESAS PAGAS</span><strong id="dashDespesas">R$ 0,00</strong>
                     </div>
                     <div class="card-dash lucro"><span>CAIXA LÍQUIDO</span><strong id="dashLucro">R$ 0,00</strong></div>
-                </div>
-
-                <div class="form-card no-print">
-                    <h4>NOVA DESPESA:</h4>
-                    <div class="input-group">
-                        <input type="text" id="descGasto" placeholder="DESCRIÇÃO (Ex: Luz, Água, Internet)">
-                        <select id="catGasto">
-                            <option value="fixo">CUSTO FIXO</option>
-                            <option value="variavel">CUSTO VARIÁVEL</option>
-                            <option value="pessoal">RETIRADA PESSOAL</option>
-                        </select>
-                        <input type="number" id="valorGasto" placeholder="VALOR">
-
-                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
-                            <input type="checkbox" id="checkGastoFuturo" style="width: 20px;">
-                            <label for="checkGastoFuturo" style="cursor:pointer; color: var(--text-primary);">AGENDAR
-                                PARA O FUTURO (CONTAS A PAGAR)</label>
-                        </div>
-
-                        <button onclick="adicionarGasto()"
-                            style="background-color: var(--danger); margin-top: 10px;">LANÇAR DESPESA</button>
-                    </div>
                 </div>
 
                 <div class="lista-container">
@@ -609,7 +622,7 @@
         <div class="fab-container">
             <div class="fab-menu" id="fabMenu">
                 <button id="btnFabFinanceiro"
-                    onclick="mostrarTela('financeiro'); document.getElementById('descGasto').focus(); toggleFab()"
+                    onclick="mostrarTela('lancamentos'); document.getElementById('descGasto').focus(); toggleFab()"
                     title="Nova Despesa">💸</button>
                 <button onclick="mostrarTela('clientes'); document.getElementById('nomeCliente').focus(); toggleFab()"
                     title="Novo Aluno">👤</button>
@@ -650,7 +663,7 @@
     <div id="modalChangelog" class="modal-overlay">
         <div class="modal-box" style="max-width: 500px; padding: 0;">
             <div class="changelog-header">
-                <h3>NOVIDADES V3.1</h3>
+                <h3>NOVIDADES V3.2</h3>
                 <p id="deviceBadge">DASHBOARD IMERSIVO</p>
             </div>
             <div class="changelog-content" id="changelogContent"></div>
