@@ -1,6 +1,6 @@
 /* ==========================================================================
    SISTEMA DE GESTÃO INTEGRADA - EDANIOS BELCHIOR
-   VERSÃO: 3.0 (ROSA SUAVE & BRANCO + ESPAÇO AMANDA)
+   VERSÃO: 3.1 (DASHBOARD IMERSIVO & NAVEGAÇÃO FLUIDA)
    DATA: 2026
    ========================================================================== */
 
@@ -38,7 +38,7 @@ const auth = getAuth(app);
 const EMAIL_ADMIN = "edanios@studio.com";
 const SENHA_ALUNO_PADRAO_SUFIXO = "2026";
 const MAX_ALUNOS = 12;
-const VERSAO_ATUAL = "3.0";
+const VERSAO_ATUAL = "3.1"; // Atualizado para ativar o changelog
 
 // Cache Local
 let listaClientes = [];
@@ -160,17 +160,20 @@ onAuthStateChanged(auth, (user) => {
         const isAdmin = user.email === EMAIL_ADMIN;
 
         // Botões e Elementos da Interface
-        const btnFin = document.querySelector("button[onclick=\"mostrarTela('financeiro')\"]");
+        const btnFin = document.querySelector("button[onclick=\"mostrarTela('financeiro')\"]") || document.getElementById('btnFinAdmin');
         const btnLogs = document.getElementById('btnLogsAdmin');
         const btnAmanda = document.getElementById('btnAmandaAdmin');
         const statsCards = document.querySelector('.stats-alunos');
         const fab = document.querySelector('.fab-container');
 
-        // CONTROLE DO BOTÃO FAB FINANCEIRO
+        // Controle dos Cards da Tela Inicial
         const fabFin = document.getElementById('btnFabFinanceiro');
-        if (fabFin) {
-            fabFin.style.display = isAdmin ? 'flex' : 'none';
-        }
+        const cardFin = document.getElementById('cardFinInicio');
+        const cardAmanda = document.getElementById('cardAmandaInicio');
+
+        if (fabFin) fabFin.style.display = isAdmin ? 'flex' : 'none';
+        if (cardFin) cardFin.style.display = isAdmin ? 'flex' : 'none';
+        if (cardAmanda) cardAmanda.style.display = isAdmin ? 'flex' : 'none';
 
         // Controle de visibilidade de elementos sensíveis e abas restritas
         if (btnFin) btnFin.style.display = isAdmin ? 'inline-block' : 'none';
@@ -184,6 +187,9 @@ onAuthStateChanged(auth, (user) => {
 
         if (!isAdmin) {
             mostrarTela('clientes');
+        } else {
+            // ADMIN É DIRECIONADO PARA A TELA INICIAL LIMPA
+            mostrarTela('inicio');
         }
 
         iniciarListeners(user);
@@ -204,7 +210,7 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // ==========================================================================
-// 4. PORTAL DO ALUNO (SIMPLIFICADO)
+// 4. PORTAL DO ALUNO
 // ==========================================================================
 
 function iniciarModoAluno() {
@@ -1291,6 +1297,13 @@ window.confirmarAcao = (titulo, texto, callback) => {
 };
 
 window.mostrarTela = (telaId) => {
+    // ATUALIZAÇÃO V3.1: Controle Dinâmico da Tela Inicial Limpa (Logo Central)
+    if (telaId === 'inicio') {
+        document.body.classList.add('is-inicio-view');
+    } else {
+        document.body.classList.remove('is-inicio-view');
+    }
+
     document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
     document.getElementById(telaId).classList.add('ativa');
     document.querySelectorAll('.main-nav button').forEach(btn => {
@@ -1305,7 +1318,7 @@ window.abrirLogs = () => {
 };
 
 // ==========================================================================
-// 13. UI/UX: FAB & CHANGELOG
+// 13. UI/UX: FAB & CHANGELOG (V3.1 ATUALIZADO)
 // ==========================================================================
 
 window.toggleFab = () => {
@@ -1320,6 +1333,11 @@ window.toggleFab = () => {
 };
 
 const changelogData = [
+    {
+        title: "NOVO DESIGN DA TELA INICIAL ✨",
+        desc: "A tela inicial agora apresenta um design focado e imersivo. Apenas a logotipo centralizada e os cards de acesso rápido são exibidos. A barra de abas superior agora só aparece de forma fluida quando você acessa um dos módulos.",
+        target: 'admin' // Aparece apenas para o administrador
+    },
     {
         title: "BEM-VINDA, AMANDA! 🌸",
         desc: "Uma nova aba foi criada. Pesquise e adicione alunos a ela, e o sistema cruzará os dias da semana na agenda e o total de pagamentos automaticamente num espelho financeiro só para ela.",
@@ -1392,7 +1410,7 @@ window.fecharChangelog = () => {
 };
 
 // ==========================================================================
-// 14. GESTÃO DA AMANDA (V3.0) - COM FILTRO SEGURO
+// 14. GESTÃO DA AMANDA (V3.1) - COM FILTRO SEGURO
 // ==========================================================================
 
 window.filtrarSelectAmanda = () => {
