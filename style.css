@@ -1,6 +1,6 @@
 /* ==========================================================================
    SISTEMA DE GESTÃO INTEGRADA - EDANIOS BELCHIOR
-   VERSÃO: 3.1 (DASHBOARD IMERSIVO & NAVEGAÇÃO FLUIDA)
+   VERSÃO: 3.2 (RESPONSIVIDADE INTELIGENTE & NOVO MÓDULO DE LANÇAMENTOS)
    ESTILO: APP BANCÁRIO, LARANJA & AZUL, FLUIDO E MOBILE-FIRST
    ========================================================================== */
 
@@ -488,15 +488,30 @@ input[type="checkbox"] {
     margin: 0;
 }
 
+/* NOVO CHECKBOX ELEGANTE E FLUIDO (V3.2) */
 .checkbox-wrapper {
     display: flex;
     align-items: center;
     gap: 12px;
+    background: var(--bg-input);
+    padding: 15px;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    transition: all 0.2s;
     margin-top: 10px;
     cursor: pointer;
-    padding: 12px;
-    background: var(--bg-input);
-    border-radius: var(--radius-sm);
+}
+
+.checkbox-wrapper:hover {
+    border-color: var(--danger);
+}
+
+.checkbox-wrapper input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    cursor: pointer;
+    accent-color: var(--primary);
 }
 
 .checkbox-wrapper label {
@@ -1333,7 +1348,7 @@ td select:hover {
 
 
 /* ==========================================================================
-   23. RESPONSIVIDADE (MOBILE FIX PARA OS DIAS DA SEMANA)
+   23. RESPONSIVIDADE (TABLET, NOTEBOOK, MOBILE FIX)
    ========================================================================== */
 @media (max-width: 1024px) {
 
@@ -1505,7 +1520,7 @@ td select:hover {
 
 
 /* ==========================================================================
-   25. TELA INICIAL LIMPA E CARDS FLUIDOS (V3.1)
+   25. TELA INICIAL LIMPA E CARDS FLUIDOS (V3.2)
    ========================================================================== */
 
 /* Transições suaves para o cabeçalho */
@@ -1572,13 +1587,15 @@ body.is-inicio-view .btn-sair-header {
     pointer-events: auto;
 }
 
-/* Grid de Cards da Tela Inicial */
+/* Grid de Cards da Tela Inicial Responsiva v3.2 */
 .nav-cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 25px;
-    margin-top: 40px;
-    max-width: 1000px;
+    /* Notebook/Desktop: 3 ou 4 colunas | iPad: 2 colunas | Mobile: 1 coluna */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+    margin-top: 30px;
+    max-width: 1100px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -1632,4 +1649,28 @@ body.is-inicio-view .btn-sair-header {
 .nav-card:hover h3,
 .nav-card:hover p {
     color: #FFFFFF;
+}
+
+/* Otimização para Tablets (iPad) */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .nav-cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 700px;
+    }
+
+    .content {
+        padding: 0 40px 120px 40px;
+    }
+
+    .header-top {
+        padding: 40px 24px;
+    }
+}
+
+/* Otimização para Notebooks pequenos e Desktop */
+@media (min-width: 1025px) {
+    .nav-cards-grid {
+        grid-template-columns: repeat(3, 1fr);
+        max-width: 1100px;
+    }
 }
