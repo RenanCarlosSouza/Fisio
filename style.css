@@ -1,6 +1,6 @@
 /* ==========================================================================
    SISTEMA DE GESTÃO INTEGRADA - EDANIOS BELCHIOR
-   VERSÃO: 7.4 (ITAÚ DIGITAL BANKING EDITION - CORREÇÃO DA AGENDA LADO A LADO)
+   VERSÃO: 3.1 (DASHBOARD IMERSIVO & NAVEGAÇÃO FLUIDA)
    ESTILO: APP BANCÁRIO, LARANJA & AZUL, FLUIDO E MOBILE-FIRST
    ========================================================================== */
 
@@ -113,6 +113,7 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    /* Transições suaves para mudança de visual */
     transition: background-color var(--transition-slow), color var(--transition-slow);
 }
 
@@ -876,12 +877,10 @@ td select:hover {
     gap: 8px;
     margin-bottom: 24px;
     width: 100%;
-    /* Mantém os botões perfeitamente distribuídos na mesma linha */
 }
 
 .btn-dia {
     flex: 1;
-    /* OBRIGA TODOS A PARTILHAREM O ESPAÇO IGUALMENTE LADO A LADO */
     background: var(--bg-card);
     border: 1px solid var(--border);
     color: var(--text-secondary);
@@ -1388,12 +1387,10 @@ td select:hover {
         width: 100% !important;
     }
 
-    /* CORREÇÃO CRÍTICA APLICADA AO MOBILE: NUNCA USAR WIDTH 100% NOS DIAS */
     .btn-dia {
         padding: 10px 2px;
         font-size: 0.8rem;
         flex: 1;
-        /* Força os elementos a continuarem lado a lado dividindo o espaço total */
     }
 
     .lista-container {
@@ -1504,4 +1501,135 @@ td select:hover {
     strong {
         color: black !important;
     }
+}
+
+
+/* ==========================================================================
+   25. TELA INICIAL LIMPA E CARDS FLUIDOS (V3.1)
+   ========================================================================== */
+
+/* Transições suaves para o cabeçalho */
+.header-top,
+.logo,
+.main-nav {
+    transition: all 0.4s ease-in-out;
+}
+
+/* Quando a classe 'is-inicio-view' estiver no body, aplica o visual limpo */
+body.is-inicio-view .main-nav {
+    max-height: 0;
+    opacity: 0;
+    padding: 0;
+    overflow: hidden;
+    pointer-events: none;
+    /* Impede cliques quando invisível */
+}
+
+body.is-inicio-view .main-nav button {
+    display: none !important;
+}
+
+body.is-inicio-view .header-top {
+    justify-content: center;
+    position: relative;
+    padding: 60px 24px 40px 24px;
+    /* Mais espaço no topo */
+}
+
+body.is-inicio-view .logo {
+    font-size: 2.8rem;
+    /* Logo maior no centro */
+    text-align: center;
+    justify-content: center;
+}
+
+/* Botão SAIR no Header Top (visível apenas na tela inicial) */
+.btn-sair-header {
+    position: absolute;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.2);
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-headline);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.btn-sair-header:hover {
+    background: var(--danger);
+}
+
+body.is-inicio-view .btn-sair-header {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Grid de Cards da Tela Inicial */
+.nav-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 25px;
+    margin-top: 40px;
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.nav-card {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 45px 25px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.nav-card .nav-icon {
+    font-size: 4rem;
+    color: var(--primary);
+    margin-bottom: 20px;
+    transition: color 0.3s ease-in-out;
+}
+
+.nav-card h3 {
+    margin: 0 0 8px 0;
+    color: var(--text-primary);
+    font-size: 1.4rem;
+    font-weight: 800;
+    transition: color 0.3s ease-in-out;
+}
+
+.nav-card p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    transition: color 0.3s ease-in-out;
+}
+
+.nav-card:hover {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    transform: translateY(-10px);
+    box-shadow: var(--shadow-floating);
+}
+
+.nav-card:hover .nav-icon,
+.nav-card:hover h3,
+.nav-card:hover p {
+    color: #FFFFFF;
 }
