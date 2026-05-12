@@ -14,16 +14,129 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
     <style>
-        /* Estilos inline específicos para a v3.0 que precisam carregar rápido */
+        /* Estilos críticos para a transição fluida e visual limpo v3.1 */
         body {
             transition: background-color 1.5s ease-in-out, color 1s ease;
         }
 
         body.logged-in {
-            background-color: #FFFFFF;
-            /* Fundo branco e limpo */
+            background-color: #F4F5F7;
         }
 
+        /* Controle da Navegação Fluida */
+        .header-top,
+        .logo,
+        .main-nav {
+            transition: all 0.4s ease-in-out;
+        }
+
+        /* Estado Inicial: Logo Central e Sem Menu */
+        body.is-inicio-view .main-nav {
+            max-height: 0;
+            opacity: 0;
+            padding: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        body.is-inicio-view .header-top {
+            justify-content: center;
+            position: relative;
+            padding: 80px 24px 50px 24px;
+        }
+
+        body.is-inicio-view .logo {
+            font-size: 3.2rem;
+            text-align: center;
+            justify-content: center;
+        }
+
+        /* Botão Sair Especial para a Tela Inicial */
+        .btn-sair-header {
+            position: absolute;
+            right: 24px;
+            top: 30px;
+            background: rgba(0, 0, 0, 0.1);
+            color: var(--text-secondary);
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--radius-pill);
+            font-family: var(--font-headline);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        body.is-inicio-view .btn-sair-header {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Grid de Cards */
+        .nav-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+            max-width: 1100px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .nav-card {
+            background-color: #FFFFFF;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 45px 25px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-card .nav-icon {
+            font-size: 4rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            transition: color 0.3s;
+        }
+
+        .nav-card h3 {
+            margin: 0 0 8px 0;
+            color: var(--text-primary);
+            font-size: 1.4rem;
+            font-weight: 800;
+            transition: color 0.3s;
+        }
+
+        .nav-card p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            transition: color 0.3s;
+        }
+
+        /* Hover: Fundo Azul e Conteúdo Branco */
+        .nav-card:hover {
+            background-color: var(--accent);
+            border-color: var(--accent);
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-floating);
+        }
+
+        .nav-card:hover .nav-icon,
+        .nav-card:hover h3,
+        .nav-card:hover p {
+            color: #FFFFFF;
+        }
+
+        /* Estilos de sub-abas da agenda */
         .agenda-subnav {
             display: flex;
             gap: 10px;
@@ -57,29 +170,10 @@
         .agenda-view.active {
             display: block;
         }
-
-        .card-agenda-hoje {
-            background: var(--bg-card);
-            padding: 20px;
-            border-left: 5px solid var(--primary);
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: var(--shadow);
-        }
-
-        .hora-destaque {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--primary);
-            font-family: var(--font-mono);
-        }
     </style>
 </head>
 
-<body>
-
+<body class="is-inicio-view">
     <div id="telaLogin" class="login-overlay" style="display: flex;">
         <div class="login-box">
             <h2 class="font-headline">EDANIOS BELCHIOR</h2>
@@ -155,13 +249,15 @@
         <header class="main-header no-print">
             <div class="header-top">
                 <div class="logo">EDANIOS BELCHIOR <span
-                        style="font-size: 0.8rem; vertical-align: super; color: var(--accent);">3.0</span></div>
+                        style="font-size: 0.8rem; vertical-align: super; color: var(--accent);">3.1</span></div>
+                <button onclick="fazerLogout()" class="btn-sair-header">SAIR</button>
             </div>
             <nav class="main-nav">
-                <button onclick="mostrarTela('clientes')" class="active">ALUNOS</button>
+                <button onclick="mostrarTela('inicio')" class="active">INÍCIO</button>
+                <button onclick="mostrarTela('clientes')">ALUNOS</button>
                 <button onclick="mostrarTela('agenda')">AGENDA</button>
                 <button onclick="mostrarTela('prontuarios')">PRONTUÁRIOS</button>
-                <button onclick="mostrarTela('financeiro')">FINANCEIRO</button>
+                <button onclick="mostrarTela('financeiro')" id="btnFinAdmin" style="display:none;">FINANCEIRO</button>
                 <button onclick="mostrarTela('amanda')" id="btnAmandaAdmin"
                     style="display:none; color: var(--primary); font-weight: bold;">AMANDA</button>
                 <button onclick="abrirLogs()" id="btnLogsAdmin"
@@ -171,7 +267,42 @@
         </header>
 
         <main class="content">
-            <section id="clientes" class="tela ativa">
+
+            <section id="inicio" class="tela ativa">
+                <div class="nav-cards-grid">
+                    <div class="nav-card" onclick="mostrarTela('clientes')">
+                        <span class="material-symbols-outlined nav-icon">group</span>
+                        <h3>ALUNOS</h3>
+                        <p>Gestão de cadastros</p>
+                    </div>
+
+                    <div class="nav-card" onclick="mostrarTela('agenda')">
+                        <span class="material-symbols-outlined nav-icon">calendar_month</span>
+                        <h3>AGENDA</h3>
+                        <p>Controle de horários</p>
+                    </div>
+
+                    <div class="nav-card" onclick="mostrarTela('prontuarios')">
+                        <span class="material-symbols-outlined nav-icon">medical_information</span>
+                        <h3>PRONTUÁRIOS</h3>
+                        <p>Evolução clínica</p>
+                    </div>
+
+                    <div class="nav-card" onclick="mostrarTela('financeiro')" id="cardFinInicio" style="display:none;">
+                        <span class="material-symbols-outlined nav-icon">account_balance</span>
+                        <h3>FINANCEIRO</h3>
+                        <p>Controle de caixa</p>
+                    </div>
+
+                    <div class="nav-card" onclick="mostrarTela('amanda')" id="cardAmandaInicio" style="display:none;">
+                        <span class="material-symbols-outlined nav-icon">spa</span>
+                        <h3>ESPAÇO AMANDA</h3>
+                        <p>Gestão e espelho</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="clientes" class="tela">
                 <div class="header-section">
                     <h2>ARQUIVO DE ALUNOS</h2>
                 </div>
@@ -317,7 +448,7 @@
 
             <section id="financeiro" class="tela">
                 <div class="header-section">
-                    <h2>THE VAULT (3.0)</h2>
+                    <h2>THE VAULT (3.1)</h2>
                 </div>
                 <div class="painel-controle-fin">
                     <div class="input-mes-wrapper">
@@ -447,9 +578,6 @@
 
                 <div class="form-card">
                     <h4>VINCULAR ALUNO À AMANDA:</h4>
-                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 15px;">Use a pesquisa
-                        para filtrar todos os alunos do sistema. O sistema puxará automaticamente os horários e
-                        pagamentos deles.</p>
                     <div class="input-group" style="flex-direction: row; gap: 10px; align-items: center;">
                         <input type="text" id="buscaAmanda" placeholder="🔍 PESQUISAR ALUNO..."
                             oninput="filtrarSelectAmanda()" style="flex: 2;">
@@ -483,11 +611,9 @@
                 <button id="btnFabFinanceiro"
                     onclick="mostrarTela('financeiro'); document.getElementById('descGasto').focus(); toggleFab()"
                     title="Nova Despesa">💸</button>
-
                 <button onclick="mostrarTela('clientes'); document.getElementById('nomeCliente').focus(); toggleFab()"
                     title="Novo Aluno">👤</button>
                 <button onclick="mostrarTela('agenda'); toggleFab()" title="Agendar">📅</button>
-
                 <button
                     onclick="mostrarTela('prontuarios'); document.getElementById('buscaProntuario').focus(); toggleFab()"
                     title="Prontuários">📋</button>
@@ -511,15 +637,12 @@
 
     <div id="modalLogs" class="modal-overlay">
         <div class="modal-box" style="max-width: 450px; text-align: center; padding: 30px;">
-            <h3 style="margin-top: 0; margin-bottom: 20px;">LOGS DESCONTINUADOS</h3>
-            <p style="color: var(--text-secondary); margin-bottom: 25px; line-height: 1.5;">
-                A aba de Logs foi descontinuada na <strong>versão 3.0</strong>.<br><br>
-                O sistema ganhou uma nova aba dedicada à <strong>Amanda</strong>, com espelho de pagamentos e gestão
-                integrada de agenda dos alunos dela.
+            <h3>LOGS DESCONTINUADOS</h3>
+            <p style="color: var(--text-secondary);">A aba de Logs foi descontinuada para dar espaço à gestão da Amanda.
             </p>
-            <div class="modal-footer" style="padding: 0;">
-                <button onclick="document.getElementById('modalLogs').style.display='none'" class="btn-fechar"
-                    style="margin: 0;">CIENTE</button>
+            <div class="modal-footer">
+                <button onclick="document.getElementById('modalLogs').style.display='none'"
+                    class="btn-fechar">CIENTE</button>
             </div>
         </div>
     </div>
@@ -527,13 +650,10 @@
     <div id="modalChangelog" class="modal-overlay">
         <div class="modal-box" style="max-width: 500px; padding: 0;">
             <div class="changelog-header">
-                <h3>NOVIDADES V3.0</h3>
-                <p id="deviceBadge"
-                    style="font-size: 0.7rem; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px; display: inline-block;">
-                    DETECTANDO DISPOSITIVO...</p>
+                <h3>NOVIDADES V3.1</h3>
+                <p id="deviceBadge">DASHBOARD IMERSIVO</p>
             </div>
-            <div class="changelog-content" id="changelogContent">
-            </div>
+            <div class="changelog-content" id="changelogContent"></div>
             <div class="changelog-nav">
                 <button onclick="prevChangelog()">←</button>
                 <span id="slideIndicator">1/3</span>
