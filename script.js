@@ -1,6 +1,6 @@
 /* ==========================================================================
    SISTEMA DE GESTÃO INTEGRADA - EDANIOS BELCHIOR
-   VERSÃO: 3.1 (DASHBOARD IMERSIVO & NAVEGAÇÃO FLUIDA)
+   VERSÃO: 3.2 (RESPONSIVIDADE & MÓDULO DE LANÇAMENTOS)
    DATA: 2026
    ========================================================================== */
 
@@ -38,7 +38,7 @@ const auth = getAuth(app);
 const EMAIL_ADMIN = "edanios@studio.com";
 const SENHA_ALUNO_PADRAO_SUFIXO = "2026";
 const MAX_ALUNOS = 12;
-const VERSAO_ATUAL = "3.1"; // Atualizado para ativar o changelog
+const VERSAO_ATUAL = "3.2"; // Atualizado para a versão 3.2
 
 // Cache Local
 let listaClientes = [];
@@ -160,7 +160,8 @@ onAuthStateChanged(auth, (user) => {
         const isAdmin = user.email === EMAIL_ADMIN;
 
         // Botões e Elementos da Interface
-        const btnFin = document.querySelector("button[onclick=\"mostrarTela('financeiro')\"]") || document.getElementById('btnFinAdmin');
+        const btnFin = document.getElementById('btnFinAdmin');
+        const btnLanc = document.getElementById('btnLancAdmin'); // Novo botão
         const btnLogs = document.getElementById('btnLogsAdmin');
         const btnAmanda = document.getElementById('btnAmandaAdmin');
         const statsCards = document.querySelector('.stats-alunos');
@@ -169,14 +170,17 @@ onAuthStateChanged(auth, (user) => {
         // Controle dos Cards da Tela Inicial
         const fabFin = document.getElementById('btnFabFinanceiro');
         const cardFin = document.getElementById('cardFinInicio');
+        const cardLanc = document.getElementById('cardLancInicio'); // Novo card
         const cardAmanda = document.getElementById('cardAmandaInicio');
 
         if (fabFin) fabFin.style.display = isAdmin ? 'flex' : 'none';
         if (cardFin) cardFin.style.display = isAdmin ? 'flex' : 'none';
+        if (cardLanc) cardLanc.style.display = isAdmin ? 'flex' : 'none'; // Permissão Lançamentos
         if (cardAmanda) cardAmanda.style.display = isAdmin ? 'flex' : 'none';
 
         // Controle de visibilidade de elementos sensíveis e abas restritas
         if (btnFin) btnFin.style.display = isAdmin ? 'inline-block' : 'none';
+        if (btnLanc) btnLanc.style.display = isAdmin ? 'inline-block' : 'none'; // Permissão Lançamentos
         if (btnLogs) btnLogs.style.display = isAdmin ? 'inline-block' : 'none';
         if (btnAmanda) btnAmanda.style.display = isAdmin ? 'inline-block' : 'none';
         if (fab) fab.style.display = 'flex';
@@ -1297,7 +1301,7 @@ window.confirmarAcao = (titulo, texto, callback) => {
 };
 
 window.mostrarTela = (telaId) => {
-    // ATUALIZAÇÃO V3.1: Controle Dinâmico da Tela Inicial Limpa (Logo Central)
+    // ATUALIZAÇÃO V3.2: Controle Dinâmico da Tela Inicial Limpa (Logo Central)
     if (telaId === 'inicio') {
         document.body.classList.add('is-inicio-view');
     } else {
@@ -1305,11 +1309,19 @@ window.mostrarTela = (telaId) => {
     }
 
     document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
-    document.getElementById(telaId).classList.add('ativa');
+
+    const target = document.getElementById(telaId);
+    if (target) target.classList.add('ativa');
+
     document.querySelectorAll('.main-nav button').forEach(btn => {
         btn.classList.remove('active');
-        if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(`'${telaId}'`)) btn.classList.add('active');
+        if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(`'${telaId}'`)) {
+            btn.classList.add('active');
+        }
     });
+
+    // Rolagem automática para o topo ao alterar de tela (Otimizado para iPad/Celular)
+    window.scrollTo(0, 0);
 };
 
 // Abre o modal de aviso sobre a descontinuação dos logs
@@ -1318,7 +1330,7 @@ window.abrirLogs = () => {
 };
 
 // ==========================================================================
-// 13. UI/UX: FAB & CHANGELOG (V3.1 ATUALIZADO)
+// 13. UI/UX: FAB & CHANGELOG (V3.2 ATUALIZADO)
 // ==========================================================================
 
 window.toggleFab = () => {
@@ -1334,24 +1346,19 @@ window.toggleFab = () => {
 
 const changelogData = [
     {
-        title: "NOVO DESIGN DA TELA INICIAL ✨",
-        desc: "A tela inicial agora apresenta um design focado e imersivo. Apenas a logotipo centralizada e os cards de acesso rápido são exibidos. A barra de abas superior agora só aparece de forma fluida quando você acessa um dos módulos.",
-        target: 'admin' // Aparece apenas para o administrador
-    },
-    {
-        title: "BEM-VINDA, AMANDA! 🌸",
-        desc: "Uma nova aba foi criada. Pesquise e adicione alunos a ela, e o sistema cruzará os dias da semana na agenda e o total de pagamentos automaticamente num espelho financeiro só para ela.",
-        target: 'all'
-    },
-    {
-        title: "VISUAL ROSA & BRANCO 🤍",
-        desc: "O site inteiro sofreu um re-design tipográfico e cromático para um estilo limpo e suave, com foco em uma paleta de cores rosa e branco.",
-        target: 'all'
-    },
-    {
-        title: "LOGS SUBSTITUÍDOS",
-        desc: "A antiga aba de Logs foi oficialmente descontinuada para dar espaço de processamento e navegação para o Espaço da Amanda.",
+        title: "NOVO MÓDULO DE LANÇAMENTOS 💸",
+        desc: "Criamos uma aba exclusiva para 'Lançar' despesas e agendamentos. Assim, o painel 'Financeiro' fica dedicado apenas para relatórios, fluxo de caixa e exportações, deixando o sistema mais organizado e seguro para o iPad e Celular.",
         target: 'admin'
+    },
+    {
+        title: "RESPONSIVIDADE INTELIGENTE 📱",
+        desc: "O sistema agora entende se você está no Celular, iPad ou Notebook. Os cards da tela inicial se ajustam perfeitamente para 1, 2 ou 3 colunas dependendo da sua tela.",
+        target: 'all'
+    },
+    {
+        title: "NAVEGAÇÃO FLUIDA ✨",
+        desc: "Ao clicar em qualquer card da tela inicial, o sistema fará um ajuste automático para o topo da página, melhorando a experiência de uso em dispositivos móveis.",
+        target: 'all'
     }
 ];
 
@@ -1410,7 +1417,7 @@ window.fecharChangelog = () => {
 };
 
 // ==========================================================================
-// 14. GESTÃO DA AMANDA (V3.1) - COM FILTRO SEGURO
+// 14. GESTÃO DA AMANDA (V3.2) - COM FILTRO SEGURO
 // ==========================================================================
 
 window.filtrarSelectAmanda = () => {
