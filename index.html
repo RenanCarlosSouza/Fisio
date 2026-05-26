@@ -14,7 +14,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
     <style>
-        /* Estilos críticos para a transição fluida e visual limpo v3.1 */
         body {
             transition: background-color 1.5s ease-in-out, color 1s ease;
         }
@@ -23,14 +22,12 @@
             background-color: #F4F5F7;
         }
 
-        /* Controle da Navegação Fluida */
         .header-top,
         .logo,
         .main-nav {
             transition: all 0.4s ease-in-out;
         }
 
-        /* Estado Inicial: Logo Central e Sem Menu */
         body.is-inicio-view .main-nav {
             max-height: 0;
             opacity: 0;
@@ -51,7 +48,6 @@
             justify-content: center;
         }
 
-        /* Botão Sair Especial para a Tela Inicial */
         .btn-sair-header {
             position: absolute;
             right: 24px;
@@ -74,7 +70,6 @@
             pointer-events: auto;
         }
 
-        /* Grid de Cards */
         .nav-cards-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -122,7 +117,6 @@
             transition: color 0.3s;
         }
 
-        /* Hover: Fundo Azul e Conteúdo Branco */
         .nav-card:hover {
             background-color: var(--accent);
             border-color: var(--accent);
@@ -136,7 +130,6 @@
             color: #FFFFFF;
         }
 
-        /* Estilos de sub-abas da agenda */
         .agenda-subnav {
             display: flex;
             gap: 10px;
@@ -180,8 +173,7 @@
             <p class="theme-subtitle">Fisioterapia & Pilates</p>
 
             <div class="login-tabs">
-                <button onclick="mudarAbaLogin('staff')" id="tabStaff" class="active">Admin</button>
-                <button onclick="mudarAbaLogin('aluno')" id="tabAluno">ALUNO</button>
+                <button id="tabStaff" class="active" style="width: 100%;">ACESSO ADMIN</button>
             </div>
 
             <div id="formStaff">
@@ -190,66 +182,16 @@
                 <button onclick="fazerLoginAdmin()" style="margin-top: 20px;">Fazer login </button>
             </div>
 
-            <div id="formAluno" style="display: none;">
-                <input type="text" id="nomeAlunoLogin" placeholder="SEU NOME COMPLETO">
-                <input type="password" id="senhaAlunoLogin" placeholder="SENHA (Nome + 2026)">
-                <button onclick="fazerLoginAluno()"
-                    style="margin-top: 20px; background-color: var(--primary); color: white;">
-                    ACESSAR MEU PRONTUÁRIO
-                </button>
-                <p
-                    style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 10px; font-family: var(--font-mono);">
-                    Ex: se seu nome é Ana, a senha é Ana2026
-                </p>
-            </div>
             <p id="msgErroLogin"
                 style="color: var(--danger); margin-top: 15px; font-weight: bold; font-family: var(--font-mono);"></p>
         </div>
-    </div>
-
-    <div id="appAluno" style="display: none;">
-        <header class="main-header" style="justify-content: center;">
-            <div class="logo">EDANIOS BELCHIOR</div>
-            <button onclick="fazerLogout()" class="btn-sair">ENCERRAR SESSÃO</button>
-        </header>
-
-        <main class="content">
-            <div class="form-card" style="text-align: center;">
-                <h2 id="saudacaoAluno">OLÁ</h2>
-                <div class="info-aula">
-                    <p
-                        style="color: var(--text-secondary); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px;">
-                        Status da Aula de Hoje:
-                    </p>
-                    <h1 id="horarioAulaAluno" style="font-size: 3rem; color: var(--text-primary); margin: 10px 0;">--:--
-                    </h1>
-                    <div id="statusBadge" class="status-badge">SEM AGENDAMENTO</div>
-                    <p id="motivoRecusaAluno"
-                        style="color: var(--danger); font-size: 0.9rem; margin-top: 10px; display: none; font-style: italic;">
-                    </p>
-                </div>
-            </div>
-
-            <div class="form-card">
-                <h3>💰 MEUS PAGAMENTOS</h3>
-                <div id="listaMeusPagamentos"
-                    style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
-                    <p style="color: var(--text-secondary);">Carregando histórico...</p>
-                </div>
-            </div>
-
-            <div class="form-card">
-                <h3>🏥 MEU PRONTUÁRIO</h3>
-                <div id="meuProntuarioLista" class="historico-prontuario">Carregando...</div>
-            </div>
-        </main>
     </div>
 
     <div id="appConteudo" style="display: none;">
         <header class="main-header no-print">
             <div class="header-top">
                 <div class="logo">EDANIOS BELCHIOR <span
-                        style="font-size: 0.8rem; vertical-align: super; color: var(--accent);">3.2</span></div>
+                        style="font-size: 0.8rem; vertical-align: super; color: var(--accent);">3.3</span></div>
                 <button onclick="fazerLogout()" class="btn-sair-header">SAIR</button>
             </div>
             <nav class="main-nav">
@@ -257,18 +199,17 @@
                 <button onclick="mostrarTela('clientes')">ALUNOS</button>
                 <button onclick="mostrarTela('lancamentos')" id="btnLancAdmin" style="display:none;">LANÇAR</button>
                 <button onclick="mostrarTela('agenda')">AGENDA</button>
+                <button onclick="mostrarTela('vencimentos')" id="btnVencimentosAdmin"
+                    style="display:none;">VENCIMENTOS</button>
                 <button onclick="mostrarTela('prontuarios')">PRONTUÁRIOS</button>
                 <button onclick="mostrarTela('financeiro')" id="btnFinAdmin" style="display:none;">RELATÓRIOS</button>
                 <button onclick="mostrarTela('amanda')" id="btnAmandaAdmin"
                     style="display:none; color: var(--primary); font-weight: bold;">AMANDA</button>
-                <button onclick="abrirLogs()" id="btnLogsAdmin"
-                    style="display:none; color:var(--text-muted);">LOGS</button>
                 <button onclick="fazerLogout()" class="btn-sair">SAIR</button>
             </nav>
         </header>
 
         <main class="content">
-
             <section id="inicio" class="tela ativa">
                 <div class="nav-cards-grid">
                     <div class="nav-card" onclick="mostrarTela('clientes')">
@@ -277,17 +218,11 @@
                         <p>Gestão de cadastros</p>
                     </div>
 
-                    <div class="nav-card" onclick="mostrarTela('lancamentos')" id="cardLancInicio"
+                    <div class="nav-card" onclick="mostrarTela('vencimentos')" id="cardVencInicio"
                         style="display:none;">
-                        <span class="material-symbols-outlined nav-icon">account_balance_wallet</span>
-                        <h3>LANÇAR</h3>
-                        <p>Novas despesas e saídas</p>
-                    </div>
-
-                    <div class="nav-card" onclick="mostrarTela('agenda')">
-                        <span class="material-symbols-outlined nav-icon">calendar_month</span>
-                        <h3>AGENDA</h3>
-                        <p>Controle de horários</p>
+                        <span class="material-symbols-outlined nav-icon">event_busy</span>
+                        <h3>VENCIMENTOS</h3>
+                        <p>Controle de faturas</p>
                     </div>
 
                     <div class="nav-card" onclick="mostrarTela('prontuarios')">
@@ -296,16 +231,23 @@
                         <p>Evolução clínica</p>
                     </div>
 
+                    <div class="nav-card" onclick="mostrarTela('agenda')">
+                        <span class="material-symbols-outlined nav-icon">calendar_month</span>
+                        <h3>AGENDA</h3>
+                        <p>Controle de horários</p>
+                    </div>
+
+                    <div class="nav-card" onclick="mostrarTela('lancamentos')" id="cardLancInicio"
+                        style="display:none;">
+                        <span class="material-symbols-outlined nav-icon">account_balance_wallet</span>
+                        <h3>LANÇAR</h3>
+                        <p>Novas despesas</p>
+                    </div>
+
                     <div class="nav-card" onclick="mostrarTela('financeiro')" id="cardFinInicio" style="display:none;">
                         <span class="material-symbols-outlined nav-icon">insights</span>
                         <h3>RELATÓRIOS</h3>
                         <p>Fluxo e Caixa</p>
-                    </div>
-
-                    <div class="nav-card" onclick="mostrarTela('amanda')" id="cardAmandaInicio" style="display:none;">
-                        <span class="material-symbols-outlined nav-icon">spa</span>
-                        <h3>ESPAÇO AMANDA</h3>
-                        <p>Gestão e espelho</p>
                     </div>
                 </div>
             </section>
@@ -385,69 +327,38 @@
                 </div>
             </section>
 
-            <section id="lancamentos" class="tela">
+            <section id="vencimentos" class="tela">
                 <div class="header-section">
-                    <h2>LANÇAR DESPESAS</h2>
+                    <h2>CONTROLE DE VENCIMENTOS</h2>
                 </div>
-                <div class="form-card highlight no-print">
-                    <h4>NOVA DESPESA:</h4>
-                    <div class="input-group">
-                        <input type="text" id="descGasto" placeholder="DESCRIÇÃO (Ex: Luz, Água, Internet, Aluguel)">
-                        <select id="catGasto">
-                            <option value="fixo">CUSTO FIXO</option>
-                            <option value="variavel">CUSTO VARIÁVEL</option>
-                            <option value="pessoal">RETIRADA PESSOAL</option>
-                        </select>
-                        <input type="number" id="valorGasto" placeholder="VALOR (R$)">
 
-                        <div class="checkbox-wrapper"
-                            style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
-                            <input type="checkbox" id="checkGastoFuturo" style="width: 20px;">
-                            <label for="checkGastoFuturo" style="cursor:pointer; color: var(--text-primary);">AGENDAR
-                                PARA O FUTURO (CONTAS A PAGAR)</label>
-                        </div>
-
-                        <button onclick="adicionarGasto()"
-                            style="background-color: var(--danger); margin-top: 10px;">CONFIRMAR LANÇAMENTO</button>
+                <div class="barra-filtros-alunos">
+                    <input type="text" id="inputBuscaVenc" placeholder="BUSCAR ALUNO..."
+                        oninput="renderizarVencimentos()">
+                    <div class="botoes-filtro">
+                        <button onclick="filtrarVencimentos('todos')" class="btn-filtro active"
+                            id="btnFiltroVencTodos">TODOS</button>
+                        <button onclick="filtrarVencimentos('pendente')" class="btn-filtro"
+                            id="btnFiltroVencPendente">PENDENTES</button>
+                        <button onclick="filtrarVencimentos('pago')" class="btn-filtro"
+                            id="btnFiltroVencPago">PAGOS</button>
                     </div>
                 </div>
-            </section>
-            <section id="agenda" class="tela">
-                <div class="header-section">
-                    <h2>GESTÃO DE AGENDA</h2>
-                </div>
 
-                <div class="agenda-subnav">
-                    <button onclick="mudarSubAbaAgenda('roteiro')" id="sub-roteiro" class="active">📅 ROTEIRO
-                        SEMANAL</button>
-                    <button onclick="mudarSubAbaAgenda('hoje')" id="sub-hoje">☀️ AGENDA DO DIA</button>
-                </div>
-
-                <div id="view-roteiro" class="agenda-view active">
-                    <div class="agenda-filtros">
-                        <input type="text" id="buscaAgenda" placeholder="BUSCAR NA AGENDA..."
-                            oninput="renderizarAgenda()">
-                        <select id="filtroOcupacao" onchange="renderizarAgenda()">
-                            <option value="todos">VER TUDO</option>
-                            <option value="ocupados">OCUPADOS</option>
-                            <option value="livres">LIVRES</option>
-                        </select>
-                    </div>
-                    <div class="dias-semana">
-                        <button onclick="mudarDia('segunda')" class="btn-dia active" id="btn-segunda">SEG</button>
-                        <button onclick="mudarDia('terca')" class="btn-dia" id="btn-terca">TER</button>
-                        <button onclick="mudarDia('quarta')" class="btn-dia" id="btn-quarta">QUA</button>
-                        <button onclick="mudarDia('quinta')" class="btn-dia" id="btn-quinta">QUI</button>
-                        <button onclick="mudarDia('sexta')" class="btn-dia" id="btn-sexta">SEX</button>
-                    </div>
-                    <div class="agenda-container" id="containerAgenda"></div>
-                </div>
-
-                <div id="view-hoje" class="agenda-view">
-                    <div class="form-card" style="border-left: 5px solid var(--primary);">
-                        <h3 id="tituloAgendaHoje">AGENDA DE HOJE</h3>
-                        <div id="listaAgendaHoje">Carregando...</div>
-                    </div>
+                <div class="lista-container">
+                    <table id="tabelaVencimentos">
+                        <thead>
+                            <tr>
+                                <th>ALUNO</th>
+                                <th>FATURA</th>
+                                <th>STATUS</th>
+                                <th>DIA VENC.</th>
+                                <th>SITUAÇÃO</th>
+                                <th>AÇÕES</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
             </section>
 
@@ -481,6 +392,68 @@
                 </div>
             </section>
 
+            <section id="lancamentos" class="tela">
+                <div class="header-section">
+                    <h2>LANÇAR DESPESAS</h2>
+                </div>
+                <div class="form-card highlight no-print">
+                    <h4>NOVA DESPESA:</h4>
+                    <div class="input-group">
+                        <input type="text" id="descGasto" placeholder="DESCRIÇÃO (Ex: Luz, Água, Internet)">
+                        <select id="catGasto">
+                            <option value="fixo">CUSTO FIXO</option>
+                            <option value="variavel">CUSTO VARIÁVEL</option>
+                            <option value="pessoal">RETIRADA PESSOAL</option>
+                        </select>
+                        <input type="number" id="valorGasto" placeholder="VALOR (R$)">
+                        <div class="checkbox-wrapper"
+                            style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                            <input type="checkbox" id="checkGastoFuturo" style="width: 20px;">
+                            <label for="checkGastoFuturo" style="cursor:pointer; color: var(--text-primary);">AGENDAR
+                                PARA O FUTURO</label>
+                        </div>
+                        <button onclick="adicionarGasto()"
+                            style="background-color: var(--danger); margin-top: 10px;">CONFIRMAR LANÇAMENTO</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="agenda" class="tela">
+                <div class="header-section">
+                    <h2>GESTÃO DE AGENDA</h2>
+                </div>
+                <div class="agenda-subnav">
+                    <button onclick="mudarSubAbaAgenda('roteiro')" id="sub-roteiro" class="active">📅 ROTEIRO
+                        SEMANAL</button>
+                    <button onclick="mudarSubAbaAgenda('hoje')" id="sub-hoje">☀️ AGENDA DO DIA</button>
+                </div>
+                <div id="view-roteiro" class="agenda-view active">
+                    <div class="agenda-filtros">
+                        <input type="text" id="buscaAgenda" placeholder="BUSCAR NA AGENDA..."
+                            oninput="renderizarAgenda()">
+                        <select id="filtroOcupacao" onchange="renderizarAgenda()">
+                            <option value="todos">VER TUDO</option>
+                            <option value="ocupados">OCUPADOS</option>
+                            <option value="livres">LIVRES</option>
+                        </select>
+                    </div>
+                    <div class="dias-semana">
+                        <button onclick="mudarDia('segunda')" class="btn-dia active" id="btn-segunda">SEG</button>
+                        <button onclick="mudarDia('terca')" class="btn-dia" id="btn-terca">TER</button>
+                        <button onclick="mudarDia('quarta')" class="btn-dia" id="btn-quarta">QUA</button>
+                        <button onclick="mudarDia('quinta')" class="btn-dia" id="btn-quinta">QUI</button>
+                        <button onclick="mudarDia('sexta')" class="btn-dia" id="btn-sexta">SEX</button>
+                    </div>
+                    <div class="agenda-container" id="containerAgenda"></div>
+                </div>
+                <div id="view-hoje" class="agenda-view">
+                    <div class="form-card" style="border-left: 5px solid var(--primary);">
+                        <h3 id="tituloAgendaHoje">AGENDA DE HOJE</h3>
+                        <div id="listaAgendaHoje">Carregando...</div>
+                    </div>
+                </div>
+            </section>
+
             <section id="financeiro" class="tela">
                 <div class="header-section">
                     <h2>FLUXO DE CAIXA E RELATÓRIOS</h2>
@@ -499,31 +472,17 @@
                         <button onclick="virarMes()" class="btn-tool danger">VIRAR MÊS</button>
                     </div>
                 </div>
-
                 <div class="fluxo-detalhado-wrapper">
-                    <div class="card-fluxo">
-                        <span class="material-symbols-outlined icon-fluxo">pix</span>
-                        <div class="info-fluxo">
-                            <span>PIX</span>
-                            <strong id="valPix">R$ 0,00</strong>
-                        </div>
+                    <div class="card-fluxo"><span class="material-symbols-outlined icon-fluxo">pix</span>
+                        <div class="info-fluxo"><span>PIX</span><strong id="valPix">R$ 0,00</strong></div>
                     </div>
-                    <div class="card-fluxo">
-                        <span class="material-symbols-outlined icon-fluxo">payments</span>
-                        <div class="info-fluxo">
-                            <span>DINHEIRO</span>
-                            <strong id="valDin">R$ 0,00</strong>
-                        </div>
+                    <div class="card-fluxo"><span class="material-symbols-outlined icon-fluxo">payments</span>
+                        <div class="info-fluxo"><span>DINHEIRO</span><strong id="valDin">R$ 0,00</strong></div>
                     </div>
-                    <div class="card-fluxo">
-                        <span class="material-symbols-outlined icon-fluxo">credit_card</span>
-                        <div class="info-fluxo">
-                            <span>CARTÃO</span>
-                            <strong id="valCar">R$ 0,00</strong>
-                        </div>
+                    <div class="card-fluxo"><span class="material-symbols-outlined icon-fluxo">credit_card</span>
+                        <div class="info-fluxo"><span>CARTÃO</span><strong id="valCar">R$ 0,00</strong></div>
                     </div>
                 </div>
-
                 <div class="dashboard-financeiro">
                     <div class="card-dash entrada"><span>RECEITA TOTAL</span><strong id="dashReceita">R$ 0,00</strong>
                     </div>
@@ -531,10 +490,9 @@
                     </div>
                     <div class="card-dash lucro"><span>CAIXA LÍQUIDO</span><strong id="dashLucro">R$ 0,00</strong></div>
                 </div>
-
                 <div class="lista-container">
                     <h4 style="padding: 10px 20px; background: #FFF3E0; color: #E65100; margin: 0;">⏳ CONTAS A PAGAR
-                        (AGENDADAS)</h4>
+                    </h4>
                     <table id="tabelaGastosFuturos">
                         <thead>
                             <tr>
@@ -545,13 +503,10 @@
                         </thead>
                         <tbody></tbody>
                     </table>
-                </div>
-
-                <br>
-
+                </div><br>
                 <div class="lista-container">
                     <h4 style="padding: 10px 20px; background: #FFEBEE; color: #C62828; margin: 0;">📉 DESPESAS
-                        REALIZADAS (PAGAS)</h4>
+                        REALIZADAS</h4>
                     <table id="tabelaGastos">
                         <thead>
                             <tr>
@@ -564,7 +519,6 @@
                         <tbody></tbody>
                     </table>
                 </div>
-
                 <div class="form-card" style="margin-top: 30px;">
                     <h4>🛠️ CATÁLOGO DE SERVIÇOS</h4>
                     <div class="input-group" style="flex-direction: row; gap: 10px;">
@@ -581,14 +535,12 @@
                 <div class="header-section">
                     <h2>ESPAÇO DA AMANDA</h2>
                 </div>
-
                 <div class="stats-alunos" style="grid-template-columns: 1fr 1fr;">
                     <div class="stat-card"><span class="label">TOTAL DE ALUNOS DELA</span><span class="value"
                             id="statAmandaAlunos">0</span></div>
                     <div class="stat-card recebido"><span class="label">ESPELHO DE RECEITA (PAGO)</span><span
                             class="value" id="statAmandaReceita" style="color: var(--success);">R$ 0,00</span></div>
                 </div>
-
                 <div class="form-card">
                     <h4>VINCULAR ALUNO À AMANDA:</h4>
                     <div class="input-group" style="flex-direction: row; gap: 10px; align-items: center;">
@@ -600,7 +552,6 @@
                         <button onclick="vincularAlunoAmanda()" style="flex: 1;">+ VINCULAR</button>
                     </div>
                 </div>
-
                 <div class="lista-container">
                     <h4 style="padding: 10px 20px; background: var(--bg-input); color: var(--primary); margin: 0;">📋
                         ALUNOS E HORÁRIOS DA AMANDA</h4>
@@ -616,20 +567,16 @@
                     </table>
                 </div>
             </section>
-
         </main>
 
         <div class="fab-container">
             <div class="fab-menu" id="fabMenu">
-                <button id="btnFabFinanceiro"
-                    onclick="mostrarTela('lancamentos'); document.getElementById('descGasto').focus(); toggleFab()"
+                <button onclick="mostrarTela('lancamentos'); document.getElementById('descGasto').focus(); toggleFab()"
                     title="Nova Despesa">💸</button>
                 <button onclick="mostrarTela('clientes'); document.getElementById('nomeCliente').focus(); toggleFab()"
                     title="Novo Aluno">👤</button>
-                <button onclick="mostrarTela('agenda'); toggleFab()" title="Agendar">📅</button>
-                <button
-                    onclick="mostrarTela('prontuarios'); document.getElementById('buscaProntuario').focus(); toggleFab()"
-                    title="Prontuários">📋</button>
+                <button onclick="mostrarTela('vencimentos'); toggleFab()" title="Vencimentos">📅</button>
+                <button onclick="mostrarTela('prontuarios'); toggleFab()" title="Prontuários">📋</button>
             </div>
             <button class="fab-main" onclick="toggleFab()">
                 <span class="material-symbols-outlined">add</span>
@@ -641,35 +588,21 @@
         <div class="modal-box">
             <h3 id="modalTitulo">CONFIRMAR</h3>
             <p id="modalTexto">Tem certeza?</p>
-            <div class="modal-footer">
-                <button id="btnModalNao" class="btn-fechar">NÃO</button>
-                <button id="btnModalSim">SIM</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="modalLogs" class="modal-overlay">
-        <div class="modal-box" style="max-width: 450px; text-align: center; padding: 30px;">
-            <h3>LOGS DESCONTINUADOS</h3>
-            <p style="color: var(--text-secondary);">A aba de Logs foi descontinuada para dar espaço à gestão da Amanda.
-            </p>
-            <div class="modal-footer">
-                <button onclick="document.getElementById('modalLogs').style.display='none'"
-                    class="btn-fechar">CIENTE</button>
-            </div>
+            <div class="modal-footer"><button id="btnModalNao" class="btn-fechar">NÃO</button><button
+                    id="btnModalSim">SIM</button></div>
         </div>
     </div>
 
     <div id="modalChangelog" class="modal-overlay">
         <div class="modal-box" style="max-width: 500px; padding: 0;">
             <div class="changelog-header">
-                <h3>NOVIDADES V3.2</h3>
-                <p id="deviceBadge">DASHBOARD IMERSIVO</p>
+                <h3>NOVIDADES V3.3</h3>
+                <p id="deviceBadge">SISTEMA ATUALIZADO</p>
             </div>
             <div class="changelog-content" id="changelogContent"></div>
             <div class="changelog-nav">
                 <button onclick="prevChangelog()">←</button>
-                <span id="slideIndicator">1/3</span>
+                <span id="slideIndicator">1/2</span>
                 <button onclick="nextChangelog()">→</button>
             </div>
             <button onclick="fecharChangelog()" style="width: 100%; border-radius: 0; padding: 20px;">ENTENDI</button>
