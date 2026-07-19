@@ -1,6 +1,6 @@
 /* ==========================================================================
    SISTEMA DE GESTÃO INTEGRADA - EDANIOS BELCHIOR
-   VERSÃO: 3.3 (VENCIMENTOS & WHATSAPP INTEGRADO)
+   VERSÃO: 3.7 (SINCRO HISTÓRICA AUTOMÁTICA & ISOLAMENTO DE CARTEIRA)
    ========================================================================== */
 
 // ==========================================================================
@@ -9,7 +9,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
     getFirestore, collection, addDoc, updateDoc, deleteDoc, doc,
-    onSnapshot, query, where, setDoc, getDoc, getDocs, arrayUnion
+    onSnapshot, query, where, setDoc, getDoc, getDocs
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import {
     getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
@@ -35,7 +35,7 @@ const auth = getAuth(app);
 
 const EMAIL_ADMIN = "edanios@studio.com";
 const MAX_ALUNOS = 12;
-const VERSAO_ATUAL = "3.3";
+const VERSAO_ATUAL = "3.7";
 
 let listaClientes = [];
 let listaServicos = [];
@@ -47,6 +47,7 @@ let activeChangelogList = [];
 let currentSlide = 0;
 
 let filtroAtualClientes = 'todos';
+let filtroAtualAmanda = 'todos';
 let filtroAtualVenc = 'todos';
 let diaAtualAgenda = 'segunda';
 
@@ -55,6 +56,8 @@ let unsubServicos = null;
 let unsubPagamentos = null;
 let unsubGastos = null;
 let unsubAgenda = null;
+
+let taxaAmandaGlob = localStorage.getItem('taxaAmandaGlob') ? Number(localStorage.getItem('taxaAmandaGlob')) : 50;
 
 const inputMes = document.getElementById('mesReferencia');
 const hoje = new Date();
@@ -89,7 +92,30 @@ window.fazerLogout = () => {
     location.reload();
 };
 
-onAuthStateChanged(auth, (user) => {
+// FUNÇÃO ADICIONADA NA V3.7 PARA FORÇAR O PUXAMENTO E CONSISTÊNCIA HISTÓRICA DO CAIXA DA EQUIPE
+async function sincronizarHistoricoPagamentosEquipe(clientesAtuais) {
+    try {
+        const alunosEquipeIds = clientesAtuais.filter(c => c.professor === 'amanda').map(c => c.id);
+        if (alunosEquipeIds.length === 0) return;
+
+        const snapPagamentos = await getDocs(collection(db, "pagamentos"));
+
+        snapPagamentos.forEach(async (documento) => {
+            const dadosPag = documento.data();
+            // Se o pagamento for de um aluno da equipe e estiver marcado como pago, garante a persistência no Firestore
+            if (alunosEquipeIds.includes(dadosPag.clienteId) && dadosPag.status === 'pago') {
+                const IDCorreto = `${dadosPag.mesReferencia}_${dadosPag.clienteId}`;
+                if (documento.id !== IDCorreto) {
+                    await setDoc(doc(db, "pagamentos", IDCorreto), dadosPag, { merge: true });
+                }
+            }
+        });
+    } catch (err) {
+        console.error("Erro ao rodar alinhamento histórico:", err);
+    }
+}
+
+onAuthStateChanged(auth, async (user) => {
     if (user) {
         document.body.classList.add('logged-in');
         document.getElementById('telaLogin').style.display = 'none';
@@ -129,6 +155,12 @@ onAuthStateChanged(auth, (user) => {
         } else {
             mostrarTela('inicio');
         }
+
+        // Executa uma varredura para resgatar todos os pagamentos antigos gerados antes do isolamento do módulo
+        const snapClientesFix = await getDocs(collection(db, "clientes"));
+        let temporarioClientes = [];
+        snapClientesFix.forEach(d => temporarioClientes.push({ id: d.id, ...d.data() }));
+        await sincronizarHistoricoPagamentosEquipe(temporarioClientes);
 
         iniciarListeners(user);
         checkChangelog(isAdmin);
@@ -221,7 +253,7 @@ window.adicionarServico = async () => {
         const nome = nomeInput.value.trim();
         const valor = valorInput.value;
 
-        if (!nome || !valor) return mostrarNotificacao("Preencha tudo!", "erro");
+        if (!nome || !valor) return mostrarNotificacao("Preencha todos os campos do serviço!", "erro");
 
         await addDoc(collection(db, "servicos"), {
             nome: nome.toUpperCase(),
@@ -230,19 +262,19 @@ window.adicionarServico = async () => {
 
         nomeInput.value = '';
         valorInput.value = '';
-        mostrarNotificacao("Serviço Salvo!");
+        mostrarNotificacao("Serviço salvo com sucesso!");
     } catch (e) {
-        mostrarNotificacao("Erro ao salvar.", "erro");
+        mostrarNotificacao("Erro ao salvar serviço.", "erro");
     }
 };
 
 window.removerServico = async (id) => {
-    if (auth.currentUser.email !== EMAIL_ADMIN) return alert("Apenas o Admin pode remover serviços.");
+    if (auth.currentUser.email !== EMAIL_ADMIN) return alert("Apenas o Administrador pode remover serviços.");
 
-    if (confirm("Remover este serviço?")) {
+    if (confirm("Deseja realmente remover este serviço do catálogo?")) {
         try {
             await deleteDoc(doc(db, "servicos", id));
-            mostrarNotificacao("Removido.");
+            mostrarNotificacao("Serviço removido.");
         } catch (e) {
             alert("Erro: " + e.message);
         }
@@ -255,14 +287,14 @@ function renderizarServicos() {
 
     if (lista) {
         lista.innerHTML = '';
-        if (listaServicos.length === 0) lista.innerHTML = '<span style="color:#777; font-size:0.8rem;">Vazio.</span>';
+        if (listaServicos.length === 0) lista.innerHTML = '<span style="color:#777; font-size:0.8rem;">Nenhum serviço cadastrado.</span>';
         else {
             listaServicos.forEach(s => {
-                const btnDelete = isAdmin ? `<button onclick="removerServico('${s.id}')" style="background:none; color:red; border:none; cursor:pointer;">&times;</button>` : '';
+                const btnDelete = isAdmin ? `<button onclick="removerServico('${s.id}')" style="background:none; color:var(--danger); border:none; cursor:pointer; font-size: 1.2rem;">&times;</button>` : '';
                 lista.innerHTML += `
-                    <div style="background:var(--bg-input); padding:5px 10px; border-radius:4px; display:flex; gap:10px; border:1px solid var(--border); align-items:center;">
-                        <span style="font-weight:bold;">${s.nome}</span>
-                        <span style="color:var(--success);">R$ ${parseFloat(s.valor).toFixed(2)}</span>
+                    <div style="background:var(--bg-input); padding:8px 12px; border-radius:var(--radius-sm); display:flex; gap:15px; border:1px solid var(--border-strong); align-items:center;">
+                        <span style="font-weight:600; color: var(--text-primary); font-family: var(--font-body);">${s.nome}</span>
+                        <span style="color:var(--success); font-weight: bold; font-family: var(--font-mono);">R$ ${parseFloat(s.valor).toFixed(2)}</span>
                         ${btnDelete}
                     </div>`;
             });
@@ -272,7 +304,7 @@ function renderizarServicos() {
     const select = document.getElementById('selectServicoCadastro');
     if (select) {
         const valAtual = select.value;
-        select.innerHTML = '<option value="">-- SELECIONE --</option>';
+        select.innerHTML = '<option value="">-- SELECIONE O SERVIÇO --</option>';
         listaServicos.forEach(s => {
             const opt = document.createElement('option');
             opt.value = s.id;
@@ -286,7 +318,7 @@ function renderizarServicos() {
 }
 
 // ==========================================================================
-// 6. GESTÃO DE ALUNOS (CADASTRO)
+// 6. GESTÃO DE ALUNOS GERAL (CADASTRO E EXIBIÇÃO)
 // ==========================================================================
 
 window.salvarOuAtualizarCliente = async () => {
@@ -300,8 +332,8 @@ window.salvarOuAtualizarCliente = async () => {
     const queixa = document.getElementById('queixaCliente').value;
     const diag = document.getElementById('diagnosticoCliente').value;
 
-    if (!nome) return mostrarNotificacao("Nome obrigatório!", "erro");
-    if (!selectServ.value && !id) return mostrarNotificacao("Selecione um Serviço!", "erro");
+    if (!nome) return mostrarNotificacao("O nome é obrigatório!", "erro");
+    if (!selectServ.value && !id) return mostrarNotificacao("Selecione um Serviço vinculado!", "erro");
 
     let dados = {
         nome, telefone: tel,
@@ -319,7 +351,7 @@ window.salvarOuAtualizarCliente = async () => {
         if (id) {
             await updateDoc(doc(db, "clientes", id), dados);
             if (selectServ.value) atualizarValorPagamentoAtual(id, dados.valorContrato);
-            mostrarNotificacao("Aluno Atualizado!");
+            mostrarNotificacao("Ficha atualizada com sucesso!");
         } else {
             const docRef = await addDoc(collection(db, "clientes"), dados);
             await setDoc(doc(db, "pagamentos", `${inputMes.value}_${docRef.id}`), {
@@ -329,11 +361,11 @@ window.salvarOuAtualizarCliente = async () => {
                 status: 'pendente',
                 forma: ''
             });
-            mostrarNotificacao("Aluno Cadastrado!");
+            mostrarNotificacao("Novo aluno registrado!");
         }
         window.cancelarEdicao();
     } catch (e) {
-        mostrarNotificacao("Erro ao salvar.", "erro");
+        mostrarNotificacao("Erro ao salvar cadastro.", "erro");
         console.error(e);
     }
 };
@@ -348,7 +380,7 @@ async function atualizarValorPagamentoAtual(clienteId, novoValor) {
 
 window.filtrarClientes = (tipo) => {
     filtroAtualClientes = tipo;
-    document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#clientes .btn-filtro').forEach(b => b.classList.remove('active'));
     let idBtn = tipo === 'todos' ? 'btnFiltroTodos' : (tipo === 'pendente' ? 'btnFiltroPendente' : 'btnFiltroPago');
     document.getElementById(idBtn).classList.add('active');
     renderizarClientes();
@@ -365,6 +397,8 @@ window.renderizarClientes = () => {
     listaClientes.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
 
     listaClientes.forEach(c => {
+        if (c.professor === 'amanda') return;
+
         const pg = dbPagamentos[c.id] || { status: 'pendente', forma: '', valor: c.valorContrato || 0 };
 
         total++;
@@ -378,28 +412,28 @@ window.renderizarClientes = () => {
         let displayServico = c.nomeServico || "-";
 
         tr.innerHTML = `
-            <td><strong>${(c.nome || 'Sem Nome').toUpperCase()}</strong><br><small style="color:#777;">${c.telefone || ''}</small></td>
+            <td><strong>${(c.nome || 'Sem Nome').toUpperCase()}</strong><br><small style="color:var(--text-muted);">${c.telefone || ''}</small></td>
             <td>
-                <select onchange="atualizarPg('${c.id}', 'status', this.value)" style="width:100%; font-weight:bold; ${pg.status === 'pago' ? 'color:var(--success);' : 'color:var(--imprevisto);'}">
+                <select onchange="atualizarPg('${c.id}', 'status', this.value)" style="width:100%; font-weight:bold; ${pg.status === 'pago' ? 'color:var(--success); border-color:var(--success);' : 'color:var(--warning); border-color:var(--warning);'}">
                     <option value="pendente" ${pg.status === 'pendente' ? 'selected' : ''}>PENDENTE</option>
                     <option value="pago" ${pg.status === 'pago' ? 'selected' : ''}>PAGO</option>
                 </select>
             </td>
             <td>
                 <select onchange="atualizarPg('${c.id}', 'forma', this.value)">
-                    <option value="" disabled ${!pg.forma ? 'selected' : ''}>...</option>
+                    <option value="" disabled ${!pg.forma ? 'selected' : ''}>---</option>
                     <option value="pix" ${pg.forma === 'pix' ? 'selected' : ''}>PIX</option>
                     <option value="dinheiro" ${pg.forma === 'dinheiro' ? 'selected' : ''}>DINHEIRO</option>
                     <option value="cartao" ${pg.forma === 'cartao' ? 'selected' : ''}>CARTÃO</option>
                 </select>
             </td>
             <td>
-                <span style="font-weight:bold; color:var(--primary); font-size:0.9rem;">${displayServico}</span>
+                <span style="font-weight:600; color:var(--accent); font-size:0.9rem;">${displayServico}</span>
             </td>
             <td>
-                <button onclick="editarCliente('${c.id}')" class="btn-tool" title="Editar">✏️</button>
-                <button onclick="confirmarAcao('EXCLUIR?', 'Apagar?', ()=>removerCliente('${c.id}', '${c.nome}'))" class="btn-tool danger" title="Excluir">🗑️</button>
-                ${(pg.status === 'pago') ? `<button onclick="baixarPdfEAbrirWpp('${c.id}', '${c.nome || ''}', '${c.telefone || ''}', '${pg.valor}', '${inputMes.value}')" class="btn-tool" style="color:var(--success);">PDF</button>` : ''}
+                <button onclick="editarCliente('${c.id}')" class="btn-tool" title="Editar Ficha">✏️</button>
+                <button onclick="confirmarAcao('EXCLUIR REGISTRO?', 'Tem certeza que deseja apagar o aluno e seu histórico financeiro?', ()=>removerCliente('${c.id}', '${c.nome}'))" class="btn-tool danger" title="Excluir Aluno">🗑️</button>
+                ${(pg.status === 'pago') ? `<button onclick="baixarPdfEAbrirWpp('${c.id}', '${c.nome || ''}', '${c.telefone || ''}', '${pg.valor}', '${inputMes.value}')" class="btn-tool" style="color:var(--success); border-color:var(--success); font-weight:bold; font-family:var(--font-headline); font-size: 0.8rem;" title="Baixar Recibo">PDF</button>` : ''}
             </td>
         `;
         tbody.appendChild(tr);
@@ -446,8 +480,9 @@ window.editarCliente = (id) => {
         document.getElementById('profissaoCliente').value = c.profissao || '';
         document.getElementById('queixaCliente').value = c.queixa || '';
         document.getElementById('diagnosticoCliente').value = c.diagnostico || '';
-        document.getElementById('btnSalvarCliente').innerText = "💾 SALVAR";
+        document.getElementById('btnSalvarCliente').innerText = "💾 SALVAR ALTERAÇÕES";
         document.getElementById('btnCancelarEdicao').style.display = "inline-block";
+        window.scrollTo(0, document.getElementById('clientes').offsetTop);
     }
 };
 
@@ -465,19 +500,19 @@ window.cancelarEdicao = () => {
 };
 
 window.removerCliente = async (id, nome) => {
-    if (auth.currentUser.email !== EMAIL_ADMIN) return alert("Apenas Admin pode excluir alunos.");
+    if (auth.currentUser.email !== EMAIL_ADMIN) return alert("Apenas o Administrador pode excluir alunos.");
 
     try {
         await deleteDoc(doc(db, "clientes", id));
         const q = query(collection(db, "pagamentos"), where("clienteId", "==", id));
         const snap = await getDocs(q);
         snap.forEach(d => deleteDoc(d.ref));
-        mostrarNotificacao("REMOVIDO!");
-    } catch (e) { mostrarNotificacao("ERRO!", "erro"); }
+        mostrarNotificacao("Registro apagado definitivamente.");
+    } catch (e) { mostrarNotificacao("ERRO AO APAGAR REGISTRO!", "erro"); }
 };
 
 // ==========================================================================
-// 7. MÓDULO DE VENCIMENTOS E WHATSAPP (NOVO - V3.3)
+// 7. MÓDULO DE VENCIMENTOS E WHATSAPP 
 // ==========================================================================
 
 window.filtrarVencimentos = (tipo) => {
@@ -501,6 +536,7 @@ window.renderizarVencimentos = () => {
     hoje.setHours(0, 0, 0, 0);
 
     listaClientes.forEach(c => {
+        if (c.professor === 'amanda') return;
         if (termo && c.nome && !c.nome.toLowerCase().includes(termo)) return;
 
         const pg = dbPagamentos[c.id] || { status: 'pendente', valor: c.valorContrato || 0 };
@@ -514,7 +550,7 @@ window.renderizarVencimentos = () => {
             badgeSituacao = '<span class="status-badge sucesso">PAGO</span>';
         } else {
             if (!diaVenc) {
-                badgeSituacao = '<span class="status-badge neutro">SEM DATA</span>';
+                badgeSituacao = '<span class="status-badge neutro">NÃO DEFINIDO</span>';
             } else {
                 let dataVenc = new Date(ano, mes - 1, diaVenc);
                 let diffTime = dataVenc - hoje;
@@ -533,17 +569,17 @@ window.renderizarVencimentos = () => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td><strong>${(c.nome || 'Sem Nome').toUpperCase()}</strong><br><small>${c.telefone || ''}</small></td>
-            <td>R$ ${Number(pg.valor || 0).toFixed(2)}</td>
-            <td><span style="color: ${pg.status === 'pago' ? 'var(--success)' : 'var(--imprevisto)'}; font-weight: bold;">${pg.status.toUpperCase()}</span></td>
+            <td style="font-family: var(--font-mono); font-weight: bold;">R$ ${Number(pg.valor || 0).toFixed(2)}</td>
+            <td><span style="color: ${pg.status === 'pago' ? 'var(--success)' : 'var(--warning)'}; font-weight: bold;">${pg.status.toUpperCase()}</span></td>
             <td>
                 <div style="display:flex; gap:5px; align-items:center;">
                     <input type="number" id="vencDia_${c.id}" value="${diaVenc}" min="1" max="31" style="width:70px; padding:8px;">
-                    <button onclick="salvarDiaVencimento('${c.id}')" class="btn-tool" style="background:var(--primary); color:white;" title="Salvar Dia">💾</button>
+                    <button onclick="salvarDiaVencimento('${c.id}')" class="btn-tool" style="background:var(--accent); color:white; border-color:var(--accent);" title="Salvar Dia">💾</button>
                 </div>
             </td>
             <td>${badgeSituacao}</td>
             <td>
-                ${pg.status !== 'pago' && c.telefone ? `<button onclick="lembrarWpp('${c.nome}', '${c.telefone}', '${diaVenc}', '${pg.valor}')" class="btn-tool" style="background:#25D366; color:white;" title="Lembrar via WhatsApp"><span class="material-symbols-outlined" style="font-size:18px;">chat</span></button>` : ''}
+                ${pg.status !== 'pago' && c.telefone ? `<button onclick="lembrarWpp('${c.nome}', '${c.telefone}', '${diaVenc}', '${pg.valor}')" class="btn-tool" style="background:#4A5E4D; color:white; border-color:#4A5E4D;" title="Lembrar via WhatsApp"><span class="material-symbols-outlined" style="font-size:18px;">chat</span></button>` : ''}
             </td>
         `;
         tbody.appendChild(tr);
@@ -557,21 +593,21 @@ window.salvarDiaVencimento = async (id) => {
     }
     try {
         await updateDoc(doc(db, "clientes", id), { diaVencimento: dia });
-        mostrarNotificacao("Dia de vencimento salvo!");
+        mostrarNotificacao("Vencimento programado!");
     } catch (e) {
-        mostrarNotificacao("Erro ao salvar", "erro");
+        mostrarNotificacao("Erro ao salvar.", "erro");
         console.error(e);
     }
 };
 
 window.lembrarWpp = (nome, tel, diaVenc, valor) => {
     const zap = (tel || '').replace(/\D/g, '');
-    if (zap.length < 10) return mostrarNotificacao("Número inválido no cadastro!", "erro");
+    if (zap.length < 10) return mostrarNotificacao("Número de telefone inválido!", "erro");
 
     let dataTexto = diaVenc ? `no dia ${diaVenc}` : "este mês";
     let valorFormato = Number(valor || 0).toFixed(2).replace('.', ',');
 
-    const msg = `Olá, ${nome}! Tudo bem? Passando para lembrar sobre o vencimento da sua fatura (R$ ${valorFormato}) programada para ${dataTexto}. Qualquer dúvida, estamos à disposição!`;
+    const msg = `Olá, ${nome}! Tudo bem? Passando para lembrar sobre o vencimento do seu pacote (R$ ${valorFormato}) programado para ${dataTexto}. Qualquer dúvida, estamos à disposição no consultório!`;
     const url = `https://wa.me/55${zap}?text=${encodeURIComponent(msg)}`;
 
     window.open(url, '_blank');
@@ -579,7 +615,7 @@ window.lembrarWpp = (nome, tel, diaVenc, valor) => {
 
 
 // ==========================================================================
-// 8. RELATÓRIOS PDF 
+// 8. RELATÓRIOS PDF E IMPRESSÃO
 // ==========================================================================
 
 window.gerarRelatorioFinanceiroPDF = () => {
@@ -590,13 +626,16 @@ window.gerarRelatorioFinanceiroPDF = () => {
     const mes = inputMes.value;
     const marginX = 14;
 
-    doc.setFontSize(18);
-    doc.setTextColor(236, 112, 0);
-    doc.text("EDANIOS BELCHIOR - RELATÓRIO MENSAL", 105, 15, null, null, "center");
+    const corTexto = [44, 42, 41];
+    const corDestaque = [94, 83, 72];
 
-    doc.setFontSize(12);
+    doc.setFontSize(18);
+    doc.setTextColor(...corTexto);
+    doc.text("EDANIOS BELCHIOR - BALANÇO FINANCEIRO", 105, 15, null, null, "center");
+
+    doc.setFontSize(11);
     doc.setTextColor(100);
-    doc.text(`Referência: ${mes}`, 105, 22, null, null, "center");
+    doc.text(`Período Base: ${mes}`, 105, 22, null, null, "center");
 
     const dadosReceita = [];
     let totalReceita = 0;
@@ -609,6 +648,7 @@ window.gerarRelatorioFinanceiroPDF = () => {
             if (cliente) {
                 const nome = cliente.nome || 'Sem Nome';
                 const servico = cliente.nomeServico || "-";
+                const origem = cliente.professor === 'amanda' ? "Equipe" : "Geral";
                 const val = parseFloat(pg.valor || 0);
                 totalReceita += val;
 
@@ -618,25 +658,26 @@ window.gerarRelatorioFinanceiroPDF = () => {
 
                 let formaPagamento = (pg.forma || "N/A").toUpperCase();
 
-                dadosReceita.push([pg.mesReferencia, nome, servico, formaPagamento, `R$ ${val.toFixed(2)}`]);
+                dadosReceita.push([pg.mesReferencia, nome, origem, formaPagamento, `R$ ${val.toFixed(2)}`]);
             }
         }
     });
 
     doc.autoTable({
         startY: 30,
-        head: [['Mês', 'Aluno', 'Serviço', 'Forma', 'Valor']],
+        head: [['Mês', 'Aluno', 'Carteira', 'Forma Pag.', 'Valor Recebido']],
         body: dadosReceita,
         theme: 'striped',
-        headStyles: { fillColor: [236, 112, 0] },
-        styles: { fontSize: 10 },
+        headStyles: { fillColor: corTexto, textColor: [245, 243, 239] },
+        alternateRowStyles: { fillColor: [245, 243, 239] },
+        styles: { fontSize: 10, textColor: corTexto },
         margin: { top: 30, bottom: 20 }
     });
 
     let finalY = doc.lastAutoTable.finalY + 10;
     doc.setFontSize(10);
-    doc.setTextColor(50);
-    doc.text(`Resumo: PIX: R$ ${sumPix.toFixed(2)} | Dinheiro: R$ ${sumDin.toFixed(2)} | Cartão: R$ ${sumCard.toFixed(2)}`, marginX, finalY);
+    doc.setTextColor(...corDestaque);
+    doc.text(`Composição (Geral+Equipe): PIX (R$ ${sumPix.toFixed(2)}) | Dinheiro (R$ ${sumDin.toFixed(2)}) | Cartão (R$ ${sumCard.toFixed(2)})`, marginX, finalY);
 
     finalY += 10;
 
@@ -653,44 +694,45 @@ window.gerarRelatorioFinanceiroPDF = () => {
     if (finalY > 240) { doc.addPage(); finalY = 20; }
 
     doc.setFontSize(12);
-    doc.setTextColor(198, 40, 40);
-    doc.text("DESPESAS REALIZADAS", marginX, finalY - 5);
+    doc.setTextColor(...corTexto);
+    doc.text("SAÍDAS E DESPESAS OPERACIONAIS", marginX, finalY - 5);
 
     doc.autoTable({
         startY: finalY,
-        head: [['Categoria', 'Descrição', 'Valor']],
+        head: [['Categoria Base', 'Descrição da Despesa', 'Custo Gerado']],
         body: dadosDespesa,
         theme: 'striped',
-        headStyles: { fillColor: [198, 40, 40] },
-        styles: { fontSize: 10 },
+        headStyles: { fillColor: [115, 46, 46], textColor: [245, 243, 239] },
+        alternateRowStyles: { fillColor: [245, 243, 239] },
+        styles: { fontSize: 10, textColor: corTexto },
         margin: { bottom: 20 }
     });
 
-    finalY = doc.lastAutoTable.finalY + 20;
-    const espacoNecessario = 40;
+    finalY = doc.lastAutoTable.finalY + 15;
 
+    const espacoNecessario = 50;
     if (finalY + espacoNecessario > 285) { doc.addPage(); finalY = 20; }
 
     const lucro = totalReceita - totalDespesa;
 
-    doc.setFontSize(14);
-    doc.setTextColor(0);
-    doc.text(`TOTAL RECEITA (ATIVOS): R$ ${totalReceita.toFixed(2)}`, marginX, finalY);
-    doc.text(`TOTAL DESPESA: R$ ${totalDespesa.toFixed(2)}`, marginX, finalY + 7);
+    doc.setFontSize(12);
+    doc.setTextColor(...corTexto);
+    doc.text(`RECEITA BRUTA TOTAL (GERAL + EQUIPE): R$ ${totalReceita.toFixed(2)}`, marginX, finalY);
+    doc.text(`CUSTOS E DESPESAS (INCLUI SALÁRIOS): - R$ ${totalDespesa.toFixed(2)}`, marginX, finalY + 6);
 
-    if (lucro >= 0) doc.setTextColor(46, 125, 50);
-    else doc.setTextColor(198, 40, 40);
+    if (lucro >= 0) doc.setTextColor(46, 71, 51);
+    else doc.setTextColor(115, 46, 46);
 
     doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
-    doc.text(`LUCRO LÍQUIDO: R$ ${lucro.toFixed(2)}`, marginX, finalY + 16);
+    doc.text(`CAIXA LÍQUIDO FINAL: R$ ${lucro.toFixed(2)}`, marginX, finalY + 16);
 
-    doc.save(`Relatorio_${mes}.pdf`);
+    doc.save(`Balanço_${mes}_Edanios.pdf`);
 };
 
 window.gerarRelatorioAnualPDF = async () => {
-    if (!confirm("Gerar DRE Anual? Isso pode levar alguns segundos.")) return;
-    mostrarNotificacao("Gerando DRE...", "sucesso");
+    if (!confirm("Gerar DRE Anual? Este processo compila todos os dados do ano e pode levar alguns segundos.")) return;
+    mostrarNotificacao("Compilando DRE...", "sucesso");
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -702,7 +744,7 @@ window.gerarRelatorioAnualPDF = async () => {
     let dre = {};
     for (let i = 1; i <= 12; i++) {
         let m = String(i).padStart(2, '0');
-        dre[m] = { receita: 0, despesa: 0, lucro: 0 };
+        dre[m] = { receita: 0, despesa: 0 };
     }
 
     snapPags.forEach(d => {
@@ -733,59 +775,65 @@ window.gerarRelatorioAnualPDF = async () => {
         bodyTable.push([`${m}/${anoAtual}`, `R$ ${r.toFixed(2)}`, `R$ ${d.toFixed(2)}`, `R$ ${l.toFixed(2)}`]);
     });
 
-    bodyTable.push(['TOTAL', `R$ ${totalRec.toFixed(2)}`, `R$ ${totalDesp.toFixed(2)}`, `R$ ${(totalRec - totalDesp).toFixed(2)}`]);
+    bodyTable.push(['BALANÇO TOTAL', `R$ ${totalRec.toFixed(2)}`, `R$ ${totalDesp.toFixed(2)}`, `R$ ${(totalRec - totalDesp).toFixed(2)}`]);
 
     doc.setFontSize(18);
-    doc.setTextColor(236, 112, 0);
-    doc.text(`DRE ANUAL - ${anoAtual}`, 105, 15, null, null, "center");
+    doc.setTextColor(44, 42, 41);
+    doc.text(`DRE CONSOLIDADO ANUAL - ${anoAtual}`, 105, 15, null, null, "center");
 
     doc.autoTable({
         startY: 25,
-        head: [['Mês', 'Receita Bruta', 'Despesas', 'Lucro Líquido']],
+        head: [['Mês Ref.', 'Receita Bruta (Global)', 'Despesas (Global)', 'Lucro Líquido']],
         body: bodyTable,
         theme: 'grid',
-        headStyles: { fillColor: [236, 112, 0] },
-        footStyles: { fillColor: [252, 228, 236], textColor: [0, 0, 0], fontStyle: 'bold' }
+        headStyles: { fillColor: [44, 42, 41], textColor: [245, 243, 239] },
+        footStyles: { fillColor: [212, 208, 200], textColor: [44, 42, 41], fontStyle: 'bold' },
+        styles: { textColor: [44, 42, 41] }
     });
 
-    doc.save(`DRE_${anoAtual}.pdf`);
-    mostrarNotificacao("DRE Gerado!");
+    doc.save(`DRE_Consolidado_${anoAtual}.pdf`);
+    mostrarNotificacao("DRE Anual gerado e exportado!");
 };
 
 window.baixarPdfEAbrirWpp = (id, nomePaciente, tel, valor, mesRef) => {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a5" });
-    const corTema = [236, 112, 0];
-    const cinzaTexto = [60, 60, 60];
+    const corTema = [44, 42, 41];
+    const corPapel = [245, 243, 239];
+    const cinzaTexto = [92, 87, 82];
+
     let textoMes = "";
     if (mesRef && mesRef.includes('-')) {
-        const [ano, mes] = mesRef.split('-'); textoMes = ` referente ao mês de ${mes}/${ano}`;
+        const [ano, mes] = mesRef.split('-'); textoMes = ` referente ao mês de referência ${mes}/${ano}`;
     } else if (mesRef) { textoMes = ` referente a ${mesRef}`; }
 
-    doc.setDrawColor(...corTema); doc.setLineWidth(1); doc.rect(5, 5, 138, 200);
+    doc.setFillColor(...corPapel);
+    doc.rect(0, 0, 148, 210, 'F');
+
+    doc.setDrawColor(...corTema); doc.setLineWidth(0.5); doc.rect(5, 5, 138, 200);
     doc.setTextColor(...corTema); doc.setFont("times", "bold"); doc.setFontSize(22);
     doc.text("EDANIOS BELCHIOR", 74, 25, null, null, "center");
     doc.setFontSize(11); doc.setFont("helvetica", "normal");
-    doc.text("FISIOTERAPEUTA", 74, 32, null, null, "center");
-    doc.setDrawColor(200, 200, 200); doc.line(20, 38, 128, 38);
-    doc.setTextColor(0, 0, 0); doc.setFontSize(16); doc.setFont("helvetica", "bold");
-    doc.text("RECIBO", 50, 60, null, null, "center");
+    doc.text("FISIOTERAPEUTA | GESTOR CLÍNICO", 74, 32, null, null, "center");
+    doc.setDrawColor(...cinzaTexto); doc.line(20, 38, 128, 38);
+    doc.setTextColor(0, 0, 0); doc.setFontSize(16); doc.setFont("times", "bold");
+    doc.text("RECIBO DE PAGAMENTO", 50, 60, null, null, "center");
     doc.setFontSize(14); doc.setTextColor(...corTema);
     doc.text(`R$ ${parseFloat(valor).toFixed(2)}`, 120, 60, null, null, "right");
     doc.setTextColor(...cinzaTexto); doc.setFontSize(11); doc.setFont("times", "normal");
     const dataHoje = new Date().toLocaleDateString('pt-BR');
-    const texto = `Recebi de ${(nomePaciente || '').toUpperCase()} a importância supramencionada, referente aos serviços de Fisioterapia/Pilates prestados${textoMes}.`;
+    const texto = `Certifico que recebi do Sr(a). ${(nomePaciente || '').toUpperCase()} a importância supramencionada, em quitação aos serviços prestados em Fisioterapia e/ou Pilates${textoMes}.`;
     const linhas = doc.splitTextToSize(texto, 110);
     doc.text(linhas, 20, 85);
     doc.setFontSize(10);
     doc.text(`Chaval - CE, ${dataHoje}`, 74, 130, null, null, "center");
-    doc.setDrawColor(...corTema); doc.setLineWidth(1); doc.line(30, 150, 118, 150);
+    doc.setDrawColor(...corTema); doc.setLineWidth(0.5); doc.line(30, 150, 118, 150);
     doc.setFontSize(9);
     doc.text("Edanios Belchior", 74, 155, null, null, "center");
-    doc.save(`Recibo_${nomePaciente}.pdf`);
-    mostrarNotificacao("PDF GERADO!");
+    doc.save(`Recibo_Clinica_${nomePaciente}.pdf`);
+    mostrarNotificacao("Recibo exportado para PDF.");
     const zap = (tel || '').replace(/\D/g, '');
-    if (zap.length > 8) setTimeout(() => window.open(`https://wa.me/55${zap}?text=Olá! Segue seu recibo digital.`, '_blank'), 1000);
+    if (zap.length > 8) setTimeout(() => window.open(`https://wa.me/55${zap}?text=Olá! Segue seu recibo digital referente aos serviços da clínica.`, '_blank'), 1000);
 };
 
 // ==========================================================================
@@ -828,14 +876,14 @@ window.renderizarAgenda = () => {
 
             htmlAlunos += `
                 <div class="aluno-item ${statusClass}">
-                    <span>${a.nome}</span>
+                    <span style="font-family: var(--font-headline); font-weight: 600; font-size: 1.1rem;">${a.nome}</span>
                     <div>
-                        <button onclick="confirmarAcao('REMOVER?', '', ()=>rmAgenda('${hora}', ${idx}))" style="color:var(--danger)">🗑️</button>
+                        <button onclick="confirmarAcao('REMOVER DA AGENDA?', 'Retirar aluno deste horário?', ()=>rmAgenda('${hora}', ${idx}))" style="color:var(--danger); background:transparent; font-size:1.2rem; border:none; padding:0; width:auto;">🗑️</button>
                     </div>
                 </div>`;
         });
 
-        let opts = `<option value="">+ ADICIONAR</option>`;
+        let opts = `<option value="">+ INSERIR ALUNO NO HORÁRIO</option>`;
         listaClientes.forEach(c => {
             if (!agendadosHojeIds.includes(c.id)) {
                 opts += `<option value="${c.id}|${c.nome}">${c.nome}</option>`;
@@ -844,14 +892,14 @@ window.renderizarAgenda = () => {
 
         container.appendChild(document.createRange().createContextualFragment(`
             <div class="horario-card">
-                <div class="horario-titulo"><span>${hora}</span><span>${alunos.length}/${MAX_ALUNOS}</span></div>
-                <div style="padding:15px;">
+                <div class="horario-titulo"><span style="font-family: var(--font-mono);">${hora}</span><span style="color:var(--text-secondary); font-size: 0.9rem;">${alunos.length}/${MAX_ALUNOS} vagas</span></div>
+                <div style="padding:15px 20px;">
                     ${htmlAlunos}
                     ${alunos.length < MAX_ALUNOS ? `
-                        <div style="display:flex; gap:10px; margin-top:15px;">
+                        <div style="display:flex; gap:10px; margin-top:20px; align-items: center;">
                             <select id="sel-${hora}" style="flex:2">${opts}</select>
-                            <button onclick="addAgenda('${hora}')" style="width:auto">OK</button>
-                        </div>` : `<div style="color:red; text-align:center;">LOTADO</div>`}
+                            <button onclick="addAgenda('${hora}')" style="width:auto; padding: 10px 20px; font-size: 0.85rem;">SALVAR</button>
+                        </div>` : `<div style="color:var(--danger); text-align:center; font-weight:bold; margin-top:15px; font-size:0.85rem; letter-spacing:1px;">TURMA LOTADA</div>`}
                 </div>
             </div>`));
     });
@@ -868,7 +916,7 @@ window.addAgenda = async (hora) => {
         if (Array.isArray(lista) && lista.some(a => a.id === id)) jaAgendado = true;
     });
 
-    if (jaAgendado) return alert("Aluno já agendado hoje!");
+    if (jaAgendado) return alert("Atenção: Este aluno já possui um horário agendado para o mesmo dia.");
 
     const ref = doc(db, "agenda", diaAtualAgenda);
     const snap = await getDoc(ref);
@@ -903,14 +951,14 @@ window.renderizarAgendaDoDia = () => {
     const hoje = new Date();
     const diaHojeStr = diasMap[hoje.getDay()];
     const dataHojeFormatada = hoje.toLocaleDateString('pt-BR');
-    if (titulo) titulo.innerText = `AGENDA DE HOJE (${diaHojeStr.toUpperCase()} - ${dataHojeFormatada})`;
+    if (titulo) titulo.innerText = `ROTEIRO DIÁRIO: ${diaHojeStr.toUpperCase()} - ${dataHojeFormatada}`;
     if (lista) lista.innerHTML = '';
     if (diaHojeStr === 'sabado' || diaHojeStr === 'domingo') {
-        if (lista) lista.innerHTML = '<p style="text-align:center; padding:20px; font-style:italic;">Fim de semana! Bom descanso.</p>';
+        if (lista) lista.innerHTML = '<p style="text-align:center; padding:30px; font-style:italic; color:var(--text-muted); font-family:var(--font-headline); font-size: 1.2rem;">Final de semana reservado para descanso da equipe clínica.</p>';
         return;
     }
     const dadosDia = dbAgenda[diaHojeStr];
-    if (!dadosDia) { if (lista) lista.innerHTML = '<p style="padding:20px;">Carregando agenda...</p>'; return; }
+    if (!dadosDia) { if (lista) lista.innerHTML = '<p style="padding:20px;">Sincronizando livro de registros...</p>'; return; }
     const horariosOrdenados = Object.keys(dadosDia).sort();
     let temAluno = false;
     horariosOrdenados.forEach(hora => {
@@ -919,22 +967,22 @@ window.renderizarAgendaDoDia = () => {
             temAluno = true;
             let nomes = alunos.map(a => {
                 let estilo = ''; let icone = '';
-                if (a.presenca === 'presente') { estilo = 'color:var(--success); font-weight:bold;'; icone = '✅ '; }
-                else if (a.presenca === 'falta') { estilo = 'color:var(--danger); text-decoration:line-through;'; icone = '❌ '; }
+                if (a.presenca === 'presente') { estilo = 'color:var(--success); font-weight:bold;'; icone = '✔️ '; }
+                else if (a.presenca === 'falta') { estilo = 'color:var(--danger); text-decoration:line-through;'; icone = '✖️ '; }
                 return `<span style="${estilo}">${icone}${a.nome}</span>`;
-            }).join(', ');
+            }).join(' <span style="color:var(--border-strong); margin: 0 5px;">|</span> ');
             if (lista) lista.innerHTML += `
-                <div class="card-agenda-hoje" style="background:var(--bg-input); padding:15px; border-left:4px solid var(--primary); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-radius:4px;">
-                    <span style="font-size:1.2rem; font-weight:bold; color:var(--primary); font-family:monospace;">${hora}</span>
-                    <div style="text-align:right;">${nomes}</div>
+                <div class="card-agenda-hoje" style="background:var(--bg-input); padding:20px; border-left:4px solid var(--accent); margin-bottom:12px; display:flex; flex-direction:column; gap:5px; border-radius:var(--radius-sm); border: 1px solid var(--border-strong);">
+                    <span style="font-size:1.2rem; font-weight:bold; color:var(--text-primary); font-family:var(--font-mono); letter-spacing:1px;">${hora}</span>
+                    <div style="font-family:var(--font-headline); font-size: 1.1rem;">${nomes}</div>
                 </div>`;
         }
     });
-    if (!temAluno) { if (lista) lista.innerHTML = '<p style="text-align:center; padding:20px; color:var(--text-secondary);">Nenhum aluno agendado para hoje.</p>'; }
+    if (!temAluno) { if (lista) lista.innerHTML = '<p style="text-align:center; padding:30px; color:var(--text-secondary); font-style:italic; font-family:var(--font-headline); font-size:1.1rem;">Agenda vazia para a data de hoje.</p>'; }
 };
 
 // ==========================================================================
-// 10. FINANCEIRO E FLUXO DE CAIXA
+// 10. FINANCEIRO GERAL E FLUXO DE CAIXA COMPLETO
 // ==========================================================================
 
 window.adicionarGasto = async () => {
@@ -957,10 +1005,10 @@ window.adicionarGasto = async () => {
     document.getElementById('valorGasto').value = '';
     document.getElementById('checkGastoFuturo').checked = false;
 
-    mostrarNotificacao(isAgendado ? "CONTA AGENDADA!" : "DESPESA PAGA!");
+    mostrarNotificacao(isAgendado ? "Conta pendente registrada no cofre!" : "Saída de caixa computada!", "sucesso");
 };
 
-window.virarMes = () => mostrarNotificacao("MUDE A DATA NO SELETOR.");
+window.virarMes = () => mostrarNotificacao("Para visualizar ou trabalhar no novo mês, altere a Data Base no seletor no topo da tela.");
 
 window.renderizarFinanceiro = () => {
     if (auth.currentUser && auth.currentUser.email !== EMAIL_ADMIN) return;
@@ -971,13 +1019,21 @@ window.renderizarFinanceiro = () => {
     tbodyPagos.innerHTML = '';
     tbodyFuturos.innerHTML = '';
 
-    let despesas = 0, receita = 0;
+    let despesas = 0;
+    let receitaGeral = 0;
+    let receitaEquipe = 0;
     let totalPix = 0, totalDinheiro = 0, totalCartao = 0;
 
     Object.values(dbPagamentos).forEach(p => {
-        if (listaClientes.some(c => c.id === p.clienteId) && p.status === 'pago') {
+        const c = listaClientes.find(cli => cli.id === p.clienteId);
+        if (c && p.status === 'pago') {
             const v = Number(p.valor || 0);
-            receita += v;
+
+            if (c.professor === 'amanda') {
+                receitaEquipe += v;
+            } else {
+                receitaGeral += v;
+            }
 
             if (p.forma === 'pix') totalPix += v;
             else if (p.forma === 'dinheiro') totalDinheiro += v;
@@ -991,28 +1047,32 @@ window.renderizarFinanceiro = () => {
         if (g.status === 'agendado') {
             tbodyFuturos.innerHTML += `
                 <tr>
-                    <td>${g.desc.toUpperCase()}</td>
-                    <td style="color:var(--warning)">R$ ${g.valor}</td>
+                    <td style="font-family:var(--font-headline); font-size:1.05rem;">${g.desc.toUpperCase()}</td>
+                    <td style="color:var(--warning); font-family:var(--font-mono); font-weight:bold;">R$ ${g.valor}</td>
                     <td>
-                        <button onclick="confirmarPagamentoGasto('${g.id}')" title="Marcar como Pago">✅</button> 
-                        <button onclick="rmGasto('${g.id}')" title="Excluir">🗑️</button>
+                        <button onclick="confirmarPagamentoGasto('${g.id}')" title="Liquidar Pagamento" style="background:var(--success); padding:8px; width:auto; border-radius:4px; font-size:0.8rem;">LIQUIDAR</button> 
+                        <button onclick="rmGasto('${g.id}')" title="Cancelar Agendamento" style="background:var(--danger); padding:8px; width:auto; border-radius:4px; font-size:0.8rem;">CANCELAR</button>
                     </td>
                 </tr>`;
         } else {
             despesas += valorGasto;
             tbodyPagos.innerHTML += `
                 <tr>
-                    <td>${g.desc.toUpperCase()}</td>
-                    <td>${g.categoria}</td>
-                    <td style="color:var(--danger)">R$ ${g.valor}</td>
-                    <td><button onclick="rmGasto('${g.id}')">🗑️</button></td>
+                    <td style="font-family:var(--font-headline); font-size:1.05rem;">${g.desc.toUpperCase()}</td>
+                    <td style="color:var(--text-secondary);">${g.categoria.toUpperCase()}</td>
+                    <td style="color:var(--danger); font-family:var(--font-mono); font-weight:bold;">R$ ${g.valor}</td>
+                    <td><button onclick="rmGasto('${g.id}')" class="btn-tool danger">🗑️</button></td>
                 </tr>`;
         }
     });
 
-    document.getElementById('dashReceita').innerText = `R$ ${receita.toFixed(2)}`;
-    document.getElementById('dashDespesas').innerText = `R$ ${despesas.toFixed(2)}`;
-    document.getElementById('dashLucro').innerText = `R$ ${(receita - despesas).toFixed(2)}`;
+    let receitaBrutaTotal = receitaGeral + receitaEquipe;
+    let lucroReal = receitaBrutaTotal - despesas;
+
+    if (document.getElementById('dashReceitaGeral')) document.getElementById('dashReceitaGeral').innerText = `R$ ${receitaGeral.toFixed(2)}`;
+    if (document.getElementById('dashReceitaEquipe')) document.getElementById('dashReceitaEquipe').innerText = `R$ ${receitaEquipe.toFixed(2)}`;
+    if (document.getElementById('dashDespesas')) document.getElementById('dashDespesas').innerText = `R$ ${despesas.toFixed(2)}`;
+    if (document.getElementById('dashLucro')) document.getElementById('dashLucro').innerText = `R$ ${lucroReal.toFixed(2)}`;
 
     if (document.getElementById('valPix')) {
         document.getElementById('valPix').innerText = `R$ ${totalPix.toFixed(2)}`;
@@ -1022,9 +1082,9 @@ window.renderizarFinanceiro = () => {
 };
 
 window.confirmarPagamentoGasto = async (id) => {
-    if (!confirm("Confirmar pagamento desta conta? Ela sairá do seu caixa agora.")) return;
+    if (!confirm("Confirma que essa obrigação financeira foi liquidada? Ela será deduzida do caixa real.")) return;
     await updateDoc(doc(db, "gastos", id), { status: 'pago' });
-    mostrarNotificacao("CONTA PAGA!");
+    mostrarNotificacao("Obrigação liquidada com sucesso!");
 }
 
 window.rmGasto = async (id) => await deleteDoc(doc(db, "gastos", id));
@@ -1038,10 +1098,10 @@ window.mostrarNotificacao = (msg, tipo = 'sucesso') => {
     if (antigo) antigo.remove();
     const toast = document.createElement('div');
     toast.className = `snake-toast ${tipo === 'erro' ? 'error' : ''}`;
-    toast.innerHTML = `<span class="material-symbols-outlined">${tipo === 'erro' ? 'skull' : 'check_circle'}</span> <span>${msg}</span>`;
+    toast.innerHTML = `<span class="material-symbols-outlined">${tipo === 'erro' ? 'priority_high' : 'verified_user'}</span> <span style="font-family:var(--font-headline); font-size:1.1rem; padding-bottom:2px;">${msg}</span>`;
     document.body.appendChild(toast);
     setTimeout(() => toast.classList.add('show'), 100);
-    setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
+    setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3500);
 };
 
 window.confirmarAcao = (titulo, texto, callback) => {
@@ -1098,13 +1158,8 @@ window.toggleFab = () => {
 
 const changelogData = [
     {
-        title: "NOVO MÓDULO DE VENCIMENTOS 📅",
-        desc: "A antiga aba de Logs foi descontinuada. Agora temos uma aba exclusiva para gerenciar os vencimentos das faturas! Defina o dia de vencimento, saiba quem está próximo de vencer, e envie lembretes direto no WhatsApp com um clique.",
-        target: 'admin'
-    },
-    {
-        title: "NOVO MÓDULO DE LANÇAMENTOS 💸",
-        desc: "Criamos uma aba exclusiva para 'Lançar' despesas e agendamentos. Assim, o painel 'Financeiro' fica dedicado apenas para relatórios, fluxo de caixa e exportações, deixando o sistema mais organizado.",
+        title: "SINCRONIZAÇÃO HISTÓRICA ATIVA 🔄",
+        desc: "Implementamos um motor de varredura automatizado que puxa os pagamentos antigos gerados antes da consolidação do painel de equipe. Quaisquer faturas pagas anteriormente são alinhadas ao mês histórico de forma retroativa.",
         target: 'admin'
     }
 ];
@@ -1123,7 +1178,7 @@ window.checkChangelog = (isAdmin) => {
 
     const ua = navigator.userAgent;
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-    const deviceText = isMobile ? "MOBILE DETECTADO" : "DESKTOP DETECTADO";
+    const deviceText = isMobile ? "MOBILE ACESSANDO" : "DESKTOP ACESSANDO";
     document.getElementById('deviceBadge').innerText = deviceText;
 
     currentSlide = 0;
@@ -1138,8 +1193,8 @@ function renderChangelogSlide() {
     const slide = activeChangelogList[currentSlide];
 
     content.innerHTML = `
-        <h2 style="color:var(--primary); margin-bottom:10px;">${slide.title}</h2>
-        <p style="color:var(--text-secondary); line-height:1.6;">${slide.desc}</p>
+        <h2 style="color:var(--primary); font-family:var(--font-headline); margin-bottom:15px; font-size: 1.6rem;">${slide.title}</h2>
+        <p style="color:var(--text-secondary); font-family:var(--font-body); line-height:1.7; font-size:1.05rem;">${slide.desc}</p>
     `;
     document.getElementById('slideIndicator').innerText = `${currentSlide + 1}/${activeChangelogList.length}`;
 }
@@ -1164,16 +1219,26 @@ window.fecharChangelog = () => {
 };
 
 // ==========================================================================
-// 13. GESTÃO DA AMANDA
+// 13. GESTÃO DA AMANDA E FINANÇAS DA EQUIPE
 // ==========================================================================
 
+window.salvarTaxaAmanda = () => {
+    const input = document.getElementById('amandaTaxa');
+    if (input && input.value) {
+        taxaAmandaGlob = Number(input.value);
+        localStorage.setItem('taxaAmandaGlob', taxaAmandaGlob);
+        renderizarAreaAmanda();
+        mostrarNotificacao(`Taxa de repasse da equipe salva: ${taxaAmandaGlob}%`);
+    }
+}
+
 window.filtrarSelectAmanda = () => {
-    const inputBusca = document.getElementById('buscaAmanda');
+    const inputBusca = document.getElementById('buscaAmandaAdd');
     const termo = inputBusca ? inputBusca.value.toLowerCase() : '';
     const sel = document.getElementById('selectAlunoAmanda');
     if (!sel) return;
 
-    sel.innerHTML = '<option value="">-- SELECIONE O ALUNO --</option>';
+    sel.innerHTML = '<option value="">-- SELECIONE O ALUNO NA LISTA GERAL --</option>';
 
     const filtrados = listaClientes.filter(c => {
         const isNotAmanda = c.professor !== 'amanda';
@@ -1186,24 +1251,41 @@ window.filtrarSelectAmanda = () => {
     });
 };
 
+window.filtrarAmanda = (tipo) => {
+    filtroAtualAmanda = tipo;
+    document.querySelectorAll('#amanda .btn-filtro').forEach(b => b.classList.remove('active'));
+    let idBtn = tipo === 'todos' ? 'btnFiltroAmandaTodos' : (tipo === 'pendente' ? 'btnFiltroAmandaPendente' : 'btnFiltroAmandaPago');
+    if (document.getElementById(idBtn)) document.getElementById(idBtn).classList.add('active');
+    renderizarAreaAmanda();
+};
+
 window.renderizarAreaAmanda = () => {
     window.filtrarSelectAmanda();
+
+    const taxaInput = document.getElementById('amandaTaxa');
+    if (taxaInput) taxaInput.value = taxaAmandaGlob;
 
     const tbody = document.getElementById('tabelaAmanda').querySelector('tbody');
     if (!tbody) return;
 
     tbody.innerHTML = '';
+    const termoBusca = document.getElementById('inputBuscaAmanda') ? document.getElementById('inputBuscaAmanda').value.toLowerCase() : '';
     let totalAlunos = 0;
-    let receitaAmanda = 0;
+    let receitaBrutaAmanda = 0;
+
+    listaClientes.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
 
     listaClientes.forEach(c => {
         if (c.professor === 'amanda') {
-            totalAlunos++;
+            const pg = dbPagamentos[c.id] || { status: 'pendente', forma: '', valor: c.valorContrato || 0 };
 
-            const pg = dbPagamentos[c.id];
-            if (pg && pg.status === 'pago') {
-                receitaAmanda += Number(pg.valor || 0);
+            totalAlunos++;
+            if (pg.status === 'pago') {
+                receitaBrutaAmanda += Number(pg.valor || 0);
             }
+
+            if (termoBusca && c.nome && !c.nome.toLowerCase().includes(termoBusca)) return;
+            if (filtroAtualAmanda !== 'todos' && pg.status !== filtroAtualAmanda) return;
 
             let horariosDoAluno = [];
             Object.keys(dbAgenda).forEach(dia => {
@@ -1211,28 +1293,49 @@ window.renderizarAreaAmanda = () => {
                 Object.keys(horas).forEach(hora => {
                     if (Array.isArray(horas[hora])) {
                         if (horas[hora].some(a => a.id === c.id)) {
-                            horariosDoAluno.push(`<b>${dia.toUpperCase()}</b> às ${hora}`);
+                            horariosDoAluno.push(`<b>${dia.toUpperCase()}</b> | ${hora}`);
                         }
                     }
                 });
             });
 
-            const displayHorarios = horariosDoAluno.length > 0 ? horariosDoAluno.join('<br>') : '<i style="color:var(--text-muted);">Sem horário na agenda</i>';
+            const displayHorarios = horariosDoAluno.length > 0 ? horariosDoAluno.join('<br>') : '<i style="color:var(--text-muted); font-family:var(--font-body);">Sem agenda.</i>';
+            const displayServico = c.nomeServico || "-";
 
             tbody.innerHTML += `
                 <tr>
-                    <td><strong>${(c.nome || 'Sem Nome').toUpperCase()}</strong></td>
-                    <td style="font-family: monospace; font-size: 0.85rem;">${displayHorarios}</td>
+                    <td style="font-family:var(--font-headline); font-size:1.1rem;"><strong>${(c.nome || 'Sem Nome').toUpperCase()}</strong></td>
                     <td>
-                        <button class="btn-tool danger" title="Desvincular" onclick="removerAlunoAmanda('${c.id}')">❌</button>
+                        <select onchange="atualizarPg('${c.id}', 'status', this.value)" style="width:100%; font-weight:bold; ${pg.status === 'pago' ? 'color:var(--success); border-color:var(--success);' : 'color:var(--warning); border-color:var(--warning);'}">
+                            <option value="pendente" ${pg.status === 'pendente' ? 'selected' : ''}>PENDENTE</option>
+                            <option value="pago" ${pg.status === 'pago' ? 'selected' : ''}>PAGO</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select onchange="atualizarPg('${c.id}', 'forma', this.value)">
+                            <option value="" disabled ${!pg.forma ? 'selected' : ''}>---</option>
+                            <option value="pix" ${pg.forma === 'pix' ? 'selected' : ''}>PIX</option>
+                            <option value="dinheiro" ${pg.forma === 'dinheiro' ? 'selected' : ''}>DINHEIRO</option>
+                            <option value="cartao" ${pg.forma === 'cartao' ? 'selected' : ''}>CARTÃO</option>
+                        </select>
+                    </td>
+                    <td>
+                        <span style="font-weight:600; color:var(--accent); font-size:0.9rem;">${displayServico}</span><br>
+                        <span style="font-family: var(--font-mono); font-size: 0.8rem;">${displayHorarios}</span>
+                    </td>
+                    <td>
+                        <button class="btn-tool danger" title="Desvincular Aluno da Equipe" onclick="removerAlunoAmanda('${c.id}')" style="width: auto; padding: 0 15px; font-size: 0.8rem; font-family: var(--font-body);">REMOVER DA EQUIPE</button>
                     </td>
                 </tr>
             `;
         }
     });
 
+    let salarioReal = receitaBrutaAmanda * (taxaAmandaGlob / 100);
+
     if (document.getElementById('statAmandaAlunos')) document.getElementById('statAmandaAlunos').innerText = totalAlunos;
-    if (document.getElementById('statAmandaReceita')) document.getElementById('statAmandaReceita').innerText = `R$ ${receitaAmanda.toFixed(2)}`;
+    if (document.getElementById('statAmandaReceita')) document.getElementById('statAmandaReceita').innerText = `R$ ${receitaBrutaAmanda.toFixed(2)}`;
+    if (document.getElementById('statAmandaSalario')) document.getElementById('statAmandaSalario').innerText = `R$ ${salarioReal.toFixed(2)}`;
 };
 
 window.vincularAlunoAmanda = async () => {
@@ -1241,15 +1344,50 @@ window.vincularAlunoAmanda = async () => {
 
     await updateDoc(doc(db, "clientes", id), { professor: 'amanda' });
 
-    const inputBusca = document.getElementById('buscaAmanda');
+    const inputBusca = document.getElementById('buscaAmandaAdd');
     if (inputBusca) inputBusca.value = '';
 
-    mostrarNotificacao("Aluno vinculado à Amanda!");
+    mostrarNotificacao("Aluno delegado à carteira da equipe com sucesso!");
 };
 
 window.removerAlunoAmanda = async (id) => {
-    if (!confirm("Remover este aluno da gestão da Amanda?")) return;
+    if (!confirm("Retirar este aluno da equipe? Ele voltará para a carteira geral da clínica.")) return;
 
     await updateDoc(doc(db, "clientes", id), { professor: null });
-    mostrarNotificacao("Aluno removido da Amanda.");
+    mostrarNotificacao("Aluno devolvido à carteira geral.");
+};
+
+window.lancarSalarioEquipe = async () => {
+    let receitaBrutaAmanda = 0;
+    Object.values(dbPagamentos).forEach(pg => {
+        const c = listaClientes.find(cli => cli.id === pg.clienteId);
+        if (c && c.professor === 'amanda' && pg.status === 'pago') {
+            receitaBrutaAmanda += Number(pg.valor || 0);
+        }
+    });
+
+    let salarioCalculado = receitaBrutaAmanda * (taxaAmandaGlob / 100);
+
+    if (salarioCalculado <= 0) return mostrarNotificacao("Não há comissão para ser lançada com base nos pagamentos recebidos.", "erro");
+
+    const jaLancado = dbGastos.some(g =>
+        g.desc.toUpperCase() === "SALÁRIO AMANDA (COMISSÃO DA EQUIPE)" &&
+        g.mesReferencia === inputMes.value
+    );
+
+    let mensagem = `Deseja registrar o valor de R$ ${salarioCalculado.toFixed(2)} nas despesas pagas do mês?`;
+    if (jaLancado) {
+        mensagem = `Atenção: Já existe um lançamento de "Salário Amanda" neste mês. Tem certeza que deseja lançar novamente o valor de R$ ${salarioCalculado.toFixed(2)}?`;
+    }
+
+    if (confirm(mensagem)) {
+        await addDoc(collection(db, "gastos"), {
+            desc: "SALÁRIO AMANDA (COMISSÃO DA EQUIPE)",
+            categoria: "pessoal",
+            valor: salarioCalculado.toFixed(2),
+            mesReferencia: inputMes.value,
+            status: 'pago'
+        });
+        mostrarNotificacao("Comissão da equipe abatida no Caixa Líquido com sucesso!");
+    }
 };
