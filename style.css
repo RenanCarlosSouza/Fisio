@@ -1,85 +1,78 @@
 /* ==========================================================================
    SISTEMA DE GESTÃO INTEGRADA - EDANIOS BELCHIOR
-   VERSÃO: 3.2 (RESPONSIVIDADE INTELIGENTE & NOVO MÓDULO DE LANÇAMENTOS)
-   ESTILO: APP BANCÁRIO, LARANJA & AZUL, FLUIDO E MOBILE-FIRST
+   VERSÃO: 3.7 (SINCRO HISTÓRICA & ESTÉTICA "TTPD / FOLKLORE")
+   ESTILO: DARK ACADEMIA, CONCEITUAL, NEUTRO, SÉPIA E ELEGANTE
    ========================================================================== */
 
 /* ==========================================================================
    1. IMPORTAÇÕES DE FONTES E ÍCONES
    ========================================================================== */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Courier+Prime:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
 
 
 /* ==========================================================================
-   2. VARIÁVEIS GLOBAIS (CSS CUSTOM PROPERTIES)
+   2. VARIÁVEIS GLOBAIS (CSS CUSTOM PROPERTIES) - PALETA POETRY/FOLKLORE
    ========================================================================== */
 :root {
-    /* --- PALETA BANKING (LARANJA & AZUL ITAÚ) --- */
+    --bg-body: #EBE8E3;
+    --bg-card: #F5F3EF;
+    --bg-input: #E4E0D7;
+    --bg-hover-light: #EFECE5;
+    --bg-overlay: rgba(26, 26, 26, 0.75);
 
-    --bg-body: #F4F5F7;
-    --bg-card: #FFFFFF;
-    --bg-input: #F0F1F5;
-    --bg-hover-light: #FAFAFA;
-    --bg-overlay: rgba(0, 41, 90, 0.7);
+    --primary: #1A1A1A;
+    --primary-hover: #333333;
+    --primary-light: #D4D0C8;
+    --primary-transparent: rgba(26, 26, 26, 0.08);
 
-    /* Laranja Itaú */
-    --primary: #EC7000;
-    --primary-hover: #CC6000;
-    --primary-light: #FFF0E5;
-    --primary-transparent: rgba(236, 112, 0, 0.15);
+    --accent: #5E5348;
+    --accent-hover: #4A4138;
+    --accent-light: #DCD8D0;
 
-    /* Azul Itaú */
-    --accent: #004990;
-    --accent-hover: #003366;
-    --accent-light: #E5F0FA;
+    --text-primary: #2C2A29;
+    --text-secondary: #5C5752;
+    --text-muted: #8F8880;
+    --text-inverse: #F5F3EF;
 
-    /* Tipografia */
-    --text-primary: #1E2022;
-    --text-secondary: #687077;
-    --text-muted: #9AA0A6;
-    --text-inverse: #FFFFFF;
+    --success-bg: #DCE3DD;
+    --success-text: #2E4733;
+    --success: #3D5A40;
 
-    /* Estados */
-    --success-bg: #E6F4EA;
-    --success-text: #1E8E3E;
-    --success: #1E8E3E;
+    --danger-bg: #EADCDA;
+    --danger-text: #732E2E;
+    --danger: #8C3A3A;
 
-    --danger-bg: #FCE8E6;
-    --danger-text: #D93025;
-    --danger: #D93025;
+    --warning-bg: #EAE6D8;
+    --warning-text: #8C6A2E;
+    --warning: #A68038;
 
-    --warning-bg: #FEF7E0;
-    --warning-text: #E37400;
-    --warning: #F9AB00;
+    --info-bg: #DCE2E6;
+    --info-text: #304E63;
+    --imprevisto: #A68038;
 
-    --info-bg: #E8F0FE;
-    --info-text: #1A73E8;
-    --imprevisto: #F9AB00;
+    --border: #DCD7CD;
+    --border-strong: #BDB7AC;
+    --border-dashed: #C4BEB3;
 
-    /* Interface */
-    --border: #E1E3E6;
-    --border-strong: #C8CCD0;
-    --border-dashed: #D1D5DB;
+    --radius-xs: 2px;
+    --radius-sm: 4px;
+    --radius: 6px;
+    --radius-lg: 8px;
+    --radius-pill: 40px;
 
-    --radius-xs: 4px;
-    --radius-sm: 8px;
-    --radius: 12px;
-    --radius-lg: 16px;
-    --radius-pill: 50px;
+    --shadow-sm: 0 2px 4px rgba(74, 65, 56, 0.05);
+    --shadow: 0 6px 16px rgba(74, 65, 56, 0.08);
+    --shadow-lg: 0 10px 24px rgba(74, 65, 56, 0.12);
+    --shadow-floating: 0 20px 40px rgba(26, 26, 26, 0.15);
 
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-    --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
-    --shadow-floating: 0 16px 32px rgba(0, 0, 0, 0.15);
-
-    --font-headline: 'Inter', sans-serif;
+    --font-headline: 'Playfair Display', serif;
     --font-body: 'Inter', sans-serif;
     --font-mono: 'Courier Prime', monospace;
 
-    --transition-fast: 0.15s ease;
-    --transition-normal: 0.25s ease-out;
-    --transition-slow: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease-out;
+    --transition-slow: 0.5s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 
@@ -97,7 +90,7 @@
 }
 
 html {
-    font-size: 16px;
+    font-size: 15px;
     scroll-behavior: smooth;
     height: 100%;
 }
@@ -106,19 +99,13 @@ body {
     font-family: var(--font-body);
     background-color: var(--bg-body);
     color: var(--text-primary);
-    line-height: 1.5;
+    line-height: 1.6;
     width: 100%;
     max-width: 100vw;
     overflow-x: hidden;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    /* Transições suaves para mudança de visual */
-    transition: background-color var(--transition-slow), color var(--transition-slow);
-}
-
-body.logged-in {
-    background-color: var(--bg-body);
 }
 
 :focus {
@@ -137,18 +124,18 @@ svg {
    4. SCROLLBAR CUSTOMIZADA E SELEÇÃO DE TEXTO
    ========================================================================== */
 ::selection {
-    background-color: var(--primary);
+    background-color: var(--accent);
     color: var(--text-inverse);
 }
 
 ::-moz-selection {
-    background-color: var(--primary);
+    background-color: var(--accent);
     color: var(--text-inverse);
 }
 
 ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -157,16 +144,16 @@ svg {
 
 ::-webkit-scrollbar-thumb {
     background-color: var(--border-strong);
-    border-radius: var(--radius-pill);
+    border-radius: var(--radius-xs);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background-color: var(--text-secondary);
+    background-color: var(--accent);
 }
 
 
 /* ==========================================================================
-   5. CABEÇALHO SÓLIDO BANCÁRIO (APP TOP BAR)
+   5. CABEÇALHO SÓLIDO (APP TOP BAR)
    ========================================================================== */
 .main-header {
     position: sticky;
@@ -177,8 +164,9 @@ svg {
     z-index: 1000;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 4px 15px rgba(236, 112, 0, 0.4);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     padding-top: env(safe-area-inset-top);
+    border-bottom: 3px solid var(--accent);
 }
 
 .header-top {
@@ -188,29 +176,32 @@ svg {
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px 24px 10px 24px;
+    padding: 25px 24px 15px 24px;
 }
 
 .logo {
     font-family: var(--font-headline);
-    font-size: 1.6rem;
+    font-size: 1.8rem;
     font-weight: 800;
+    font-style: italic;
     color: var(--text-inverse);
     text-align: left;
-    letter-spacing: -0.5px;
+    letter-spacing: 1px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
 }
 
 .logo span {
     font-size: 0.75rem;
-    color: var(--primary);
-    background: var(--text-inverse);
-    padding: 3px 8px;
+    color: var(--bg-body);
+    background: var(--accent);
+    padding: 3px 10px;
     border-radius: var(--radius-pill);
-    font-weight: 800;
-    box-shadow: var(--shadow-sm);
+    font-weight: 600;
+    font-family: var(--font-body);
+    font-style: normal;
+    letter-spacing: 0;
 }
 
 
@@ -222,12 +213,12 @@ svg {
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
     flex-wrap: nowrap !important;
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 10px 24px 20px 24px;
+    padding: 5px 24px 20px 24px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
@@ -242,16 +233,16 @@ svg {
     flex-shrink: 0;
     background: transparent;
     border: none;
-    color: rgba(255, 255, 255, 0.8) !important;
-    padding: 8px 12px;
-    font-family: var(--font-headline);
-    font-size: 0.95rem;
-    font-weight: 600 !important;
-    text-transform: capitalize;
+    color: rgba(245, 243, 239, 0.6) !important;
+    padding: 8px 15px;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    font-weight: 500 !important;
+    letter-spacing: 1px;
+    text-transform: uppercase;
     cursor: pointer;
     transition: all var(--transition-fast);
-    border-radius: 0;
-    border-bottom: 3px solid transparent !important;
+    border-radius: var(--radius-sm);
     white-space: nowrap;
     width: auto !important;
     display: inline-block;
@@ -259,27 +250,28 @@ svg {
 
 .main-nav button:hover {
     color: var(--text-inverse) !important;
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .main-nav button.active {
-    color: #FFFFFF !important;
-    font-weight: 800 !important;
-    border-bottom: 3px solid #FFFFFF !important;
+    color: var(--primary) !important;
+    background: var(--bg-body) !important;
+    font-weight: 700 !important;
 }
 
 .main-nav .btn-sair {
     margin-left: auto;
-    color: #FFFFFF !important;
-    background: rgba(0, 0, 0, 0.2) !important;
+    color: var(--text-inverse) !important;
+    background: transparent !important;
+    border: 1px solid rgba(245, 243, 239, 0.4) !important;
     padding: 6px 18px;
-    border-radius: var(--radius-pill);
-    border-bottom: none !important;
     display: inline-flex;
     align-items: center;
 }
 
 .main-nav .btn-sair:hover {
-    background-color: var(--accent) !important;
+    background-color: var(--danger) !important;
+    border-color: var(--danger) !important;
 }
 
 
@@ -296,7 +288,7 @@ svg {
 .content {
     max-width: 1100px;
     margin: 0 auto;
-    margin-top: -15px;
+    margin-top: 30px;
     z-index: 10;
     position: relative;
     padding: 0 20px 120px 20px;
@@ -321,14 +313,14 @@ svg {
 
 
 /* ==========================================================================
-   8. CARTÕES BANCÁRIOS (FORM CARDS)
+   8. CARTÕES DE FORMULÁRIOS
    ========================================================================== */
 .form-card {
     background: var(--bg-card);
-    padding: 30px;
+    padding: 35px 30px;
     border: 1px solid var(--border);
     box-shadow: var(--shadow);
-    margin-bottom: 24px;
+    margin-bottom: 25px;
     border-radius: var(--radius);
     position: relative;
     overflow: hidden;
@@ -348,43 +340,38 @@ svg {
    9. TIPOGRAFIA INTERNA
    ========================================================================== */
 .header-section {
-    margin-bottom: 25px;
-    padding-top: 10px;
+    margin-bottom: 30px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-strong);
 }
 
 .header-section h2 {
     font-family: var(--font-headline);
-    font-size: 2rem;
-    font-weight: 800;
+    font-size: 2.2rem;
+    font-weight: 700;
     text-align: left;
-    color: var(--text-primary);
+    color: var(--primary);
     margin-bottom: 5px;
-    letter-spacing: -0.5px;
+    letter-spacing: 0.5px;
 }
 
 h3,
 h4 {
     font-family: var(--font-headline);
-    font-size: 1.15rem;
-    color: var(--accent);
+    font-size: 1.25rem;
+    color: var(--primary);
     margin-bottom: 20px;
     font-weight: 700;
     display: flex;
     align-items: center;
-    gap: 8px;
-    letter-spacing: -0.2px;
-    text-transform: none;
-}
-
-h3::before,
-h4::before {
-    content: none;
+    gap: 10px;
+    letter-spacing: 0;
 }
 
 p {
     margin-bottom: 15px;
     color: var(--text-secondary);
-    font-size: 0.95rem;
+    font-size: 1rem;
 }
 
 small {
@@ -411,7 +398,7 @@ small {
 }
 
 label {
-    font-family: var(--font-headline);
+    font-family: var(--font-body);
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--text-secondary);
@@ -419,6 +406,8 @@ label {
     margin-bottom: -10px;
     display: inline-block;
     z-index: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 input[type="text"],
@@ -431,8 +420,8 @@ select,
 textarea {
     background-color: var(--bg-input);
     color: var(--text-primary);
-    border: 2px solid transparent;
-    padding: 16px 16px;
+    border: 1px solid var(--border-strong);
+    padding: 16px 18px;
     font-family: var(--font-body);
     font-size: 1rem;
     font-weight: 500;
@@ -452,26 +441,29 @@ input::placeholder,
 textarea::placeholder {
     color: var(--text-muted);
     font-weight: 400;
+    font-style: italic;
 }
 
 input:focus,
 select:focus,
 textarea:focus {
-    border-color: var(--primary);
+    border-color: var(--accent);
     background-color: var(--bg-card);
+    box-shadow: 0 0 0 3px var(--primary-transparent);
 }
 
 input:disabled,
 select:disabled,
 textarea:disabled,
 input[readonly] {
-    background-color: #E5E7EB;
+    background-color: var(--bg-hover-light);
     color: var(--text-muted);
     cursor: not-allowed;
+    border-style: dashed;
 }
 
 select {
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235C5752' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 16px center;
     background-size: 16px;
@@ -479,16 +471,6 @@ select {
     cursor: pointer;
 }
 
-input[type="checkbox"] {
-    width: 24px;
-    height: 24px;
-    border-radius: var(--radius-xs);
-    cursor: pointer;
-    accent-color: var(--primary);
-    margin: 0;
-}
-
-/* NOVO CHECKBOX ELEGANTE E FLUIDO (V3.2) */
 .checkbox-wrapper {
     display: flex;
     align-items: center;
@@ -496,14 +478,14 @@ input[type="checkbox"] {
     background: var(--bg-input);
     padding: 15px;
     border-radius: var(--radius-sm);
-    border: 1px solid transparent;
+    border: 1px solid var(--border-strong);
     transition: all 0.2s;
     margin-top: 10px;
     cursor: pointer;
 }
 
 .checkbox-wrapper:hover {
-    border-color: var(--danger);
+    border-color: var(--accent);
 }
 
 .checkbox-wrapper input[type="checkbox"] {
@@ -511,14 +493,16 @@ input[type="checkbox"] {
     height: 20px;
     margin: 0;
     cursor: pointer;
-    accent-color: var(--primary);
+    accent-color: var(--accent);
 }
 
 .checkbox-wrapper label {
     margin-bottom: 0;
     cursor: pointer;
     color: var(--text-primary);
-    font-weight: 500;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0;
 }
 
 
@@ -530,10 +514,11 @@ button {
     color: var(--text-inverse);
     border: none;
     padding: 16px 24px;
-    font-family: var(--font-headline);
-    font-size: 1rem;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
     font-weight: 600;
-    text-transform: none;
+    letter-spacing: 1px;
+    text-transform: uppercase;
     cursor: pointer;
     transition: all var(--transition-fast);
     width: 100%;
@@ -548,7 +533,7 @@ button {
 button:hover {
     background-color: var(--primary-hover);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(236, 112, 0, 0.25);
+    box-shadow: 0 4px 12px rgba(26, 26, 26, 0.2);
 }
 
 button:active {
@@ -563,12 +548,12 @@ button.secondary {
 
 button.secondary:hover {
     background-color: var(--accent-hover);
-    box-shadow: 0 4px 12px rgba(0, 73, 144, 0.3);
 }
 
 button.danger {
     background-color: var(--danger-bg);
     color: var(--danger);
+    border: 1px solid var(--danger);
 }
 
 button.danger:hover {
@@ -584,10 +569,11 @@ button.success {
 .btn-tool {
     background: var(--bg-input);
     color: var(--text-primary);
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
     padding: 0;
     border-radius: var(--radius-sm);
+    border: 1px solid var(--border-strong);
     box-shadow: none;
     font-size: 1.1rem;
     flex-shrink: 0;
@@ -596,11 +582,13 @@ button.success {
 .btn-tool:hover {
     color: var(--text-inverse);
     background: var(--accent);
+    border-color: var(--accent);
 }
 
 .btn-tool.danger {
     color: var(--danger);
-    background: var(--danger-bg);
+    background: var(--bg-card);
+    border-color: var(--danger);
 }
 
 .btn-tool.danger:hover {
@@ -610,7 +598,7 @@ button.success {
 
 
 /* ==========================================================================
-   12. TABELAS DE DADOS (EXTRATOS/LISTAS BANCÁRIAS)
+   12. TABELAS DE DADOS (LISTAS)
    ========================================================================== */
 .lista-container {
     background: var(--bg-card);
@@ -629,16 +617,17 @@ table {
 }
 
 th {
-    background: var(--bg-card);
+    background: var(--bg-input);
     padding: 16px 24px;
     text-align: left;
-    font-family: var(--font-headline);
+    font-family: var(--font-body);
     font-size: 0.8rem;
     text-transform: uppercase;
     color: var(--text-secondary);
-    border-bottom: 2px solid var(--border);
+    border-bottom: 2px solid var(--border-strong);
     white-space: nowrap;
     font-weight: 700;
+    letter-spacing: 0.5px;
 }
 
 td {
@@ -654,16 +643,18 @@ tr:last-child td {
 }
 
 td strong {
-    color: var(--text-primary);
+    color: var(--primary);
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 1.05rem;
+    font-family: var(--font-headline);
 }
 
 td small {
-    color: var(--text-secondary);
+    color: var(--text-muted);
     display: block;
     margin-top: 4px;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
+    font-family: var(--font-mono);
 }
 
 tr:hover td {
@@ -672,30 +663,30 @@ tr:hover td {
 
 td select {
     padding: 8px 12px;
-    border-radius: var(--radius-sm);
-    background-color: var(--bg-input);
-    border: none;
+    border-radius: var(--radius-xs);
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-strong);
     font-family: var(--font-body);
     font-size: 0.85rem;
     font-weight: 600;
     width: auto;
-    min-width: 110px;
+    min-width: 120px;
     color: var(--text-primary);
 }
 
 td select:hover {
-    background-color: var(--border);
+    background-color: var(--bg-hover-light);
 }
 
 
 /* ==========================================================================
-   13. DASHBOARD BANCÁRIO (CARTÕES DE SALDO)
+   13. DASHBOARD DE INDICADORES (CARDS)
    ========================================================================== */
 .dashboard-financeiro,
 .fluxo-detalhado-wrapper,
 .stats-alunos {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 16px;
     margin-bottom: 30px;
 }
@@ -704,7 +695,7 @@ td select:hover {
 .stat-card,
 .card-fluxo {
     background: var(--bg-card);
-    padding: 24px;
+    padding: 25px;
     text-align: left;
     border: 1px solid var(--border);
     border-radius: var(--radius);
@@ -713,11 +704,25 @@ td select:hover {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    position: relative;
+}
+
+.card-dash::before,
+.stat-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--border-strong);
+    border-radius: var(--radius) 0 0 var(--radius);
 }
 
 .card-dash:hover,
 .stat-card:hover {
-    transform: scale(1.02);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
 }
 
 .card-fluxo {
@@ -726,33 +731,44 @@ td select:hover {
     gap: 20px;
 }
 
+.card-fluxo::before {
+    display: none;
+}
+
 .icon-fluxo {
     font-size: 2rem;
     color: var(--accent);
-    background: var(--accent-light);
+    background: var(--bg-input);
     padding: 12px;
     border-radius: var(--radius-sm);
+    border: 1px solid var(--border-strong);
 }
 
 .info-fluxo span,
 .stat-card .label,
 .card-dash span {
-    font-family: var(--font-headline);
-    font-size: 0.85rem;
+    font-family: var(--font-body);
+    font-size: 0.8rem;
     color: var(--text-secondary);
     display: block;
-    margin-bottom: 8px;
-    font-weight: 500;
+    margin-bottom: 5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .info-fluxo strong,
 .card-dash strong,
 .stat-card .value {
     font-family: var(--font-headline);
-    font-size: 2rem;
+    font-size: 2.2rem;
     color: var(--text-primary);
-    font-weight: 800;
-    letter-spacing: -1px;
+    font-weight: 700;
+}
+
+.card-dash.entrada::before,
+.stat-card.recebido::before {
+    background: var(--success);
 }
 
 .card-dash.entrada strong,
@@ -760,12 +776,16 @@ td select:hover {
     color: var(--success);
 }
 
-.card-dash.saida strong {
-    color: var(--text-primary);
+.card-dash.saida::before {
+    background: var(--danger);
+}
+
+.card-dash.lucro::before {
+    background: var(--primary);
 }
 
 .card-dash.lucro strong {
-    color: var(--accent);
+    color: var(--primary);
 }
 
 
@@ -798,12 +818,7 @@ td select:hover {
 .tools-fin button {
     width: auto !important;
     padding: 12px 20px;
-    background: var(--bg-input);
-    color: var(--text-primary);
-}
-
-.tools-fin button:hover {
-    background: var(--border);
+    border: 1px solid var(--border-strong);
 }
 
 .agenda-filtros,
@@ -838,84 +853,52 @@ td select:hover {
     background: var(--bg-input);
     color: var(--text-secondary);
     padding: 10px 16px;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     width: auto;
-    border-radius: var(--radius-pill);
+    border-radius: var(--radius-sm);
     font-weight: 600;
+    border: 1px solid var(--border-strong);
 }
 
 .btn-filtro.active {
-    background: var(--accent);
+    background: var(--primary);
     color: var(--text-inverse);
+    border-color: var(--primary);
 }
 
 
 /* ==========================================================================
-   15. GESTÃO DE AGENDA (CORRIGIDA: DIAS LADO A LADO E IGUAIS)
+   15. GESTÃO DE AGENDA
    ========================================================================== */
-.agenda-subnav {
+.dias-semana {
     display: flex;
     gap: 10px;
     margin-bottom: 25px;
-    flex-wrap: wrap;
-}
-
-.agenda-subnav button {
-    flex-shrink: 0;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    color: var(--text-secondary);
-    padding: 10px 20px;
-    font-size: 0.95rem;
-    width: auto;
-    border-radius: var(--radius-pill);
-    box-shadow: var(--shadow-sm);
-}
-
-.agenda-subnav button.active {
-    background: var(--accent);
-    color: var(--text-inverse);
-    border-color: var(--accent);
-}
-
-.agenda-view {
-    display: none;
-}
-
-.agenda-view.active {
-    display: block;
-    animation: fadeIn var(--transition-normal) forwards;
-}
-
-.dias-semana {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 24px;
     width: 100%;
 }
 
 .btn-dia {
     flex: 1;
     background: var(--bg-card);
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-strong);
     color: var(--text-secondary);
     font-size: 0.9rem;
     font-weight: 600;
     padding: 12px 5px;
-    border-radius: var(--radius-pill);
+    border-radius: var(--radius-sm);
     box-shadow: var(--shadow-sm);
     text-align: center;
     white-space: nowrap;
 }
 
 .btn-dia.active {
-    background: var(--primary);
+    background: var(--accent);
     color: var(--text-inverse);
-    border-color: var(--primary);
+    border-color: var(--accent);
 }
 
 .horario-card {
-    margin-bottom: 16px;
+    margin-bottom: 20px;
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: var(--radius);
@@ -924,24 +907,24 @@ td select:hover {
 }
 
 .horario-titulo {
-    background: transparent;
+    background: var(--bg-input);
     padding: 16px 20px;
     font-family: var(--font-headline);
-    font-weight: 800;
-    color: var(--text-primary);
-    border-bottom: 1px solid var(--border);
+    font-weight: 700;
+    color: var(--primary);
+    border-bottom: 1px solid var(--border-strong);
     display: flex;
     justify-content: space-between;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
 }
 
 .aluno-item {
     padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px dashed var(--border-strong);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 1rem;
+    font-size: 1.05rem;
 }
 
 .aluno-item:last-child {
@@ -954,6 +937,7 @@ td select:hover {
 
 .aluno-item.presente {
     background-color: var(--success-bg);
+    border-bottom-color: var(--success);
 }
 
 .aluno-item.presente span {
@@ -963,59 +947,12 @@ td select:hover {
 
 .aluno-item.falta {
     background-color: var(--danger-bg);
-    opacity: 0.8;
+    opacity: 0.9;
 }
 
 .aluno-item.falta span {
     text-decoration: line-through;
     color: var(--danger-text);
-}
-
-
-/* ==========================================================================
-   16. PRONTUÁRIOS E HISTÓRICO
-   ========================================================================== */
-.historico-prontuario {
-    max-height: 500px;
-    overflow-y: auto;
-    padding: 10px 0;
-}
-
-.evolucao-item {
-    padding: 24px;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg-card);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-sm);
-    margin-bottom: 16px;
-    border-left: 4px solid var(--accent);
-}
-
-.evolucao-data {
-    font-family: var(--font-headline);
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-}
-
-#dadosPacienteHeader {
-    background: var(--bg-input);
-    padding: 24px;
-    border-radius: var(--radius);
-    margin-bottom: 20px;
-}
-
-#dadosPacienteHeader div {
-    font-family: var(--font-body);
-    font-size: 1rem;
-    margin-bottom: 8px;
-}
-
-#dadosPacienteHeader strong {
-    color: var(--text-secondary);
-    margin-right: 5px;
 }
 
 
@@ -1027,41 +964,47 @@ td select:hover {
     align-items: center;
     justify-content: center;
     padding: 6px 14px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
-    margin-top: 15px;
-    border-radius: var(--radius-pill);
+    margin-top: 10px;
+    border-radius: var(--radius-sm);
     font-weight: 700;
+    letter-spacing: 0.5px;
+    border: 1px solid;
 }
 
 .status-badge.sucesso {
     color: var(--success-text);
     background: var(--success-bg);
+    border-color: var(--success);
 }
 
 .status-badge.erro {
     color: var(--danger-text);
     background: var(--danger-bg);
+    border-color: var(--danger);
 }
 
 .status-badge.pendente {
     color: var(--warning-text);
     background: var(--warning-bg);
+    border-color: var(--warning);
 }
 
 .status-badge.neutro {
     color: var(--text-secondary);
-    background: var(--border);
+    background: var(--bg-input);
+    border-color: var(--border-strong);
 }
 
 
 /* ==========================================================================
-   18. MODAIS, OVERLAYS E TELA DE LOGIN
+   17. MODAIS E TELA DE LOGIN
    ========================================================================== */
 .modal-overlay,
 .login-overlay {
     background: var(--bg-overlay);
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(5px);
     position: fixed;
     top: 0;
     left: 0;
@@ -1083,10 +1026,10 @@ td select:hover {
 .login-box,
 .modal-box {
     background: var(--bg-card);
-    padding: 40px;
+    padding: 50px 40px;
     border-radius: var(--radius-lg);
     width: 100%;
-    max-width: 420px;
+    max-width: 440px;
     max-height: 90vh;
     overflow-y: auto;
     box-shadow: var(--shadow-floating);
@@ -1095,23 +1038,27 @@ td select:hover {
     display: flex;
     flex-direction: column;
     animation: scaleUp var(--transition-normal);
+    border: 1px solid var(--border-strong);
 }
 
 .login-box h2 {
     font-family: var(--font-headline);
     font-size: 2.8rem;
     font-weight: 800;
-    color: var(--accent);
+    color: var(--primary);
     margin-bottom: 5px;
-    letter-spacing: -1px;
+    letter-spacing: 0;
+    line-height: 1.1;
 }
 
 .theme-subtitle {
-    font-family: var(--font-headline);
-    font-size: 1rem;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
     font-weight: 500;
-    margin-bottom: 30px;
-    color: var(--primary);
+    margin-bottom: 35px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }
 
 .login-tabs {
@@ -1120,16 +1067,17 @@ td select:hover {
     gap: 8px;
     margin-bottom: 30px;
     background: var(--bg-input);
-    padding: 4px;
+    padding: 6px;
     border-radius: var(--radius-sm);
+    border: 1px solid var(--border-strong);
 }
 
 .login-tabs button {
     background: transparent;
     color: var(--text-secondary);
-    font-size: 0.95rem;
-    padding: 10px;
-    width: 50%;
+    font-size: 0.85rem;
+    padding: 12px;
+    width: 100%;
     border-radius: var(--radius-xs);
     transition: all var(--transition-fast);
 }
@@ -1138,23 +1086,25 @@ td select:hover {
     background: var(--bg-card);
     color: var(--text-primary);
     box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-strong);
 }
 
 .modal-box {
     max-width: 500px;
+    padding: 40px;
 }
 
 .modal-box h3 {
-    margin-bottom: 20px;
-    font-size: 1.5rem;
+    margin-bottom: 15px;
+    font-size: 1.6rem;
     justify-content: center;
-    color: var(--text-primary);
+    color: var(--primary);
 }
 
 .modal-footer {
     padding: 24px 0 0 0;
     display: flex;
-    gap: 12px;
+    gap: 15px;
     justify-content: center;
     margin-top: auto;
 }
@@ -1166,15 +1116,16 @@ td select:hover {
 .btn-fechar {
     background: var(--bg-input);
     color: var(--text-primary);
+    border: 1px solid var(--border-strong);
 }
 
 .btn-fechar:hover {
-    background: var(--border);
+    background: var(--border-strong);
 }
 
 
 /* ==========================================================================
-   19. MODAL CHANGELOG
+   18. MODAL CHANGELOG
    ========================================================================== */
 #modalChangelog .modal-box {
     padding: 0;
@@ -1184,19 +1135,20 @@ td select:hover {
 .changelog-header {
     background: var(--primary);
     color: var(--text-inverse);
-    padding: 30px 24px;
+    padding: 35px 24px;
     text-align: center;
+    border-bottom: 3px solid var(--accent);
 }
 
 .changelog-header h3 {
     color: var(--text-inverse);
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     margin: 0;
 }
 
 .changelog-content {
-    padding: 40px 30px;
-    min-height: 200px;
+    padding: 40px 35px;
+    min-height: 220px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1207,34 +1159,36 @@ td select:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 20px;
-    padding-bottom: 30px;
+    gap: 25px;
+    padding-bottom: 35px;
 }
 
 .changelog-nav button {
     width: 45px;
     height: 45px;
-    border-radius: 50%;
+    border-radius: var(--radius-sm);
     padding: 0;
     background: var(--bg-input);
     color: var(--text-primary);
+    border: 1px solid var(--border-strong);
 }
 
 #slideIndicator {
     font-weight: 700;
     color: var(--text-secondary);
+    font-family: var(--font-mono);
 }
 
 
 /* ==========================================================================
-   20. TOAST NOTIFICATIONS
+   19. TOAST NOTIFICATIONS
    ========================================================================== */
 .snake-toast {
     position: fixed;
     top: calc(20px + env(safe-area-inset-top));
     left: 50%;
     transform: translate(-50%, -100px);
-    background: var(--text-primary);
+    background: var(--primary);
     color: var(--text-inverse);
     font-family: var(--font-body);
     font-weight: 500;
@@ -1244,9 +1198,10 @@ td select:hover {
     display: flex;
     align-items: center;
     gap: 12px;
-    border-radius: var(--radius-pill);
+    border-radius: var(--radius-sm);
     opacity: 0;
     transition: all var(--transition-slow);
+    border: 1px solid var(--accent);
 }
 
 .snake-toast.show {
@@ -1255,21 +1210,21 @@ td select:hover {
 }
 
 .snake-toast span.material-symbols-outlined {
-    color: var(--primary);
+    color: var(--bg-body);
 }
 
 .snake-toast.error span.material-symbols-outlined {
-    color: var(--danger);
+    color: #FFAAAA;
 }
 
 
 /* ==========================================================================
-   21. FAB CONTAINER (BOTÃO AZUL)
+   20. FAB CONTAINER (BOTÃO FLUTUANTE)
    ========================================================================== */
 .fab-container {
     position: fixed;
     bottom: calc(30px + env(safe-area-inset-bottom));
-    right: 24px;
+    right: 30px;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
@@ -1281,14 +1236,15 @@ td select:hover {
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    background: var(--accent);
+    background: var(--primary);
     color: var(--text-inverse);
-    box-shadow: 0 4px 16px rgba(0, 73, 144, 0.4);
+    box-shadow: var(--shadow-lg);
     padding: 0;
+    border: 2px solid var(--accent);
 }
 
 .fab-main:hover {
-    transform: scale(1.05);
+    transform: scale(1.05) rotate(90deg);
 }
 
 .fab-menu {
@@ -1303,14 +1259,15 @@ td select:hover {
     height: 52px;
     border-radius: 50%;
     background: var(--bg-card);
-    color: var(--accent);
+    color: var(--primary);
     box-shadow: var(--shadow);
     padding: 0;
+    border: 1px solid var(--border-strong);
 }
 
 
 /* ==========================================================================
-   22. ANIMAÇÕES
+   21. ANIMAÇÕES
    ========================================================================== */
 @keyframes fadeIn {
     from {
@@ -1348,7 +1305,7 @@ td select:hover {
 
 
 /* ==========================================================================
-   23. RESPONSIVIDADE (TABLET, NOTEBOOK, MOBILE FIX)
+   22. RESPONSIVIDADE
    ========================================================================== */
 @media (max-width: 1024px) {
 
@@ -1370,7 +1327,7 @@ td select:hover {
     }
 
     .content {
-        margin-top: 0;
+        margin-top: 15px;
         padding: 20px 20px calc(100px + env(safe-area-inset-bottom)) 20px;
     }
 
@@ -1383,7 +1340,6 @@ td select:hover {
 
     .form-card {
         padding: 24px 20px;
-        border-radius: var(--radius);
     }
 
     .header-section h2 {
@@ -1413,8 +1369,8 @@ td select:hover {
         margin-right: -20px;
         border-radius: 0;
         box-shadow: none;
-        border-top: 1px solid var(--border);
-        border-bottom: 1px solid var(--border);
+        border-left: none;
+        border-right: none;
     }
 
     .snake-toast {
@@ -1426,7 +1382,7 @@ td select:hover {
 
     .login-box,
     .modal-box {
-        padding: 30px 20px;
+        padding: 40px 25px;
     }
 
     .login-box h2 {
@@ -1442,13 +1398,13 @@ td select:hover {
 
 
 /* ==========================================================================
-   24. IMPRESSÃO
+   23. IMPRESSÃO
    ========================================================================== */
 @media print {
     body {
         background: white !important;
         color: black !important;
-        font-size: 12pt;
+        font-size: 11pt;
     }
 
     .no-print,
@@ -1484,7 +1440,7 @@ td select:hover {
     .card-dash,
     .stat-card,
     .lista-container {
-        border: 1px solid #DDD !important;
+        border: 1px solid #CCC !important;
         box-shadow: none !important;
         padding: 0 !important;
         margin-bottom: 20px !important;
@@ -1499,8 +1455,8 @@ td select:hover {
 
     th,
     td {
-        border: 1px solid #CCC !important;
-        padding: 6px !important;
+        border: 1px solid #999 !important;
+        padding: 8px !important;
         color: black !important;
     }
 
@@ -1515,162 +1471,6 @@ td select:hover {
     h4,
     strong {
         color: black !important;
-    }
-}
-
-
-/* ==========================================================================
-   25. TELA INICIAL LIMPA E CARDS FLUIDOS (V3.2)
-   ========================================================================== */
-
-/* Transições suaves para o cabeçalho */
-.header-top,
-.logo,
-.main-nav {
-    transition: all 0.4s ease-in-out;
-}
-
-/* Quando a classe 'is-inicio-view' estiver no body, aplica o visual limpo */
-body.is-inicio-view .main-nav {
-    max-height: 0;
-    opacity: 0;
-    padding: 0;
-    overflow: hidden;
-    pointer-events: none;
-    /* Impede cliques quando invisível */
-}
-
-body.is-inicio-view .main-nav button {
-    display: none !important;
-}
-
-body.is-inicio-view .header-top {
-    justify-content: center;
-    position: relative;
-    padding: 60px 24px 40px 24px;
-    /* Mais espaço no topo */
-}
-
-body.is-inicio-view .logo {
-    font-size: 2.8rem;
-    /* Logo maior no centro */
-    text-align: center;
-    justify-content: center;
-}
-
-/* Botão SAIR no Header Top (visível apenas na tela inicial) */
-.btn-sair-header {
-    position: absolute;
-    right: 24px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(0, 0, 0, 0.2);
-    color: white;
-    border: none;
-    padding: 8px 20px;
-    border-radius: var(--radius-pill);
-    font-family: var(--font-headline);
-    font-weight: 600;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    opacity: 0;
-    pointer-events: none;
-}
-
-.btn-sair-header:hover {
-    background: var(--danger);
-}
-
-body.is-inicio-view .btn-sair-header {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-/* Grid de Cards da Tela Inicial Responsiva v3.2 */
-.nav-cards-grid {
-    display: grid;
-    /* Notebook/Desktop: 3 ou 4 colunas | iPad: 2 colunas | Mobile: 1 coluna */
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
-    padding: 20px 0;
-    margin-top: 30px;
-    max-width: 1100px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.nav-card {
-    background-color: #FFFFFF;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 45px 25px;
-    text-align: center;
-    cursor: pointer;
-    box-shadow: var(--shadow-sm);
-    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-}
-
-.nav-card .nav-icon {
-    font-size: 4rem;
-    color: var(--primary);
-    margin-bottom: 20px;
-    transition: color 0.3s ease-in-out;
-}
-
-.nav-card h3 {
-    margin: 0 0 8px 0;
-    color: var(--text-primary);
-    font-size: 1.4rem;
-    font-weight: 800;
-    transition: color 0.3s ease-in-out;
-}
-
-.nav-card p {
-    margin: 0;
-    color: var(--text-secondary);
-    font-size: 0.95rem;
-    transition: color 0.3s ease-in-out;
-}
-
-.nav-card:hover {
-    background-color: var(--accent);
-    border-color: var(--accent);
-    transform: translateY(-10px);
-    box-shadow: var(--shadow-floating);
-}
-
-.nav-card:hover .nav-icon,
-.nav-card:hover h3,
-.nav-card:hover p {
-    color: #FFFFFF;
-}
-
-/* Otimização para Tablets (iPad) */
-@media (min-width: 769px) and (max-width: 1024px) {
-    .nav-cards-grid {
-        grid-template-columns: repeat(2, 1fr);
-        max-width: 700px;
-    }
-
-    .content {
-        padding: 0 40px 120px 40px;
-    }
-
-    .header-top {
-        padding: 40px 24px;
-    }
-}
-
-/* Otimização para Notebooks pequenos e Desktop */
-@media (min-width: 1025px) {
-    .nav-cards-grid {
-        grid-template-columns: repeat(3, 1fr);
-        max-width: 1100px;
+        font-family: serif;
     }
 }
