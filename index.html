@@ -4,11 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edanios Belchior</title>
+    <title>Edanios Belchior - Gestão</title>
 
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -19,7 +22,7 @@
         }
 
         body.logged-in {
-            background-color: #F4F5F7;
+            background-color: var(--bg-body);
         }
 
         .header-top,
@@ -46,18 +49,19 @@
             font-size: 3.2rem;
             text-align: center;
             justify-content: center;
+            font-family: var(--font-headline);
         }
 
         .btn-sair-header {
             position: absolute;
             right: 24px;
             top: 30px;
-            background: rgba(0, 0, 0, 0.1);
-            color: var(--text-secondary);
-            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-inverse);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             padding: 10px 20px;
             border-radius: var(--radius-pill);
-            font-family: var(--font-headline);
+            font-family: var(--font-body);
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
@@ -68,6 +72,11 @@
         body.is-inicio-view .btn-sair-header {
             opacity: 1;
             pointer-events: auto;
+        }
+
+        .btn-sair-header:hover {
+            background: var(--danger);
+            border-color: var(--danger);
         }
 
         .nav-cards-grid {
@@ -81,32 +90,47 @@
         }
 
         .nav-card {
-            background-color: #FFFFFF;
+            background-color: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
             padding: 45px 25px;
             text-align: center;
             cursor: pointer;
             box-shadow: var(--shadow-sm);
-            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--accent);
+            opacity: 0;
+            transition: opacity 0.3s;
         }
 
         .nav-card .nav-icon {
-            font-size: 4rem;
-            color: var(--primary);
+            font-size: 3.5rem;
+            color: var(--accent);
             margin-bottom: 20px;
-            transition: color 0.3s;
+            transition: all 0.3s;
         }
 
         .nav-card h3 {
             margin: 0 0 8px 0;
             color: var(--text-primary);
             font-size: 1.4rem;
-            font-weight: 800;
+            font-weight: 700;
+            font-family: var(--font-headline);
             transition: color 0.3s;
         }
 
@@ -114,20 +138,26 @@
             margin: 0;
             color: var(--text-secondary);
             font-size: 0.95rem;
+            font-family: var(--font-body);
             transition: color 0.3s;
         }
 
         .nav-card:hover {
-            background-color: var(--accent);
-            border-color: var(--accent);
-            transform: translateY(-10px);
+            background-color: var(--primary);
+            border-color: var(--primary);
+            transform: translateY(-8px);
             box-shadow: var(--shadow-floating);
+        }
+
+        .nav-card:hover::before {
+            opacity: 1;
+            background: var(--bg-body);
         }
 
         .nav-card:hover .nav-icon,
         .nav-card:hover h3,
         .nav-card:hover p {
-            color: #FFFFFF;
+            color: var(--text-inverse);
         }
 
         .agenda-subnav {
@@ -146,18 +176,18 @@
             padding: 8px 15px;
             font-size: 0.8rem;
             width: auto;
-            border-radius: 4px;
+            border-radius: var(--radius-sm);
         }
 
         .agenda-subnav button.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
+            background: var(--accent);
+            color: var(--text-inverse);
+            border-color: var(--accent);
         }
 
         .agenda-view {
             display: none;
-            animation: fadeIn 0.3s ease;
+            animation: fadeIn 0.4s ease;
         }
 
         .agenda-view.active {
@@ -173,13 +203,13 @@
             <p class="theme-subtitle">Fisioterapia & Pilates</p>
 
             <div class="login-tabs">
-                <button id="tabStaff" class="active" style="width: 100%;">ACESSO ADMIN</button>
+                <button id="tabStaff" class="active" style="width: 100%; letter-spacing: 2px;">ACESSO RESTRITO</button>
             </div>
 
             <div id="formStaff">
                 <input type="email" id="emailLogin" placeholder="E-MAIL ADMINISTRATIVO">
                 <input type="password" id="senhaLogin" placeholder="SENHA">
-                <button onclick="fazerLoginAdmin()" style="margin-top: 20px;">Fazer login </button>
+                <button onclick="fazerLoginAdmin()" style="margin-top: 20px;">ENTRAR</button>
             </div>
 
             <p id="msgErroLogin"
@@ -191,7 +221,8 @@
         <header class="main-header no-print">
             <div class="header-top">
                 <div class="logo">EDANIOS BELCHIOR <span
-                        style="font-size: 0.8rem; vertical-align: super; color: var(--accent);">3.3</span></div>
+                        style="font-size: 0.8rem; vertical-align: super; color: var(--bg-body); background: var(--accent);">V.
+                        3.7</span></div>
                 <button onclick="fazerLogout()" class="btn-sair-header">SAIR</button>
             </div>
             <nav class="main-nav">
@@ -201,10 +232,9 @@
                 <button onclick="mostrarTela('agenda')">AGENDA</button>
                 <button onclick="mostrarTela('vencimentos')" id="btnVencimentosAdmin"
                     style="display:none;">VENCIMENTOS</button>
-                <button onclick="mostrarTela('prontuarios')">PRONTUÁRIOS</button>
                 <button onclick="mostrarTela('financeiro')" id="btnFinAdmin" style="display:none;">RELATÓRIOS</button>
                 <button onclick="mostrarTela('amanda')" id="btnAmandaAdmin"
-                    style="display:none; color: var(--primary); font-weight: bold;">AMANDA</button>
+                    style="display:none; color: var(--bg-body); font-weight: bold;">EQUIPE</button>
                 <button onclick="fazerLogout()" class="btn-sair">SAIR</button>
             </nav>
         </header>
@@ -215,20 +245,13 @@
                     <div class="nav-card" onclick="mostrarTela('clientes')">
                         <span class="material-symbols-outlined nav-icon">group</span>
                         <h3>ALUNOS</h3>
-                        <p>Gestão de cadastros</p>
+                        <p>Gestão</p>
                     </div>
 
-                    <div class="nav-card" onclick="mostrarTela('vencimentos')" id="cardVencInicio"
-                        style="display:none;">
-                        <span class="material-symbols-outlined nav-icon">event_busy</span>
-                        <h3>VENCIMENTOS</h3>
-                        <p>Controle de faturas</p>
-                    </div>
-
-                    <div class="nav-card" onclick="mostrarTela('prontuarios')">
-                        <span class="material-symbols-outlined nav-icon">medical_information</span>
-                        <h3>PRONTUÁRIOS</h3>
-                        <p>Evolução clínica</p>
+                    <div class="nav-card" onclick="mostrarTela('amanda')">
+                        <span class="material-symbols-outlined nav-icon">engineering</span>
+                        <h3>EQUIPE (AMANDA)</h3>
+                        <p>Gestão</p>
                     </div>
 
                     <div class="nav-card" onclick="mostrarTela('agenda')">
@@ -241,27 +264,28 @@
                         style="display:none;">
                         <span class="material-symbols-outlined nav-icon">account_balance_wallet</span>
                         <h3>LANÇAR</h3>
-                        <p>Novas despesas</p>
+                        <p>Novas despesas e contas</p>
                     </div>
 
                     <div class="nav-card" onclick="mostrarTela('financeiro')" id="cardFinInicio" style="display:none;">
-                        <span class="material-symbols-outlined nav-icon">insights</span>
+                        <span class="material-symbols-outlined nav-icon">query_stats</span>
                         <h3>RELATÓRIOS</h3>
-                        <p>Fluxo e Caixa</p>
+                        <p>Fluxo de caixa geral</p>
                     </div>
                 </div>
             </section>
 
             <section id="clientes" class="tela">
                 <div class="header-section">
-                    <h2>ARQUIVO DE ALUNOS</h2>
+                    <h2>CARTEIRA DE ALUNOS (GERAL)</h2>
+                    <p style="margin-top: 5px;">*Alunos delegados para a equipe não aparecem nesta lista.</p>
                 </div>
                 <div class="stats-alunos">
-                    <div class="stat-card"><span class="label">TOTAL</span><span class="value" id="statTotal">0</span>
-                    </div>
-                    <div class="stat-card pendente"><span class="label">PENDENTES</span><span class="value"
+                    <div class="stat-card"><span class="label">TOTAL REGISTRADO</span><span class="value"
+                            id="statTotal">0</span></div>
+                    <div class="stat-card pendente"><span class="label">PAGAMENTO PENDENTE</span><span class="value"
                             id="statPendentes">0</span></div>
-                    <div class="stat-card recebido"><span class="label">RECEBIDO</span><span class="value"
+                    <div class="stat-card recebido"><span class="label">RECEITA ARRECADADA</span><span class="value"
                             id="statRecebido">---</span></div>
                 </div>
 
@@ -292,19 +316,19 @@
 
                         <button id="btnSalvarCliente" onclick="salvarOuAtualizarCliente()">+ REGISTRAR FICHA</button>
                         <button id="btnCancelarEdicao" onclick="cancelarEdicao()"
-                            style="display:none; background:var(--danger);">CANCELAR</button>
+                            style="display:none; background:var(--danger); color: white;">CANCELAR EDIÇÃO</button>
                     </div>
-                    <div style="margin-top: 20px;">
-                        <label>MÊS DE REFERÊNCIA:</label>
+                    <div style="margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px;">
+                        <label>MÊS DE REFERÊNCIA GERAL:</label>
                         <input type="month" id="mesReferencia">
                     </div>
                 </div>
 
                 <div class="barra-filtros-alunos">
-                    <input type="text" id="inputBusca" placeholder="BUSCAR NOME..." oninput="renderizarClientes()">
+                    <input type="text" id="inputBusca" placeholder="BUSCAR PELO NOME..." oninput="renderizarClientes()">
                     <div class="botoes-filtro">
-                        <button onclick="filtrarClientes('todos')" class="btn-filtro active"
-                            id="btnFiltroTodos">TODOS</button>
+                        <button onclick="filtrarClientes('todos')" class="btn-filtro active" id="btnFiltroTodos">TODOS
+                            OS ALUNOS</button>
                         <button onclick="filtrarClientes('pendente')" class="btn-filtro"
                             id="btnFiltroPendente">PENDENTES</button>
                         <button onclick="filtrarClientes('pago')" class="btn-filtro" id="btnFiltroPago">PAGOS</button>
@@ -317,7 +341,7 @@
                             <tr>
                                 <th>ALUNO</th>
                                 <th>STATUS</th>
-                                <th>FORMA</th>
+                                <th>FORMA PAG.</th>
                                 <th>SERVIÇO</th>
                                 <th>AÇÕES</th>
                             </tr>
@@ -329,7 +353,8 @@
 
             <section id="vencimentos" class="tela">
                 <div class="header-section">
-                    <h2>CONTROLE DE VENCIMENTOS</h2>
+                    <h2>CONTROLE DE VENCIMENTOS GERAL</h2>
+                    <p style="margin-top: 5px;">*Alunos delegados para a equipe não aparecem nesta lista.</p>
                 </div>
 
                 <div class="barra-filtros-alunos">
@@ -352,7 +377,7 @@
                                 <th>ALUNO</th>
                                 <th>FATURA</th>
                                 <th>STATUS</th>
-                                <th>DIA VENC.</th>
+                                <th>DIA VENCIMENTO</th>
                                 <th>SITUAÇÃO</th>
                                 <th>AÇÕES</th>
                             </tr>
@@ -362,58 +387,29 @@
                 </div>
             </section>
 
-            <section id="prontuarios" class="tela">
-                <div class="header-section">
-                    <h2>EVOLUÇÃO CLÍNICA</h2>
-                </div>
-                <div class="form-card">
-                    <div class="input-group">
-                        <label>PACIENTE:</label>
-                        <input type="text" id="buscaProntuario" placeholder="FILTRAR POR NOME..."
-                            oninput="filtrarSelectProntuario()">
-                        <select id="selectProntuarioAluno" onchange="carregarProntuarioSelecionado()">
-                            <option value="">-- SELECIONE --</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div id="areaProntuario" style="display:none;">
-                    <div class="form-card" id="dadosPacienteHeader"
-                        style="background:var(--bg-input); border:1px dashed var(--text-secondary);"></div>
-                    <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
-                        <button onclick="gerarProntuarioPDF()" class="btn-tool" style="width: auto;">BAIXAR PDF</button>
-                    </div>
-                    <div class="historico-prontuario" id="listaEvolucao"></div>
-                    <div class="form-card">
-                        <h4>NOVA NOTA:</h4>
-                        <textarea id="textoNovaEvolucao" rows="4" placeholder="Escreva a evolução..."></textarea>
-                        <button onclick="adicionarEvolucao()" style="margin-top:10px;">SALVAR REGISTRO</button>
-                    </div>
-                </div>
-            </section>
-
             <section id="lancamentos" class="tela">
                 <div class="header-section">
                     <h2>LANÇAR DESPESAS</h2>
                 </div>
                 <div class="form-card highlight no-print">
-                    <h4>NOVA DESPESA:</h4>
+                    <h4>REGISTRO DE SAÍDA:</h4>
                     <div class="input-group">
-                        <input type="text" id="descGasto" placeholder="DESCRIÇÃO (Ex: Luz, Água, Internet)">
+                        <input type="text" id="descGasto" placeholder="DESCRIÇÃO (Ex: Luz, Água, Material)">
                         <select id="catGasto">
-                            <option value="fixo">CUSTO FIXO</option>
+                            <option value="fixo">CUSTO FIXO OPERACIONAL</option>
                             <option value="variavel">CUSTO VARIÁVEL</option>
-                            <option value="pessoal">RETIRADA PESSOAL</option>
+                            <option value="pessoal">RETIRADA PESSOAL / SÓCIOS</option>
                         </select>
-                        <input type="number" id="valorGasto" placeholder="VALOR (R$)">
+                        <input type="number" id="valorGasto" placeholder="VALOR TOTAL (R$)">
                         <div class="checkbox-wrapper"
                             style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
                             <input type="checkbox" id="checkGastoFuturo" style="width: 20px;">
-                            <label for="checkGastoFuturo" style="cursor:pointer; color: var(--text-primary);">AGENDAR
-                                PARA O FUTURO</label>
+                            <label for="checkGastoFuturo"
+                                style="cursor:pointer; color: var(--text-primary); font-family: var(--font-body);">AGENDAR
+                                PARA O FUTURO (CONTAS A PAGAR)</label>
                         </div>
                         <button onclick="adicionarGasto()"
-                            style="background-color: var(--danger); margin-top: 10px;">CONFIRMAR LANÇAMENTO</button>
+                            style="background-color: var(--accent); margin-top: 15px;">CONFIRMAR LANÇAMENTO</button>
                     </div>
                 </div>
             </section>
@@ -423,18 +419,18 @@
                     <h2>GESTÃO DE AGENDA</h2>
                 </div>
                 <div class="agenda-subnav">
-                    <button onclick="mudarSubAbaAgenda('roteiro')" id="sub-roteiro" class="active">📅 ROTEIRO
+                    <button onclick="mudarSubAbaAgenda('roteiro')" id="sub-roteiro" class="active">VISÃO
                         SEMANAL</button>
-                    <button onclick="mudarSubAbaAgenda('hoje')" id="sub-hoje">☀️ AGENDA DO DIA</button>
+                    <button onclick="mudarSubAbaAgenda('hoje')" id="sub-hoje">AGENDA DO DIA</button>
                 </div>
                 <div id="view-roteiro" class="agenda-view active">
                     <div class="agenda-filtros">
-                        <input type="text" id="buscaAgenda" placeholder="BUSCAR NA AGENDA..."
+                        <input type="text" id="buscaAgenda" placeholder="BUSCAR ALUNO NA AGENDA..."
                             oninput="renderizarAgenda()">
                         <select id="filtroOcupacao" onchange="renderizarAgenda()">
-                            <option value="todos">VER TUDO</option>
-                            <option value="ocupados">OCUPADOS</option>
-                            <option value="livres">LIVRES</option>
+                            <option value="todos">VER TODOS OS HORÁRIOS</option>
+                            <option value="ocupados">MOSTRAR APENAS OCUPADOS</option>
+                            <option value="livres">MOSTRAR APENAS LIVRES</option>
                         </select>
                     </div>
                     <div class="dias-semana">
@@ -447,120 +443,175 @@
                     <div class="agenda-container" id="containerAgenda"></div>
                 </div>
                 <div id="view-hoje" class="agenda-view">
-                    <div class="form-card" style="border-left: 5px solid var(--primary);">
+                    <div class="form-card highlight">
                         <h3 id="tituloAgendaHoje">AGENDA DE HOJE</h3>
-                        <div id="listaAgendaHoje">Carregando...</div>
+                        <div id="listaAgendaHoje">Carregando horários...</div>
                     </div>
                 </div>
             </section>
 
             <section id="financeiro" class="tela">
                 <div class="header-section">
-                    <h2>FLUXO DE CAIXA E RELATÓRIOS</h2>
+                    <h2>FLUXO DE CAIXA GERAL</h2>
                 </div>
                 <div class="painel-controle-fin">
                     <div class="input-mes-wrapper">
-                        <label>PERÍODO:</label>
+                        <label>PERÍODO ANALISADO:</label>
                         <input type="month" id="mesFinanceiro" onchange="mudarMesRelatorio(this.value)">
                     </div>
                     <div class="tools-fin">
                         <button onclick="gerarRelatorioFinanceiroPDF()" class="btn-tool"
-                            style="color: white; background: var(--text-primary); font-weight: bold;">📄 PDF
-                            MÊS</button>
+                            style="color: white; background: var(--text-primary); font-weight: bold; width: auto; padding: 0 15px;">📄
+                            PDF DO MÊS</button>
                         <button onclick="gerarRelatorioAnualPDF()" class="btn-tool"
-                            style="color: white; background: var(--accent); font-weight: bold;">📊 DRE ANUAL</button>
-                        <button onclick="virarMes()" class="btn-tool danger">VIRAR MÊS</button>
+                            style="color: white; background: var(--accent); font-weight: bold; width: auto; padding: 0 15px;">📊
+                            DRE ANUAL</button>
+                        <button onclick="virarMes()" class="btn-tool"
+                            style="background: var(--bg-input); width: auto; padding: 0 15px;">VIRAR MÊS</button>
                     </div>
                 </div>
+
                 <div class="fluxo-detalhado-wrapper">
                     <div class="card-fluxo"><span class="material-symbols-outlined icon-fluxo">pix</span>
-                        <div class="info-fluxo"><span>PIX</span><strong id="valPix">R$ 0,00</strong></div>
+                        <div class="info-fluxo"><span>ENTRADAS PIX</span><strong id="valPix">R$ 0,00</strong></div>
                     </div>
                     <div class="card-fluxo"><span class="material-symbols-outlined icon-fluxo">payments</span>
-                        <div class="info-fluxo"><span>DINHEIRO</span><strong id="valDin">R$ 0,00</strong></div>
+                        <div class="info-fluxo"><span>ENTRADAS DINHEIRO</span><strong id="valDin">R$ 0,00</strong></div>
                     </div>
                     <div class="card-fluxo"><span class="material-symbols-outlined icon-fluxo">credit_card</span>
-                        <div class="info-fluxo"><span>CARTÃO</span><strong id="valCar">R$ 0,00</strong></div>
+                        <div class="info-fluxo"><span>ENTRADAS CARTÃO</span><strong id="valCar">R$ 0,00</strong></div>
                     </div>
                 </div>
-                <div class="dashboard-financeiro">
-                    <div class="card-dash entrada"><span>RECEITA TOTAL</span><strong id="dashReceita">R$ 0,00</strong>
+
+                <div class="dashboard-financeiro" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                    <div class="card-dash entrada"><span>RECEITA (GERAL)</span><strong id="dashReceitaGeral">R$
+                            0,00</strong></div>
+                    <div class="card-dash" style="border-left: 4px solid var(--accent);"><span>RECEITA
+                            (EQUIPE)</span><strong id="dashReceitaEquipe" style="color: var(--accent);">R$ 0,00</strong>
                     </div>
                     <div class="card-dash saida"><span>DESPESAS PAGAS</span><strong id="dashDespesas">R$ 0,00</strong>
                     </div>
-                    <div class="card-dash lucro"><span>CAIXA LÍQUIDO</span><strong id="dashLucro">R$ 0,00</strong></div>
+                    <div class="card-dash lucro" style="background-color: var(--primary); border: none;">
+                        <span style="color: var(--text-inverse); opacity: 0.8;">CAIXA LÍQUIDO</span>
+                        <strong id="dashLucro" style="color: var(--text-inverse);">R$ 0,00</strong>
+                    </div>
                 </div>
+
                 <div class="lista-container">
-                    <h4 style="padding: 10px 20px; background: #FFF3E0; color: #E65100; margin: 0;">⏳ CONTAS A PAGAR
-                    </h4>
+                    <h4
+                        style="padding: 15px 24px; background: var(--bg-hover-light); color: var(--text-primary); margin: 0; border-bottom: 1px solid var(--border);">
+                        ⏳ CONTAS A PAGAR AGENDADAS</h4>
                     <table id="tabelaGastosFuturos">
                         <thead>
                             <tr>
-                                <th>DESCRIÇÃO</th>
+                                <th>DESCRIÇÃO DA CONTA</th>
                                 <th>VALOR</th>
-                                <th>AÇÃO</th>
+                                <th>AÇÕES</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
                     </table>
                 </div><br>
                 <div class="lista-container">
-                    <h4 style="padding: 10px 20px; background: #FFEBEE; color: #C62828; margin: 0;">📉 DESPESAS
-                        REALIZADAS</h4>
+                    <h4
+                        style="padding: 15px 24px; background: var(--bg-hover-light); color: var(--text-primary); margin: 0; border-bottom: 1px solid var(--border);">
+                        📉 DESPESAS REALIZADAS NO MÊS</h4>
                     <table id="tabelaGastos">
                         <thead>
                             <tr>
-                                <th>DESCRIÇÃO</th>
+                                <th>DESCRIÇÃO DA DESPESA</th>
                                 <th>CATEGORIA</th>
                                 <th>VALOR</th>
-                                <th>AÇÃO</th>
+                                <th>AÇÕES</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
                     </table>
                 </div>
+
                 <div class="form-card" style="margin-top: 30px;">
-                    <h4>🛠️ CATÁLOGO DE SERVIÇOS</h4>
+                    <h4>CATÁLOGO DE SERVIÇOS & CONTRATOS</h4>
                     <div class="input-group" style="flex-direction: row; gap: 10px;">
-                        <input type="text" id="nomeNovoServico" placeholder="NOME DO SERVIÇO" style="flex:2;">
-                        <input type="number" id="valorNovoServico" placeholder="VALOR (R$)" style="flex:1;">
-                        <button onclick="adicionarServico()" style="width: auto;">+ ADICIONAR</button>
+                        <input type="text" id="nomeNovoServico" placeholder="NOME DO SERVIÇO (Ex: Pacote Pilates 2x)"
+                            style="flex:2;">
+                        <input type="number" id="valorNovoServico" placeholder="VALOR BASE (R$)" style="flex:1;">
+                        <button onclick="adicionarServico()" style="width: auto;">+ ADICIONAR SERVIÇO</button>
                     </div>
-                    <div id="listaServicosCadastrados" style="display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;">
+                    <div id="listaServicosCadastrados" style="display:flex; flex-wrap:wrap; gap:10px; margin-top:15px;">
                     </div>
                 </div>
             </section>
 
             <section id="amanda" class="tela">
                 <div class="header-section">
-                    <h2>ESPAÇO DA AMANDA</h2>
+                    <h2>GESTÃO DE EQUIPE: AMANDA</h2>
+                    <p style="margin-top: 5px;">Módulo financeiro independente para controle da carteira da equipe.</p>
                 </div>
-                <div class="stats-alunos" style="grid-template-columns: 1fr 1fr;">
-                    <div class="stat-card"><span class="label">TOTAL DE ALUNOS DELA</span><span class="value"
-                            id="statAmandaAlunos">0</span></div>
-                    <div class="stat-card recebido"><span class="label">ESPELHO DE RECEITA (PAGO)</span><span
-                            class="value" id="statAmandaReceita" style="color: var(--success);">R$ 0,00</span></div>
-                </div>
-                <div class="form-card">
-                    <h4>VINCULAR ALUNO À AMANDA:</h4>
-                    <div class="input-group" style="flex-direction: row; gap: 10px; align-items: center;">
-                        <input type="text" id="buscaAmanda" placeholder="🔍 PESQUISAR ALUNO..."
-                            oninput="filtrarSelectAmanda()" style="flex: 2;">
-                        <select id="selectAlunoAmanda" style="flex: 3;">
-                            <option value="">-- SELECIONE O ALUNO --</option>
-                        </select>
-                        <button onclick="vincularAlunoAmanda()" style="flex: 1;">+ VINCULAR</button>
+                <div class="stats-alunos" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
+                    <div class="stat-card">
+                        <span class="label">ALUNOS VINCULADOS</span>
+                        <span class="value" id="statAmandaAlunos">0</span>
+                    </div>
+                    <div class="stat-card recebido">
+                        <span class="label">CAIXA ARRECADADO (PAGOS)</span>
+                        <span class="value" id="statAmandaReceita" style="color: var(--success);">R$ 0,00</span>
+                    </div>
+                    <div class="stat-card" style="border-top: 4px solid var(--accent);">
+                        <span class="label" style="color: var(--primary);">SALÁRIO / COMISSÃO CALCULADA</span>
+                        <span class="value" id="statAmandaSalario" style="color: var(--primary);">R$ 0,00</span>
+                        <div
+                            style="margin-top: 15px; display: flex; align-items: center; gap: 10px; background: var(--bg-input); padding: 10px; border-radius: var(--radius-sm);">
+                            <label style="font-size: 0.8rem; margin: 0; color: var(--text-primary);">TAXA DE REPASSE
+                                (%):</label>
+                            <input type="number" id="amandaTaxa" value="50" onchange="salvarTaxaAmanda()"
+                                style="width: 80px; padding: 6px 10px; font-size: 0.9rem; text-align: center; border: 1px solid var(--border-strong);">
+                        </div>
                     </div>
                 </div>
+
+                <div class="form-card highlight">
+                    <h4 style="color: var(--text-primary); margin-bottom: 5px;">CONTROLE DE COMISSÃO</h4>
+                    <p>Ao confirmar, o valor do salário calculado acima será injetado automaticamente como uma despesa
+                        no fluxo de caixa geral da clínica.</p>
+                    <button onclick="lancarSalarioEquipe()" style="background: var(--accent); margin-top: 10px;">💸
+                        LANÇAR SALÁRIO DA EQUIPE COMO DESPESA</button>
+                </div>
+
+                <div class="form-card">
+                    <h4>VINCULAR NOVO ALUNO À AMANDA:</h4>
+                    <div class="input-group" style="flex-direction: row; gap: 10px; align-items: center;">
+                        <input type="text" id="buscaAmandaAdd" placeholder="🔍 PESQUISAR PELO NOME..."
+                            oninput="filtrarSelectAmanda()" style="flex: 2;">
+                        <select id="selectAlunoAmanda" style="flex: 3;">
+                            <option value="">-- SELECIONE O ALUNO NA LISTA GERAL --</option>
+                        </select>
+                        <button onclick="vincularAlunoAmanda()" style="flex: 1; background: var(--primary);">+ VINCULAR
+                            ALUNO</button>
+                    </div>
+                </div>
+
+                <div class="barra-filtros-alunos">
+                    <input type="text" id="inputBuscaAmanda" placeholder="BUSCAR NA CARTEIRA DA EQUIPE..."
+                        oninput="renderizarAreaAmanda()">
+                    <div class="botoes-filtro">
+                        <button onclick="filtrarAmanda('todos')" class="btn-filtro active"
+                            id="btnFiltroAmandaTodos">TODOS</button>
+                        <button onclick="filtrarAmanda('pendente')" class="btn-filtro"
+                            id="btnFiltroAmandaPendente">PENDENTES</button>
+                        <button onclick="filtrarAmanda('pago')" class="btn-filtro"
+                            id="btnFiltroAmandaPago">PAGOS</button>
+                    </div>
+                </div>
+
                 <div class="lista-container">
-                    <h4 style="padding: 10px 20px; background: var(--bg-input); color: var(--primary); margin: 0;">📋
-                        ALUNOS E HORÁRIOS DA AMANDA</h4>
                     <table id="tabelaAmanda">
                         <thead>
                             <tr>
-                                <th>ALUNO</th>
-                                <th>DIAS E HORÁRIOS (AGENDA)</th>
-                                <th>AÇÕES</th>
+                                <th>NOME DO ALUNO</th>
+                                <th>STATUS</th>
+                                <th>FORMA PAG.</th>
+                                <th>SERVIÇO</th>
+                                <th>AÇÕES / AGENDA</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -576,7 +627,6 @@
                 <button onclick="mostrarTela('clientes'); document.getElementById('nomeCliente').focus(); toggleFab()"
                     title="Novo Aluno">👤</button>
                 <button onclick="mostrarTela('vencimentos'); toggleFab()" title="Vencimentos">📅</button>
-                <button onclick="mostrarTela('prontuarios'); toggleFab()" title="Prontuários">📋</button>
             </div>
             <button class="fab-main" onclick="toggleFab()">
                 <span class="material-symbols-outlined">add</span>
@@ -586,26 +636,31 @@
 
     <div id="modalConfirm" class="modal-overlay">
         <div class="modal-box">
-            <h3 id="modalTitulo">CONFIRMAR</h3>
-            <p id="modalTexto">Tem certeza?</p>
-            <div class="modal-footer"><button id="btnModalNao" class="btn-fechar">NÃO</button><button
-                    id="btnModalSim">SIM</button></div>
+            <h3 id="modalTitulo" style="font-family: var(--font-headline);">CONFIRMAR AÇÃO</h3>
+            <p id="modalTexto" style="margin-bottom: 25px;">Tem certeza que deseja prosseguir?</p>
+            <div class="modal-footer">
+                <button id="btnModalNao" class="btn-fechar">CANCELAR</button>
+                <button id="btnModalSim"
+                    style="background: var(--danger); border: 1px solid var(--danger);">CONFIRMAR</button>
+            </div>
         </div>
     </div>
 
     <div id="modalChangelog" class="modal-overlay">
         <div class="modal-box" style="max-width: 500px; padding: 0;">
-            <div class="changelog-header">
-                <h3>NOVIDADES V3.3</h3>
-                <p id="deviceBadge">SISTEMA ATUALIZADO</p>
+            <div class="changelog-header" style="background: var(--primary);">
+                <h3 style="font-family: var(--font-headline); font-style: italic;">NOVIDADES V3.7</h3>
+                <p id="deviceBadge" style="opacity: 0.8; font-size: 0.85rem; margin-top: 5px;">SISTEMA ATUALIZADO</p>
             </div>
-            <div class="changelog-content" id="changelogContent"></div>
-            <div class="changelog-nav">
+            <div class="changelog-content" id="changelogContent" style="background: var(--bg-card);"></div>
+            <div class="changelog-nav" style="background: var(--bg-card);">
                 <button onclick="prevChangelog()">←</button>
                 <span id="slideIndicator">1/2</span>
                 <button onclick="nextChangelog()">→</button>
             </div>
-            <button onclick="fecharChangelog()" style="width: 100%; border-radius: 0; padding: 20px;">ENTENDI</button>
+            <button onclick="fecharChangelog()"
+                style="width: 100%; border-radius: 0; padding: 20px; background: var(--accent);">ACESSAR
+                SISTEMA</button>
         </div>
     </div>
 
